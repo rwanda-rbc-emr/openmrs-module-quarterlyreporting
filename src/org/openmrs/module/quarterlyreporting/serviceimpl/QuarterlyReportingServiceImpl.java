@@ -321,6 +321,30 @@ public class QuarterlyReportingServiceImpl implements QuarterlyReportingService 
 		return quarterlyreportingDAO.getPatientsWithCD4AtMo(patientIds);
 	}
 
+	@Override
+	public List<Integer> getARTpatientsTransferreIn(Date quarterFrom,
+			Date quarterTo) {
+		return quarterlyreportingDAO.getARTpatientsTransferreIn(quarterFrom, quarterTo);
+	}
+
+	@Override
+	public List<Integer> getPreARTpatientsTransferreIn(Date quarterFrom,
+			Date quarterTo) {
+		return quarterlyreportingDAO.getPreARTpatientsTransferreIn(quarterFrom, quarterTo);
+	}
+
+	@Override
+	public List<Object[]> getNewEnrolled(Date quarterFrom, Date quarterTo,
+			String gender, Integer minAge, Integer maxAge) {
+		return quarterlyreportingDAO.getNewEnrolled(quarterFrom, quarterTo, gender, minAge, maxAge);
+	}
+
+	@Override
+	public List<Integer> getAllPatientsTransferredIn(Date quarterFrom,
+			Date quarterTo) {
+		return quarterlyreportingDAO.getAllPatientsTransferredIn(quarterFrom, quarterTo);
+	}
+
 
 
 }

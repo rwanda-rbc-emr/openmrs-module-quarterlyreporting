@@ -106,10 +106,40 @@ public interface QuarterReportingDAO {
 	 * 
 	 * @param quarterFrom
 	 * @param quarterTo
-	 * @return ids
+	 * @return List<Object[]>
 	 */
 	public List<Object[]> getPatientsTransferreIn(Date quarterFrom, Date quarterTo, String gender, Integer minAge,
 			Integer maxAge);
+	
+	/**
+	 * 
+	 * gives preART patients at the time when they were transferred in
+	 * 
+	 * @param quarterFrom
+	 * @param quarterTo
+	 * @return List<Object[]>
+	 */
+	public List<Integer> getPreARTpatientsTransferreIn(Date quarterFrom, Date quarterTo);
+	
+	/**
+	 * 
+	 * gives patients who were on ART treatment at the time when they were transferred in
+	 * 
+	 * @param quarterFrom
+	 * @param quarterTo
+	 * @return List<Integer>
+	 */
+	public List<Integer> getARTpatientsTransferreIn(Date quarterFrom, Date quarterTo);
+	
+	/**
+	 * 
+	 * gives all patients transferred in during the quarter
+	 * 
+	 * @param quarterFrom
+	 * @param quarterTo
+	 * @return List<Integer>
+	 */
+	public List<Integer> getAllPatientsTransferredIn(Date quarterFrom, Date quarterTo);
 		
 	/**
 	 * 	
@@ -437,6 +467,19 @@ public interface QuarterReportingDAO {
 	 * @return
 	 */
 	public List<Object[]> getPatientsWithCD4AtMo(List<Object[]> patientIds) ;
+	
+	/**
+	 * 
+	 * new enrolled
+	 * 
+	 * @param quarterFrom
+	 * @param quarterTo
+	 * @param gender
+	 * @param minAge
+	 * @param maxAge
+	 * @return List<Object[]>
+	 */
+	public List<Object[]> getNewEnrolled(Date quarterFrom, Date quarterTo,String gender, Integer minAge, Integer maxAge);
 	
 	
 }

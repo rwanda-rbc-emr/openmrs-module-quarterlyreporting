@@ -133,7 +133,9 @@ public class QuarterlyReportingDAOImpl implements QuarterReportingDAO {
 		queryPortion.append(" INNER JOIN program pm on pg.program_id=pg.program_id ");
 		queryPortion.append("INNER JOIN patient pat on pat.patient_id = pg.patient_id ");
 		queryPortion.append("INNER JOIN person ps on ps.person_id=pat.patient_id and gender = '"+ gender + "' ");
+//		queryPortion.append(" INNER JOIN obs obs on obs.person_id=ps.person_id ");
 		queryPortion.append(" AND pg.program_id = "	+ QuarterlyReportUtil.gpGetHIVProgramId());
+
 
 		if (quarterFrom != null && quarterTo == null) {
 //			strbuf.append(queryPortion);
@@ -171,7 +173,7 @@ public class QuarterlyReportingDAOImpl implements QuarterReportingDAO {
 			strbuf.append(" group by pat.patient_id ");
 		}
 		
-//		log.info("rrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrr "+strbuf.toString());
+		log.info("rrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrr "+strbuf.toString());
 		
 		query = sessionFactory.getCurrentSession().createSQLQuery(
 				strbuf.toString());
@@ -239,8 +241,18 @@ public class QuarterlyReportingDAOImpl implements QuarterReportingDAO {
 		
 		List<Object[]> objs = new ArrayList<Object[]>();
 		
+		List<Integer> transferreInPatients = new ArrayList<Integer>();
+		
+		if(quarterFrom!=null && quarterTo==null)
+			transferreInPatients = service.getAllPatientsTransferredIn(quarterFrom, null);
+		if(quarterFrom==null && quarterTo!=null)
+			transferreInPatients = service.getAllPatientsTransferredIn(null, quarterTo);
+		if(quarterFrom!=null && quarterTo!=null)
+			transferreInPatients = service.getAllPatientsTransferredIn(quarterFrom, quarterTo);
+		
 		for (Integer id : patIds2) {
 			Patient p = Context.getPatientService().getPatient(id);
+			if(!transferreInPatients.contains(id))
 			objs.add(new Object[] {id,getWhenEnrolled(p),"Enrollment Date"});
 			
          }
@@ -401,12 +413,12 @@ public class QuarterlyReportingDAOImpl implements QuarterReportingDAO {
 				
 				if (minAge != null && maxAge != null) {
 					if (patientAge >= minAge && patientAge <= maxAge)
-//						if(!transferredInDuringQter.contains(id))
+//						if(!transferredInDuringQter.contains(id)) 
 						patIds2.add(id);
 				}
 				else if (minAge != null && maxAge == null) {
 					if (patientAge >= minAge)
-//						sif(!transferredInDuringQter.contains(id))
+//						if(!transferredInDuringQter.contains(id))
 						patIds2.add(id);
 				}
 			}
@@ -739,7 +751,7 @@ public class QuarterlyReportingDAOImpl implements QuarterReportingDAO {
 	
 		List<Integer> patientsReceivedHIVCare = query.list();
 		List<Integer> exitedInThePeriod = QuarterlyReportUtil.getConvertToType(getPatientsExitedInThePeriod(null, quarterTo)); 
-		log.info("eaaaaaaaaaaaaaaaaaaaaaaaaaa "+exitedInThePeriod);
+//		log.info("eaaaaaaaaaaaaaaaaaaaaaaaaaa "+exitedInThePeriod);
 		List<Object[]> obj = new ArrayList<Object[]>();
 		for (Integer id : patientsReceivedHIVCare) {
 			Patient patient = Context.getPatientService().getPatient(id); 
@@ -971,7 +983,7 @@ public class QuarterlyReportingDAOImpl implements QuarterReportingDAO {
 		SQLQuery queryNoLongerPreg = sessionFactory.getCurrentSession().createSQLQuery("select patient_id from orders where discontinued='1' " +
 				"and discontinued_reason=1748 and discontinued_date<=' "+df.format(endqter)+"'");
            List<Integer> patsNoLongerPregnant = queryNoLongerPreg.list();
-           log.info("ddddddddddddddddddddddddddddd "+patsNoLongerPregnant);
+//           log.info("ddddddddddddddddddddddddddddd "+patsNoLongerPregnant);
            List<Object[]> obj = new ArrayList<Object[]>();
            for (Object[] ob : obj) {
         	   obj.add(new Object[] { ob[0], "","" });
@@ -1265,7 +1277,7 @@ public class QuarterlyReportingDAOImpl implements QuarterReportingDAO {
 			patientsOnART = QuarterlyReportUtil.getConvertToType(getPatientsStartedART(quarterFrom,quarterTo, gender, minAge, maxAge));  
 
 		if (gender == null) {
-			queryPortion.append(" SELECT DISTINCT o.person_id FROM obs o ");
+			queryPortion.append(" SELECT DISTINCT o.person_id FROM obs o ");  
 			queryPortion.append(" INNER JOIN person pe ON pe.person_id=o.person_id ");
 			queryPortion.append(" INNER JOIN patient pa ON pa.patient_id=pe.person_id ");
 			queryPortion.append(" AND o.concept_id= "	+ Integer.parseInt(QuarterlyReportUtil.gpTransferInConceptId())+" AND value_coded=1065  ");
@@ -3821,6 +3833,210 @@ public class QuarterlyReportingDAOImpl implements QuarterReportingDAO {
 	     }
 	   
 		return objects;
+	}
+
+	@Override
+	public List<Integer> getPreARTpatientsTransferreIn(Date quarterFrom,Date quarterTo) {
+		StringBuffer transferInBuf = new StringBuffer();
+		StringBuffer preArtBuf = new StringBuffer();
+		SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd");
+		
+		transferInBuf.append(" SELECT DISTINCT o.person_id FROM obs o ");
+		transferInBuf.append(" INNER JOIN person pe ON pe.person_id=o.person_id ");
+		transferInBuf.append(" INNER JOIN patient pa ON pa.patient_id=pe.person_id ");
+		transferInBuf.append(" AND o.concept_id= "	+ Integer.parseInt(QuarterlyReportUtil.gpTransferInConceptId())+" AND value_coded=1065  ");
+		transferInBuf.append(" and o.obs_datetime BETWEEN '"+df.format(quarterFrom)+"' AND '"+df.format(quarterTo)+"'");
+		
+		SQLQuery query = sessionFactory.getCurrentSession().createSQLQuery(transferInBuf.toString());
+		
+		List<Integer> transferredInPatients = query.list();
+		
+		List<Integer> preArtTransferredInPatients = new ArrayList<Integer>();
+		
+		preArtBuf.append("SELECT o.patient_id FROM orders o  ");
+		preArtBuf.append(" INNER JOIN patient pat on pat.patient_id=o.patient_id ");
+		preArtBuf.append(" INNER JOIN patient_program pg on pat.patient_id=pg.patient_id ");
+		preArtBuf.append(" INNER JOIN program gr on gr.program_id=pg.program_id AND gr.program_id = ");
+		preArtBuf.append(Integer.parseInt(QuarterlyReportUtil.gpGetHIVProgramId()));
+		preArtBuf.append(" AND o.concept_id in( "+ QuarterlyReportUtil.gpGetProphylaxisDrugConceptIds() + ") ");
+		preArtBuf.append(" AND o.voided=0 AND pat.voided=0 AND pg.voided=0 ");
+		
+		SQLQuery query1 = sessionFactory.getCurrentSession().createSQLQuery(preArtBuf.toString());
+		
+		List<Integer> preArtPatients = query1.list();
+		
+		for (Integer id : preArtPatients) {
+			if(transferredInPatients.contains(id))
+				preArtTransferredInPatients.add(id);
+		}
+		
+		return preArtTransferredInPatients;
+	}
+
+	@Override
+	public List<Integer> getARTpatientsTransferreIn(Date quarterFrom,
+			Date quarterTo) {
+		
+		StringBuffer transferInBuf = new StringBuffer();
+		StringBuffer artBuf = new StringBuffer();
+		SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd");
+		
+		transferInBuf.append(" SELECT DISTINCT o.person_id FROM obs o ");
+		transferInBuf.append(" INNER JOIN person pe ON pe.person_id=o.person_id ");
+		transferInBuf.append(" INNER JOIN patient pa ON pa.patient_id=pe.person_id ");
+		transferInBuf.append(" AND o.concept_id= "	+ Integer.parseInt(QuarterlyReportUtil.gpTransferInConceptId())+" AND value_coded=1065  ");
+		transferInBuf.append(" and o.obs_datetime BETWEEN '"+df.format(quarterFrom)+"' AND '"+df.format(quarterTo)+"'");
+		
+		SQLQuery query = sessionFactory.getCurrentSession().createSQLQuery(transferInBuf.toString());
+		
+		List<Integer> transferredInPatients = query.list();
+		
+		List<Integer> artTransferredInPatients = new ArrayList<Integer>();
+		
+		artBuf.append("SELECT o.patient_id FROM orders o  ");
+		artBuf.append(" INNER JOIN patient pat on pat.patient_id=o.patient_id ");
+		artBuf.append(" INNER JOIN patient_program pg on pat.patient_id=pg.patient_id ");
+		artBuf.append(" INNER JOIN program gr on gr.program_id=pg.program_id AND gr.program_id = ");
+		artBuf.append(Integer.parseInt(QuarterlyReportUtil.gpGetHIVProgramId()));
+		artBuf.append(" AND o.concept_id in( "+ QuarterlyReportUtil.gpGetARVConceptIds() + ") ");
+		artBuf.append(" AND o.voided=0 AND pat.voided=0 AND pg.voided=0 ");
+		
+		SQLQuery query1 = sessionFactory.getCurrentSession().createSQLQuery(artBuf.toString());
+		
+		List<Integer> artPatients = query1.list();
+		
+		for (Integer id : artPatients) {
+			if(transferredInPatients.contains(id))
+				artTransferredInPatients.add(id);
+		}
+		
+		return artTransferredInPatients;
+	}
+
+	@Override
+	public List<Object[]> getNewEnrolled(Date quarterFrom, Date quarterTo,
+			String gender, Integer minAge, Integer maxAge) {
+		
+		StringBuffer strbuf = new StringBuffer(); 
+
+		SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd");
+
+		strbuf.append("SELECT pat.patient_id , ");
+		strbuf.append("IF((select min(pg.date_enrolled)) BETWEEN ");
+		strbuf.append("'" + df.format(quarterFrom) + "' AND '"+df.format(quarterTo)+"'" + " , "	+ " true " + " ," + "false)  ");
+		strbuf.append(" FROM patient_program pg "); 
+		strbuf.append(" INNER JOIN program pm on pg.program_id=pg.program_id ");
+		strbuf.append("INNER JOIN patient pat on pat.patient_id = pg.patient_id ");
+		strbuf.append("INNER JOIN person ps on ps.person_id=pat.patient_id and gender = '"+ gender + "' ");
+		strbuf.append(" INNER JOIN obs obs on obs.person_id=ps.person_id ");
+		strbuf.append(" AND pg.program_id = "	+ QuarterlyReportUtil.gpGetHIVProgramId());
+		strbuf.append(" group by pat.patient_id ");
+		
+		SQLQuery query = sessionFactory.getCurrentSession().createSQLQuery(strbuf.toString());
+		
+		List<Object[]> records = query.list();
+		
+		List<Integer> patIds = new ArrayList<Integer>();
+		
+		Map<String, Integer> patientStartedWhenMap = new HashMap<String, Integer>();
+
+		int add = 0;
+
+		for (Object[] obj : records) {
+			add++;
+			Integer id = (Integer) obj[0];
+			String booleanValue = obj[1].toString() + add + "";
+			patientStartedWhenMap.put(booleanValue, id);
+		}
+
+		for (String key : patientStartedWhenMap.keySet()) { 
+			if (key.charAt(0) == '1') {
+				patIds.add(patientStartedWhenMap.get(key));
+			}
+		}
+
+
+		List<Integer> patIds2 = new ArrayList<Integer>();
+
+		int patientAge = 0;
+
+		for (Integer id : patIds) {
+
+			SQLQuery query2 = null;
+			StringBuffer strbuf2 = new StringBuffer();
+
+			strbuf2.append("SELECT (YEAR(pg.date_enrolled) - YEAR(s.birthdate)) * 12 ");
+			strbuf2.append(" + (MONTH(pg.date_enrolled) - MONTH(s.birthdate)) ");
+			strbuf2.append("  - IF(DAYOFMONTH(CURDATE()) < DAYOFMONTH(s.birthdate),1,0) ");
+			strbuf2.append(" FROM  person s ");
+			strbuf2.append(" INNER JOIN patient p on p.patient_id=s.person_id ");
+			strbuf2.append(" INNER JOIN patient_program pg on pg.patient_id=p.patient_id and p.patient_id= " + id);
+
+			query2 = sessionFactory.getCurrentSession().createSQLQuery(
+					strbuf2.toString());
+
+			List<BigInteger> record = query2.list();
+			
+			if(record.get(0)!=null)
+			patientAge = record.get(0).intValue();
+
+			if (minAge != null && maxAge != null) {
+				if (patientAge >= minAge && patientAge <= maxAge)
+					patIds2.add(id);
+			}
+			else if (minAge != null && maxAge == null) {
+				if (patientAge >= minAge)
+					patIds2.add(id);
+			}
+		}
+
+		QuarterlyReportingService service = Context.getService(QuarterlyReportingService.class);
+		
+		List<Object[]> objs = new ArrayList<Object[]>();
+		
+		for (Integer id : patIds2) {
+			Patient p = Context.getPatientService().getPatient(id);
+			if(!getAllPatientsTransferredIn(quarterFrom, quarterTo).contains(id))
+			objs.add(new Object[] {id,getWhenEnrolled(p),"Enrollment Date"});
+			
+         }
+		return objs;
+	}
+
+	@Override
+	public List<Integer> getAllPatientsTransferredIn(Date quarterFrom,
+			Date quarterTo) {
+		StringBuffer transferInBuf = new StringBuffer();
+		SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd");
+		
+		if(quarterFrom!=null && quarterTo==null){
+			transferInBuf.append(" SELECT DISTINCT o.person_id FROM obs o ");
+			transferInBuf.append(" INNER JOIN person pe ON pe.person_id=o.person_id ");
+			transferInBuf.append(" INNER JOIN patient pa ON pa.patient_id=pe.person_id ");
+			transferInBuf.append(" AND o.concept_id= "	+ Integer.parseInt(QuarterlyReportUtil.gpTransferInConceptId())+" AND value_coded=1065  ");
+			transferInBuf.append(" and o.obs_datetime <= '"+df.format(quarterFrom)+"'");
+		}
+		if(quarterFrom==null && quarterTo!=null){
+			transferInBuf.append(" SELECT DISTINCT o.person_id FROM obs o ");
+			transferInBuf.append(" INNER JOIN person pe ON pe.person_id=o.person_id ");
+			transferInBuf.append(" INNER JOIN patient pa ON pa.patient_id=pe.person_id ");
+			transferInBuf.append(" AND o.concept_id= "	+ Integer.parseInt(QuarterlyReportUtil.gpTransferInConceptId())+" AND value_coded=1065  ");
+			transferInBuf.append(" and o.obs_datetime <= '"+df.format(quarterTo)+"'");
+		}
+		if(quarterFrom!=null && quarterTo!=null){
+			transferInBuf.append(" SELECT DISTINCT o.person_id FROM obs o ");
+			transferInBuf.append(" INNER JOIN person pe ON pe.person_id=o.person_id ");
+			transferInBuf.append(" INNER JOIN patient pa ON pa.patient_id=pe.person_id ");
+			transferInBuf.append(" AND o.concept_id= "	+ Integer.parseInt(QuarterlyReportUtil.gpTransferInConceptId())+" AND value_coded=1065  ");
+			transferInBuf.append(" and o.obs_datetime BETWEEN '"+df.format(quarterFrom)+"' AND '"+df.format(quarterTo)+"'");
+		}
+
+		
+		SQLQuery query = sessionFactory.getCurrentSession().createSQLQuery(transferInBuf.toString());
+		
+		List<Integer> transferredInPatients = query.list();
+		
+		return transferredInPatients;
 	}
 
 	
