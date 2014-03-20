@@ -468,18 +468,8 @@ public interface QuarterReportingDAO {
 	 */
 	public List<Object[]> getPatientsWithCD4AtMo(List<Object[]> patientIds) ;
 	
-	/**
-	 * 
-	 * new enrolled
-	 * 
-	 * @param quarterFrom
-	 * @param quarterTo
-	 * @param gender
-	 * @param minAge
-	 * @param maxAge
-	 * @return List<Object[]>
-	 */
-	public List<Object[]> getNewEnrolled(Date quarterFrom, Date quarterTo,String gender, Integer minAge, Integer maxAge);
+	public List<Object[]> getNewOnArtTransferInExcluded(Date quarterFrom,
+			Date quarterTo, String gender, Integer minAge, Integer maxAge);
 	
 	
 }

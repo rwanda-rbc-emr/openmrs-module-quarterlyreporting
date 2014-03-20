@@ -651,8 +651,8 @@ public class QuarterlyReportFormController extends
 			// _______________________________table 2 ====>new on ART_______________________
 			// ============================= adult(table 2.0)===================================
 			// male 0-179
-			List<Object[]> cumMalePat0To179StartedARTBegQterList1 = service.getPatientsStartedART(quarterFromDate, null, maleGender,zeroMonthAge, one79MonAge);
-			List<Object[]> cumMalePat0To179StartedARTBegQterList = (List<Object[]>) service.SubtractACollection(cumMalePat0To179StartedARTBegQterList1, transferredInTotalList);
+			List<Object[]> cumMalePat0To179StartedARTBegQterList = service.getPatientsStartedART(quarterFromDate, null, maleGender,zeroMonthAge, one79MonAge);
+//			List<Object[]> cumMalePat0To179StartedARTBegQterList = (List<Object[]>) service.SubtractACollection(cumMalePat0To179StartedARTBegQterList1, transferredInTotalList);
 			List<Object[]> cumMalePat0To179StartedDuringQterList = service.getPatientsStartedART(quarterFromDate, quarterToDate,maleGender, zeroMonthAge, one79MonAge);
 //			List<Object[]> cumMalePat0To179StartedDuringQterList = (List<Object[]>) service.union(cumMalePat0To179StartedDuringQterList1, male0To179TransfInDuringQterList);
 			List<Object[]> cumMalePat0To179StartedEndQterList = (List<Object[]>) service.union(cumMalePat0To179StartedARTBegQterList, cumMalePat0To179StartedDuringQterList);
@@ -670,10 +670,10 @@ public class QuarterlyReportFormController extends
 			map.put("cumMalePat0To179StartedEndQter",cumMalePat0To179StartedEndQter);
 
 			// female 0-179
-			List<Object[]> cumfem0To179StartedARTBegQterList1 = service.getPatientsStartedART(quarterFromDate, null, femaleGender,zeroMonthAge, one79MonAge);
-			List<Object[]> cumfem0To179StartedARTBegQterList = (List<Object[]>) service.SubtractACollection(cumfem0To179StartedARTBegQterList1, transferredInTotalList);
-			List<Object[]> cumfem0To179StartedARTDuringQterList1 = service.getPatientsStartedART(quarterFromDate, quarterToDate,femaleGender, zeroMonthAge, one79MonAge);
-			List<Object[]> cumfem0To179StartedARTDuringQterList = (List<Object[]>) service.union(cumfem0To179StartedARTDuringQterList1, femaleOTo179TransfInDuringQterList);
+			List<Object[]> cumfem0To179StartedARTBegQterList = service.getPatientsStartedART(quarterFromDate, null, femaleGender,zeroMonthAge, one79MonAge);
+//			List<Object[]> cumfem0To179StartedARTBegQterList = (List<Object[]>) service.SubtractACollection(cumfem0To179StartedARTBegQterList1, transferredInTotalList);
+			List<Object[]> cumfem0To179StartedARTDuringQterList = service.getPatientsStartedART(quarterFromDate, quarterToDate,femaleGender, zeroMonthAge, one79MonAge);
+//			List<Object[]> cumfem0To179StartedARTDuringQterList = (List<Object[]>) service.union(cumfem0To179StartedARTDuringQterList1, femaleOTo179TransfInDuringQterList);
 			List<Object[]> cumfemPat0To179StartedARTEndQterList = (List<Object[]>) service.union(cumfem0To179StartedARTBegQterList, cumfem0To179StartedARTDuringQterList);
 
 			map.put("cumfem0To179StartedARTBegQterList",cumfem0To179StartedARTBegQterList);
@@ -689,10 +689,10 @@ public class QuarterlyReportFormController extends
 			map.put("cumfemPat0To179StartedARTEndQter",cumfemPat0To179StartedARTEndQter);
 
 			// male >180 transferredInTotalList
-			List<Object[]> cumMalePatOver180StartedARTBegQterList1 = service.getPatientsStartedART(quarterFromDate, null, maleGender,one80MonAge, null);
-			List<Object[]> cumMalePatOver180StartedARTBegQterList = (List<Object[]>) service.SubtractACollection(cumMalePatOver180StartedARTBegQterList1, transferredInTotalList);
-			List<Object[]> cumMalePatOver180StartedARTDuringQterList1 = service.getPatientsStartedART(quarterFromDate, quarterToDate,maleGender, one80MonAge, null);
-			List<Object[]> cumMalePatOver180StartedARTDuringQterList = (List<Object[]>) service.union(cumMalePatOver180StartedARTDuringQterList1, maleOver180TransfInDuringQterList);
+			List<Object[]> cumMalePatOver180StartedARTBegQterList = service.getPatientsStartedART(quarterFromDate, null, maleGender,one80MonAge, null);
+//			List<Object[]> cumMalePatOver180StartedARTBegQterList = (List<Object[]>) service.SubtractACollection(cumMalePatOver180StartedARTBegQterList1, transferredInTotalList);
+			List<Object[]> cumMalePatOver180StartedARTDuringQterList = service.getPatientsStartedART(quarterFromDate, quarterToDate,maleGender, one80MonAge, null);
+//			List<Object[]> cumMalePatOver180StartedARTDuringQterList = (List<Object[]>) service.union(cumMalePatOver180StartedARTDuringQterList1, maleOver180TransfInDuringQterList);
 			List<Object[]> cumMalePatOver180StartedARTEndQterList = (List<Object[]>) service.union(cumMalePatOver180StartedARTBegQterList, cumMalePatOver180StartedARTDuringQterList);
 
 			map.put("cumMalePatOver180StartedARTBegQterList",cumMalePatOver180StartedARTBegQterList);
@@ -708,10 +708,10 @@ public class QuarterlyReportFormController extends
 			map.put("cumMalePatOver80StartedARTEndQter",cumMalePatOver80StartedARTEndQter);
 
 			// female >180
-			List<Object[]> cumFemPatOver180StartedARTBegQterList1 = service.getPatientsStartedART(quarterFromDate, null, femaleGender,one80MonAge, null);
-			List<Object[]> cumFemPatOver180StartedARTBegQterList = (List<Object[]>) service.SubtractACollection(cumFemPatOver180StartedARTBegQterList1, transferredInTotalList);
-			List<Object[]> cumFemPatOver180StartedARTDuringQterList1 = service.getPatientsStartedART(quarterFromDate, quarterToDate,femaleGender, one80MonAge, null);
-			List<Object[]> cumFemPatOver180StartedARTDuringQterList = (List<Object[]>) service.union(cumFemPatOver180StartedARTDuringQterList1, femaleOver180TransfInDuringQterList);
+			List<Object[]> cumFemPatOver180StartedARTBegQterList = service.getPatientsStartedART(quarterFromDate, null, femaleGender,one80MonAge, null);
+//			List<Object[]> cumFemPatOver180StartedARTBegQterList = (List<Object[]>) service.SubtractACollection(cumFemPatOver180StartedARTBegQterList1, transferredInTotalList);
+			List<Object[]> cumFemPatOver180StartedARTDuringQterList = service.getPatientsStartedART(quarterFromDate, quarterToDate,femaleGender, one80MonAge, null);
+//			List<Object[]> cumFemPatOver180StartedARTDuringQterList = (List<Object[]>) service.union(cumFemPatOver180StartedARTDuringQterList1, femaleOver180TransfInDuringQterList);
 			List<Object[]> cumFemPatOver180StartedARTEndQterList = (List<Object[]>) service.union(cumFemPatOver180StartedARTBegQterList, cumFemPatOver180StartedARTDuringQterList);
 
 			map.put("cumFemPatOver180StartedARTBegQterList",cumFemPatOver180StartedARTBegQterList);
@@ -756,9 +756,9 @@ public class QuarterlyReportFormController extends
 			// ====================2.1 (pediatric)=========================================
 			// male 0-11
 			List<Object[]> malePat0To11StartedBegQterList = service.getPatientsStartedART(quarterFromDate, null, maleGender,zeroMonthAge, elevMonAge);
-			List<Object[]> malePat0To11StartedDuringQterList1 = service.getPatientsStartedART(quarterFromDate, quarterToDate,maleGender, zeroMonthAge, elevMonAge);
-			List<Object[]> malePat0To11StartedDuringQterList = (List<Object[]>) service.union(malePat0To11StartedDuringQterList1, male0To11TransfInDuringQterList);
-			List<Object[]> malePat0To11StartedEndQterList = (List<Object[]>) service.union(malePat0To11StartedBegQterList, malePat0To11StartedDuringQterList);
+//			List<Object[]> malePat0To11StartedDuringQterList1 = service.getPatientsStartedART(quarterFromDate, quarterToDate,maleGender, zeroMonthAge, elevMonAge);
+			List<Object[]> malePat0To11StartedDuringQterList = service.getPatientsStartedART(quarterFromDate, quarterToDate, maleGender,zeroMonthAge, elevMonAge);
+			List<Object[]> malePat0To11StartedEndQterList = service.getPatientsStartedART(null, quarterToDate, maleGender,zeroMonthAge, elevMonAge);
 
 			map.put("malePat0To11StartedBegQterList",malePat0To11StartedBegQterList);
 			map.put("malePat0To11StartedDuringQterList",malePat0To11StartedDuringQterList);
@@ -774,9 +774,9 @@ public class QuarterlyReportFormController extends
 			
 			// male 12-23
 			List<Object[]> malePat12To23StartedBegQterList = service.getPatientsStartedART(quarterFromDate, null, maleGender,twlvMonAge, twenty3MonAge);
-			List<Object[]> malePat12To23StartedDuringQterList1 = service.getPatientsStartedART(quarterFromDate, quarterToDate,maleGender, twlvMonAge, twenty3MonAge);
-			List<Object[]> malePat12To23StartedDuringQterList = (List<Object[]>) service.union(malePat12To23StartedDuringQterList1, male12To23TransfInDuringQterList);
-			List<Object[]> malePat12To23StartedEndQterList = (List<Object[]>) service.union(malePat12To23StartedBegQterList, malePat12To23StartedDuringQterList);
+//			List<Object[]> malePat12To23StartedDuringQterList1 = service.getPatientsStartedART(quarterFromDate, quarterToDate,maleGender, twlvMonAge, twenty3MonAge);
+			List<Object[]> malePat12To23StartedDuringQterList = service.getPatientsStartedART(quarterFromDate, quarterToDate, maleGender,twlvMonAge, twenty3MonAge);
+			List<Object[]> malePat12To23StartedEndQterList = service.getPatientsStartedART(null, quarterToDate, maleGender,twlvMonAge, twenty3MonAge);
 
 			map.put("malePat12To23StartedBegQterList",malePat12To23StartedBegQterList);
 			map.put("malePat12To23StartedDuringQterList",malePat12To23StartedDuringQterList);
@@ -792,9 +792,9 @@ public class QuarterlyReportFormController extends
 			
 			// male 24-59
 			List<Object[]> malePat24To59StartedBegQterList = service.getPatientsStartedART(quarterFromDate, null, maleGender,twentyFoMonAge, fifty9MonAge);
-			List<Object[]> malePat24To59StartedDuringQterList1 = service.getPatientsStartedART(quarterFromDate, quarterToDate,maleGender, twentyFoMonAge, fifty9MonAge);
-			List<Object[]> malePat24To59StartedDuringQterList = (List<Object[]>) service.union(malePat24To59StartedDuringQterList1, male24To59TransfInDuringQterList);
-			List<Object[]> malePat24To59StartedEndList = (List<Object[]>) service.union(malePat24To59StartedBegQterList, malePat24To59StartedDuringQterList);
+//			List<Object[]> malePat24To59StartedDuringQterList1 = service.getPatientsStartedART(quarterFromDate, quarterToDate,maleGender, twentyFoMonAge, fifty9MonAge);
+			List<Object[]> malePat24To59StartedDuringQterList = service.getPatientsStartedART(quarterFromDate, quarterToDate, maleGender,twentyFoMonAge, fifty9MonAge);
+			List<Object[]> malePat24To59StartedEndList = service.getPatientsStartedART(null, quarterToDate, maleGender,twentyFoMonAge, fifty9MonAge);
 
 			map.put("malePat24To59StartedBegQterList",malePat24To59StartedBegQterList);
 			map.put("malePat24To59StartedDuringQterList",malePat24To59StartedDuringQterList);
@@ -810,9 +810,9 @@ public class QuarterlyReportFormController extends
 
 			// male 60-179
 			List<Object[]> malePat60To179StartedBegQterList = service.getPatientsStartedART(quarterFromDate, null, maleGender,sixtyMonAge, one79MonAge);
-			List<Object[]> malePat60To179StartedDuringQterList1 = service.getPatientsStartedART(quarterFromDate, quarterToDate,maleGender, sixtyMonAge, one79MonAge);
-			List<Object[]> malePat60To179StartedDuringQterList = (List<Object[]>) service.union(malePat60To179StartedDuringQterList1, male60To179TransfInDuringQterList);
-			List<Object[]> malePat60To179StartedEndQterList = (List<Object[]>) service.union(malePat60To179StartedBegQterList, malePat60To179StartedDuringQterList);
+//			List<Object[]> malePat60To179StartedDuringQterList1 = service.getPatientsStartedART(quarterFromDate, quarterToDate,maleGender, sixtyMonAge, one79MonAge);
+			List<Object[]> malePat60To179StartedDuringQterList = service.getPatientsStartedART(quarterFromDate, quarterToDate, maleGender,sixtyMonAge, one79MonAge);
+			List<Object[]> malePat60To179StartedEndQterList = service.getPatientsStartedART(null, quarterToDate, maleGender,sixtyMonAge, one79MonAge);
 
 			map.put("malePat60To179StartedBegQterList",malePat60To179StartedBegQterList);
 			map.put("malePat60To179StartedDuringQterList",malePat60To179StartedDuringQterList);
@@ -828,9 +828,9 @@ public class QuarterlyReportFormController extends
 
 			// female 0-11
 			List<Object[]> femPat0To11StartedBegQterList = service.getPatientsStartedART(quarterFromDate, null, femaleGender,zeroMonthAge, elevMonAge);
-			List<Object[]> femPat0To11StartedDuringQterList1 = service.getPatientsStartedART(quarterFromDate, quarterToDate,femaleGender, zeroMonthAge, elevMonAge);
-			List<Object[]> femPat0To11StartedDuringQterList = (List<Object[]>) service.union(femPat0To11StartedDuringQterList1, female0To11TransfInDuringQterList);
-            List<Object[]> femPat0To11StartedEndQterList = (List<Object[]>) service.union(femPat0To11StartedBegQterList, femPat0To11StartedDuringQterList);
+//			List<Object[]> femPat0To11StartedDuringQterList1 = service.getPatientsStartedART(quarterFromDate, quarterToDate,femaleGender, zeroMonthAge, elevMonAge);
+			List<Object[]> femPat0To11StartedDuringQterList = service.getPatientsStartedART(quarterFromDate, quarterToDate, femaleGender,zeroMonthAge, elevMonAge);
+            List<Object[]> femPat0To11StartedEndQterList = service.getPatientsStartedART(null, quarterToDate, femaleGender,zeroMonthAge, elevMonAge);
 
 			map.put("femPat0To11StartedBegQterList",femPat0To11StartedBegQterList);
 			map.put("femPat0To11StartedDuringQterList",femPat0To11StartedDuringQterList);
@@ -846,9 +846,10 @@ public class QuarterlyReportFormController extends
 			
 			// female 12-23
 			List<Object[]> femPat12To23StartedBegQterList = service.getPatientsStartedART(quarterFromDate, null, femaleGender,twlvMonAge, twenty3MonAge);
-			List<Object[]> femPat12To23StartedDuringQterList1 = service.getPatientsStartedART(quarterFromDate, quarterToDate,femaleGender, twlvMonAge, twenty3MonAge);
-			List<Object[]> femPat12To23StartedDuringQterList = (List<Object[]>) service.union(femPat12To23StartedDuringQterList1, female12To23TransfInDuringQterList);
-            List<Object[]> femPat12To23StartedEndQterList = (List<Object[]>) service.union(femPat12To23StartedBegQterList, femPat12To23StartedDuringQterList);
+//			List<Object[]> femPat12To23StartedDuringQterList1 = service.getPatientsStartedART(quarterFromDate, quarterToDate,femaleGender, twlvMonAge, twenty3MonAge);
+			List<Object[]> femPat12To23StartedDuringQterList = service.getPatientsStartedART(quarterFromDate, quarterToDate, femaleGender,twlvMonAge, twenty3MonAge);
+			
+			List<Object[]> femPat12To23StartedEndQterList = service.getPatientsStartedART(null, quarterToDate, femaleGender,twlvMonAge, twenty3MonAge);
 
 			map.put("femPat12To23StartedBegQterList",femPat12To23StartedBegQterList);
 			map.put("femPat12To23StartedDuringQterList",femPat12To23StartedDuringQterList);
@@ -859,14 +860,14 @@ public class QuarterlyReportFormController extends
 			int femPat12To23StartedEndQter = femPat12To23StartedEndQterList.size();
 
 			map.put("femPat12To23StartedBegQter",femPat12To23StartedBegQter);
-			map.put("femPat0To11StartedDuringQter",femPat12To23StartedDuringQter);
+			map.put("femPat12To23StartedDuringQter",femPat12To23StartedDuringQter);
 			map.put("femPat12To23StartedEndQter",femPat12To23StartedEndQter);
 
 			// female 24-59
 			List<Object[]> femPat24To59StartedBegQterList = service.getPatientsStartedART(quarterFromDate, null, femaleGender,twentyFoMonAge, fifty9MonAge);
-			List<Object[]> femPat24To59StartedDuringQterList1 = service.getPatientsStartedART(quarterFromDate, quarterToDate,femaleGender, twentyFoMonAge, fifty9MonAge);
-			List<Object[]> femPat24To59StartedDuringQterList = (List<Object[]>) service.union(femPat24To59StartedDuringQterList1, female24To59TransfInDuringQterList);
-			List<Object[]> femPat24To59StartedEndList = (List<Object[]>) service.union(femPat24To59StartedBegQterList, femPat24To59StartedDuringQterList);
+//			List<Object[]> femPat24To59StartedDuringQterList1 = service.getPatientsStartedART(quarterFromDate, quarterToDate,femaleGender, twentyFoMonAge, fifty9MonAge);
+			List<Object[]> femPat24To59StartedDuringQterList = service.getPatientsStartedART(quarterFromDate, quarterToDate, femaleGender,twentyFoMonAge, fifty9MonAge);
+			List<Object[]> femPat24To59StartedEndList = service.getPatientsStartedART(null, quarterToDate, femaleGender,twentyFoMonAge, fifty9MonAge);
 
 			map.put("femPat24To59StartedBegQterList",femPat24To59StartedBegQterList);
 			map.put("femPat24To59StartedDuringQterList",femPat24To59StartedDuringQterList);
@@ -882,9 +883,9 @@ public class QuarterlyReportFormController extends
 
 			// female 60-179
 			List<Object[]> femPat60To179StartedBegQterList = service.getPatientsStartedART(quarterFromDate, null, femaleGender,sixtyMonAge, one79MonAge);
-			List<Object[]> femPat60To179StartedDuringQterList1 = service.getPatientsStartedART(quarterFromDate, quarterToDate,femaleGender, sixtyMonAge, one79MonAge);
-			List<Object[]> femPat60To179StartedDuringQterList = (List<Object[]>) service.union(femPat60To179StartedDuringQterList1, female60To179TransfInDuringQterList);
-			List<Object[]> femPat60To179StartedEndQterList = (List<Object[]>) service.union(femPat60To179StartedBegQterList, femPat60To179StartedDuringQterList);
+//			List<Object[]> femPat60To179StartedDuringQterList1 = service.getPatientsStartedART(quarterFromDate, quarterToDate,femaleGender, sixtyMonAge, one79MonAge);
+			List<Object[]> femPat60To179StartedDuringQterList =  service.getPatientsStartedART(quarterFromDate, quarterToDate, femaleGender,sixtyMonAge, one79MonAge);
+			List<Object[]> femPat60To179StartedEndQterList =  service.getPatientsStartedART(null, quarterToDate, femaleGender,sixtyMonAge, one79MonAge);
 
 			map.put("femPat60To179StartedBegQterList",femPat60To179StartedBegQterList);
 			map.put("femPat60To179StartedDuringQterList",femPat60To179StartedDuringQterList);
@@ -1330,30 +1331,30 @@ public class QuarterlyReportFormController extends
 
 			// ___________________________________________________________________________________
 			// Nbre de nouveau patients ayant demarre le ARV pendant ce trimestre(2.0 colonne5)
-			// only New non TRANSFER-IN
+			// only New ,non TRANSFER-IN
 			// ____________________________________________________________________________________
 			
 			// =============================adult=======================================================
 			// male 0-179
-			List<Object[]> male0To179NewOnARTDuringQterNoTransfList = (List<Object[]>) service.SubtractACollection(cumMalePat0To179StartedDuringQterList,male0To179TransfInDuringQterList);
+			List<Object[]> male0To179NewOnARTDuringQterNoTransfList = service.getNewOnArtTransferInExcluded(quarterFromDate, quarterToDate, maleGender,zeroMonthAge, one79MonAge);
 			int male0To179NewOnArtDuringQterNoTransferIn = male0To179NewOnARTDuringQterNoTransfList.size();
 			map.put("male0To179NewOnArtDuringQterNoTransferIn",	male0To179NewOnArtDuringQterNoTransferIn);
 			map.put("male0To179NewOnARTDuringQterNoTransfList",male0To179NewOnARTDuringQterNoTransfList);
 
 			// male >180
-			List<Object[]> maleOver179NewOnARTDuringQterNoTransfList = (List<Object[]>) service.SubtractACollection(cumMalePatOver180StartedARTDuringQterList,maleOver180TransfInDuringQterList);
+			List<Object[]> maleOver179NewOnARTDuringQterNoTransfList = service.getNewOnArtTransferInExcluded(quarterFromDate, quarterToDate, maleGender,one80MonAge, null);
 			int maleOver180NewOnArtDuringQterNoTransferIn = maleOver179NewOnARTDuringQterNoTransfList.size();
 			map.put("maleOver180NewOnArtDuringQterNoTransferIn",maleOver180NewOnArtDuringQterNoTransferIn);
 			map.put("maleOver179NewOnARTDuringQterNoTransfList",maleOver179NewOnARTDuringQterNoTransfList);
 
 			// female 0-179
-			List<Object[]> fem0To179NewOnARTDuringQterNoTransfList = (List<Object[]>) service.SubtractACollection(cumfem0To179StartedARTDuringQterList,femaleOTo179TransfInDuringQterList);
+			List<Object[]> fem0To179NewOnARTDuringQterNoTransfList = service.getNewOnArtTransferInExcluded(quarterFromDate, quarterToDate, femaleGender,zeroMonthAge, one79MonAge);
 			int fem0To179OnArtDuringQterNoTransferIn = fem0To179NewOnARTDuringQterNoTransfList.size();
 			map.put("fem0To179OnArtDuringQterNoTransferIn",fem0To179OnArtDuringQterNoTransferIn);
 			map.put("fem0To179NewOnARTDuringQterNoTransfList",fem0To179NewOnARTDuringQterNoTransfList);
 
 			// female >180
-			List<Object[]> cumFemPatOver180NewOnARTDuringQterList = (List<Object[]>) service.SubtractACollection(cumFemPatOver180StartedARTDuringQterList,femaleOver180TransfInDuringQterList);
+			List<Object[]> cumFemPatOver180NewOnARTDuringQterList = service.getNewOnArtTransferInExcluded(quarterFromDate, quarterToDate, femaleGender,one80MonAge, null);
 			int femOver180NewOnARTDuringQterNoTransfIn = cumFemPatOver180NewOnARTDuringQterList.size();
 			map.put("femOver180NewOnARTDuringQterNoTransfIn",femOver180NewOnARTDuringQterNoTransfIn);
 			map.put("cumFemPatOver180NewOnARTDuringQterList",cumFemPatOver180NewOnARTDuringQterList);
@@ -1369,49 +1370,49 @@ public class QuarterlyReportFormController extends
 
 			// ======================pediatric==========================================================
 			// male 0-11
-			List<Object[]> male0To11NewOnARTDuringQterNoTransfList = (List<Object[]>) service.SubtractACollection(malePat0To11StartedDuringQterList,male0To11TransfInDuringQterList);
+			List<Object[]> male0To11NewOnARTDuringQterNoTransfList = service.getNewOnArtTransferInExcluded(quarterFromDate, quarterToDate, maleGender,zeroMonthAge, elevMonAge);
 			int male0To11NewOnARTDuringQterNoTransferIn = male0To11NewOnARTDuringQterNoTransfList.size();
 			map.put("male0To11NewOnARTDuringQterNoTransferIn",male0To11NewOnARTDuringQterNoTransferIn);
 			map.put("male0To11NewOnARTDuringQterNoTransfList",male0To11NewOnARTDuringQterNoTransfList);
 
 			// male 12-23
-			List<Object[]> male12To23NewOnARTDuringQterNoTransfList = (List<Object[]>) service.SubtractACollection(malePat12To23StartedDuringQterList,male12To23TransfInDuringQterList);
+			List<Object[]> male12To23NewOnARTDuringQterNoTransfList = service.getNewOnArtTransferInExcluded(quarterFromDate, quarterToDate, maleGender,twlvMonAge, twenty3MonAge);
 			int male12To23NewOnARTDuringQterNoTransferIn = male12To23NewOnARTDuringQterNoTransfList.size();
 			map.put("male12To23NewOnARTDuringQterNoTransferIn",male12To23NewOnARTDuringQterNoTransferIn);
 			map.put("male12To23NewOnARTDuringQterNoTransfList",male12To23NewOnARTDuringQterNoTransfList);
 			
 			// male 24-59
-			List<Object[]> male24To59NewOnARTDuringQterNoTransfList = (List<Object[]>) service.SubtractACollection(malePat24To59StartedDuringQterList,male24To59TransfInDuringQterList);
+			List<Object[]> male24To59NewOnARTDuringQterNoTransfList = service.getNewOnArtTransferInExcluded(quarterFromDate, quarterToDate, maleGender,twentyFoMonAge, fifty9MonAge);
 			int male24To59NewOnARTDuringQterNoTransferIn = male24To59NewOnARTDuringQterNoTransfList.size();
 			map.put("male24To59NewOnARTDuringQterNoTransferIn",male24To59NewOnARTDuringQterNoTransferIn);
 			map.put("male24To59NewOnARTDuringQterNoTransfList",male24To59NewOnARTDuringQterNoTransfList);
 
 			// male 60-179
-			List<Object[]> male60To179NewOnARTDuringQterNoTransfList = (List<Object[]>) service.SubtractACollection(malePat60To179StartedDuringQterList,male60To179TransfInDuringQterList);
+			List<Object[]> male60To179NewOnARTDuringQterNoTransfList = service.getNewOnArtTransferInExcluded(quarterFromDate, quarterToDate, maleGender,sixtyMonAge, one79MonAge);
 			int male60To179NewOnARTDuringQterNoTransferIn = male60To179NewOnARTDuringQterNoTransfList.size();
 			map.put("male60To179NewOnARTDuringQterNoTransferIn",male60To179NewOnARTDuringQterNoTransferIn);
 			map.put("male60To179NewOnARTDuringQterNoTransfList",male60To179NewOnARTDuringQterNoTransfList);
 
 			// female 0-11
-			List<Object[]> fem0To11NewOnARTDuringQterNoTransfList = (List<Object[]>) service.SubtractACollection(femPat0To11StartedDuringQterList,female0To11TransfInDuringQterList);
+			List<Object[]> fem0To11NewOnARTDuringQterNoTransfList = service.getNewOnArtTransferInExcluded(quarterFromDate, quarterToDate, femaleGender,zeroMonthAge, elevMonAge);
 			int fem0To11NewOnARTDuringQterNoTransferIn = fem0To11NewOnARTDuringQterNoTransfList.size();
 			map.put("fem0To11NewOnARTDuringQterNoTransferIn",fem0To11NewOnARTDuringQterNoTransferIn);
 			map.put("fem0To11NewOnARTDuringQterNoTransfList",fem0To11NewOnARTDuringQterNoTransfList);
 
 			// female 12-23
-			List<Object[]> fem12To23NewOnARTDuringQterNoTransfList = (List<Object[]>) service.SubtractACollection(femPat12To23StartedDuringQterList,female0To11TransfInDuringQterList);
+			List<Object[]> fem12To23NewOnARTDuringQterNoTransfList = service.getNewOnArtTransferInExcluded(quarterFromDate, quarterToDate, femaleGender,twlvMonAge, twenty3MonAge);
 			int fem12To23NewOnARTDuringQterNoTransferIn = fem12To23NewOnARTDuringQterNoTransfList.size();
 			map.put("fem12To23NewOnARTDuringQterNoTransferIn",fem12To23NewOnARTDuringQterNoTransferIn);
 			map.put("fem12To23NewOnARTDuringQterNoTransfList",fem12To23NewOnARTDuringQterNoTransfList);
 			
 			// female 24-59
-			List<Object[]> fem24To59NewOnARTDuringQterNoTransfList = (List<Object[]>) service.SubtractACollection(femPat24To59StartedDuringQterList,female24To59TransfInDuringQterList);
+			List<Object[]> fem24To59NewOnARTDuringQterNoTransfList = service.getNewOnArtTransferInExcluded(quarterFromDate, quarterToDate, femaleGender,twentyFoMonAge, fifty9MonAge);
 			int fem24To59NewOnARTDuringQterNoTransferIn = fem24To59NewOnARTDuringQterNoTransfList.size();
 			map.put("fem24To59NewOnARTDuringQterNoTransferIn",fem24To59NewOnARTDuringQterNoTransferIn);
 			map.put("fem24To59NewOnARTDuringQterNoTransfList",fem24To59NewOnARTDuringQterNoTransfList);
 
 			// female 60-179
-			List<Object[]> fem60To179NewOnARTDuringQterNoTransfList = (List<Object[]>) service.SubtractACollection(femPat60To179StartedDuringQterList,female60To179TransfInDuringQterList);
+			List<Object[]> fem60To179NewOnARTDuringQterNoTransfList = service.getNewOnArtTransferInExcluded(quarterFromDate, quarterToDate, femaleGender,sixtyMonAge, one79MonAge);
 			int fem60To179NewOnARTDuringQterNoTransferIn = fem60To179NewOnARTDuringQterNoTransfList.size();
 			map.put("fem60To179NewOnARTDuringQterNoTransferIn",fem60To179NewOnARTDuringQterNoTransferIn);
 			map.put("fem60To179NewOnARTDuringQterNoTransfList",fem60To179NewOnARTDuringQterNoTransfList);

@@ -5,7 +5,7 @@
 	<!-- quarterly reporting Module Properties -->
 	<id>quarterlyreporting</id>
 	<name>Quarterly HIV Care and ART Reporting</name>
-	<version>0.4.4</version>
+	<version>0.4.5</version>
 	<package>org.openmrs.module.@MODULE_ID@</package>
 	<author>Mariam N.</author>
 	<description>

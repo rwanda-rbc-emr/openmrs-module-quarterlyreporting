@@ -333,16 +333,17 @@ public class QuarterlyReportingServiceImpl implements QuarterlyReportingService 
 		return quarterlyreportingDAO.getPreARTpatientsTransferreIn(quarterFrom, quarterTo);
 	}
 
-	@Override
-	public List<Object[]> getNewEnrolled(Date quarterFrom, Date quarterTo,
-			String gender, Integer minAge, Integer maxAge) {
-		return quarterlyreportingDAO.getNewEnrolled(quarterFrom, quarterTo, gender, minAge, maxAge);
-	}
 
 	@Override
 	public List<Integer> getAllPatientsTransferredIn(Date quarterFrom,
 			Date quarterTo) {
 		return quarterlyreportingDAO.getAllPatientsTransferredIn(quarterFrom, quarterTo);
+	}
+
+	@Override
+	public List<Object[]> getNewOnArtTransferInExcluded(Date quarterFrom,
+			Date quarterTo, String gender, Integer minAge, Integer maxAge) {
+		return quarterlyreportingDAO.getNewOnArtTransferInExcluded(quarterFrom, quarterTo, gender, minAge, maxAge);
 	}
 
 

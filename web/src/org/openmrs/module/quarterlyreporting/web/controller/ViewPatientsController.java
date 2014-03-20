@@ -652,112 +652,112 @@ public class ViewPatientsController extends ParameterizableViewController {
 			title="Total Active Patients on ART By the End of the Quarter ";
 		}
 		// ====================2.1 (pediatric)=======================================================================
-		// male 0-1
-		if(linkId.equals("malePat01StartedByTheBegOfQter")){ // mariam
-			currentList=(List<Object[]>) map.get("female5To14TransfInDuringQterList");
-			title="Male Patients(Aged 0 to 1) on ART By the Beginning of the Quarter ";
+		// male on ART by the beginning of the qter
+		if(linkId.equals("malePat0To11StartedBegQter")){ 
+			currentList=(List<Object[]>) map.get("malePat0To11StartedBegQterList");
+			title="Male Patients(Aged 0 to 11 months old) on ART By the Beginning of the Quarter ";
 		}
-		if(linkId.equals("malePat01StartedDuringTheQter")){
-			currentList=(List<Object[]>) map.get("malePat01StartedDuringTheQterList");
-			title="Male Patients(Aged 0 to 1) on ART During the Quarter ";
+		if(linkId.equals("malePat12To23StartedBegQter")){
+			currentList=(List<Object[]>) map.get("malePat12To23StartedBegQterList");
+			title="Male Patients(Aged 12 to 23 months old) on ART By the Beginning of the Quarter ";
 		}
-		if(linkId.equals("malePat01StartedByTheEndOfQter")){
-			currentList=(List<Object[]>) map.get("malePat01StartedByTheEndOfQterList");
-			title="Male Patients(Aged 0 to 1) on ART By the End of the Quarter ";
+		if(linkId.equals("malePat24To59StartedBegQter")){
+			currentList=(List<Object[]>) map.get("malePat24To59StartedBegQterList");
+			title="Male Patients(Aged 24 to 59 months old) on ART By the Beginning of the Quarter ";
 		}
-		if(linkId.equals("male0To1NewOnARTDuringQterNoTransferIn")){
-			currentList=(List<Object[]>) map.get("male0To1NewOnARTDuringQterNoTransfList");
-			title="Male Patients(Aged 0 to 1) on ART During the Quarter ------> Transferred In Not Considered ";
-		}
-		
-		// male 2-4
-		if(linkId.equals("malePat24StartedByTheBegOfQter")){
-			currentList=(List<Object[]>) map.get("malePat24StartedByTheBegOfQterList");
-			title="Male Patients(Aged 2 to 4) on ART By the Beginning of the Quarter ";
-		}
-		if(linkId.equals("malePat24StartedByDuringQter")){
-			currentList=(List<Object[]>) map.get("malePat24StartedByDuringQterList");
-			title="Male Patients(Aged  to 1) on ART During the Quarter ";
-		}
-		if(linkId.equals("malePat24StartedByTheEnd")){
-			currentList=(List<Object[]>) map.get("malePat24StartedByTheEndList");
-			title="Male Patients(Aged 2 to 4) on ART By the End of the Quarter ";
-		}
-		if(linkId.equals("male2To4NewOnARTDuringQterNoTransferIn")){
-			currentList=(List<Object[]>) map.get("male2To4NewOnARTDuringQterNoTransfList");
-			title="Male Patients(Aged 2 to 4) on ART During the Quarter -------> Transferred In Not Considerred ";
+		if(linkId.equals("malePat60To179StartedBegQter")){
+			currentList=(List<Object[]>) map.get("malePat60To179StartedBegQterList");
+			title="Male Patients(Aged 60 to 179 months old) on ART By the Beginning of the Quarter ";
 		}
 		
-		//male 5-14
-		if(linkId.equals("malePat5To14StartedByTheBegOfQter")){
-			currentList=(List<Object[]>) map.get("malePat5To14StartedByTheBegOfQterList");
-			title="Male Patients(Aged 5 to 14) Started ART By the Beginning of the Quarter ";
+		//female on ART by the beginning of the qter
+		if(linkId.equals("femPat0To11StartedBegQter")){ 
+			currentList=(List<Object[]>) map.get("femPat0To11StartedBegQterList");
+			title="Female Patients(Aged 0 to 11 months old) on ART By the Beginning of the Quarter ";
 		}
-		if(linkId.equals("malePat5To14StartedByDuringQter")){
-			currentList=(List<Object[]>) map.get("malePat5To14StartedByDuringQterList");
-			title="Male Patients(Aged 5 to 14) Started ART During the Quarter ";
+		if(linkId.equals("femPat12To23StartedBegQter")){
+			currentList=(List<Object[]>) map.get("femPat12To23StartedBegQterList");
+			title="Female Patients(Aged 12 to 23 months old) on ART By the Beginning of the Quarter ";
 		}
-		if(linkId.equals("malePat5To14StartedByTheEndOfQter")){
-			currentList=(List<Object[]>) map.get("malePat5To14StartedByTheEndOfQterList");
-			title="Male Patients(Aged 5 to 14) Started ART By the End of the Quarter ";
+		if(linkId.equals("femPat24To59StartedBegQter")){
+			currentList=(List<Object[]>) map.get("femPat24To59StartedBegQterList");
+			title="Female Patients(Aged 24 to 59 months old) on ART By the End of the Quarter ";
 		}
-		if(linkId.equals("male5To14NewOnARTDuringQterNoTransferIn")){
-			currentList=(List<Object[]>) map.get("male5To14NewOnARTDuringQterNoTransfList");
-			title="Male Patients(Aged 5 to 14) Stated ART During the Quarter -------> Transferred In Not Considerred ";
-		}
-		
-		//female 0-1
-		if(linkId.equals("femalePat0To1StartedByTheBegOfQter")){
-			currentList=(List<Object[]>) map.get("femalePat01StartedByTheBegOfQterList");
-			title="Female Patients(Aged 0 to 1) New on ART By the Beginning of the Quarter ";
-		}
-		if(linkId.equals("femalePat0To1StartedDuringTheQter")){
-			currentList=(List<Object[]>) map.get("femalePat01StartedDuringTheQterList");
-			title="Female Patients(Aged 0 to 1) New on ART During the Quarter ";
-		}
-		if(linkId.equals("femalePat0To1StartedByTheEndOfQter")){
-			currentList=(List<Object[]>) map.get("femalePat01StartedByTheEndOfQterList");
-			title="Female Patients(Aged 0 to 1) New on ART By the End of the Quarter ";
-		}
-		if(linkId.equals("female0To1NewOnARTDuringQterNoTransferIn")){
-			currentList=(List<Object[]>) map.get("female0To1NewOnARTDuringQterNoTransfList");
-			title="Female Patients(Aged 0 to 1) New ART During the Quarter -------> Transferred In Not Considerred ";
+		if(linkId.equals("femPat60To179StartedBegQter")){
+			currentList=(List<Object[]>) map.get("femPat60To179StartedBegQterList");
+			title="Female Patients(Aged 60 to 179 months old) on ART By the Beginning of the Quarter ";
 		}
 		
-		//female 2-4
-		if(linkId.equals("femalePat2To4StartedByTheBegOfQter")){
-			currentList=(List<Object[]>) map.get("femalePat2To4StartedByTheBegOfQterList");
-			title="Female Patients(Aged 2 to 4) Started ART By the Beginning of the Quarter ";
+		// male new on ART during the quarter (NEW and TRANSFER-IN included)
+		if(linkId.equals("malePat0To11StartedDuringQter")){
+			currentList=(List<Object[]>) map.get("malePat0To11StartedDuringQterList");
+			title="Male Patients(Aged 0 to 11) on ART during the quarter ";
 		}
-		if(linkId.equals("femalePat2To4StartedByDuringQter")){
-			currentList=(List<Object[]>) map.get("femalePat2To4StartedByDuringQterList");
-			title="Female Patients(Aged 2 to 4) Stated ART During the Quarter ";
+		if(linkId.equals("malePat12To23StartedDuringQter")){
+			currentList=(List<Object[]>) map.get("malePat12To23StartedDuringQterList");
+			title="Male Patients(Aged 12 to 23) on ART During the Quarter ";
 		}
-		if(linkId.equals("femalePat2To4StartedByTheEnd")){
-			currentList=(List<Object[]>) map.get("femalePat2To4StartedByTheEndList");
-			title="Female Patients(Aged 2 to 4) Started ART By the End of the Quarter ";
+		if(linkId.equals("malePat24To59StartedDuringQter")){
+			currentList=(List<Object[]>) map.get("malePat24To59StartedDuringQterList");
+			title="Male Patients(Aged 24 to 59) on ART during the quarter ";
 		}
-		if(linkId.equals("female2To4NewOnARTDuringQterNoTransferIn")){
-			currentList=(List<Object[]>) map.get("female2To4NewOnARTDuringQterNoTransfList");
-			title="Female Patients(Aged 2 to 4) New on ART During the Quarter -------> Transferred In Not Considerred ";
+		if(linkId.equals("malePat60To179StartedDuringQter")){
+			currentList=(List<Object[]>) map.get("malePat60To179StartedDuringQterList");
+			title="Male Patients(Aged 60 to 179) on ART during the quarter ";
 		}
 		
-		//female 5-14
-		if(linkId.equals("fPat5To14StartedBegOfQter")){
-			currentList=(List<Object[]>) map.get("femalePat5To14StartedByTheBegOfQterList");
-			title="Female Patients(Aged 5 to 14) Started ART By the Beginning of the Quarter ";
+		// female new on ART during the quarter (NEW and TRANSFER-IN included)
+		if(linkId.equals("femPat0To11StartedDuringQter")){
+			currentList=(List<Object[]>) map.get("femPat0To11StartedDuringQterList");
+			title="Female Patients(Aged 0 to 11) on ART during the quarter ";
 		}
-		if(linkId.equals("fPat5To14StartedDuringQter")){
-			currentList=(List<Object[]>) map.get("femalePat5To14StartedByDuringQterList");
-			title="Female Patients(Aged 5 to 14) Started ART During the Quarter ";
+		if(linkId.equals("femPat12To23StartedDuringQter")){
+			currentList=(List<Object[]>) map.get("femPat12To23StartedDuringQterList");
+			log.info("iiiiiiiiiiiiiiiiiiiiiiiii "+(List<Object[]>) map.get("femPat12To23StartedDuringQterList"));
+			title="Female Patients(Aged 12 to 23) on ART During the Quarter ";
 		}
-		if(linkId.equals("fPat5To14StartedEndOfQter")){
-			currentList=(List<Object[]>) map.get("fPat5To14StartedEndOfQterList");
-			title="Female Patients(Aged 5 to 14) Started ART By the End of the Quarter ";
+		if(linkId.equals("femPat24To59StartedDuringQter")){
+			currentList=(List<Object[]>) map.get("femPat24To59StartedDuringQterList");
+			title="Female Patients(Aged 24 to 59) on ART during the quarter ";
 		}
-		if(linkId.equals("female5To14NewOnARTDuringQterNoTransferIn")){
-			currentList=(List<Object[]>) map.get("female5To14NewOnARTDuringQterNoTransfList");
-			title="Female Patients(Aged 5 to 14) Started ART During the Quarter -------> Transferred In Not Considerred";
+		if(linkId.equals("femPat60To179StartedDuringQter")){
+			currentList=(List<Object[]>) map.get("femPat60To179StartedDuringQterList");
+			title="Female Patients(Aged 60 to 179) on ART during the quarter ";
+		}
+		//male on ART end of the quarter
+		if(linkId.equals("malePat0To11StartedEndQter")){ 
+			currentList=(List<Object[]>) map.get("malePat0To11StartedEndQterList");
+			title="Male Patients(Aged 0 to 11 months old) on ART By the end of the Quarter ";
+		}
+		if(linkId.equals("malePat12To23StartedEndQter")){
+			currentList=(List<Object[]>) map.get("malePat12To23StartedEndQterList");
+			title="Male Patients(Aged 12 to 23 months old) on ART By the end of the Quarter ";
+		}
+		if(linkId.equals("malePat24To59StartedEnd")){
+			currentList=(List<Object[]>) map.get("malePat24To59StartedEndList");
+			title="Male Patients(Aged 24 to 59 months old) on ART By the End of the Quarter ";
+		}
+		if(linkId.equals("malePat60To179StartedEndQter")){
+			currentList=(List<Object[]>) map.get("malePat60To179StartedEndQterList");
+			title="Male Patients(Aged 60 to 179 months old) on ART By the end of the Quarter ";
+		}
+		
+		//female on ART end of the quarter
+		if(linkId.equals("femPat0T11StartedEndQter")){ 
+			currentList=(List<Object[]>) map.get("femPat0To11StartedEndQterList");
+			title="Female Patients(Aged 0 to 11 months old) on ART By the end of the Quarter ";
+		}
+		if(linkId.equals("femPat12To23StartedEndQter")){
+			currentList=(List<Object[]>) map.get("femPat12To23StartedEndQterList");
+			title="Female Patients(Aged 12 to 23 months old) on ART By the end of the Quarter ";
+		}
+		if(linkId.equals("femPat24To59StartedEnd")){
+			currentList=(List<Object[]>) map.get("femPat24To59StartedEndList");
+			title="Female Patients(Aged 24 to 59 months old) on ART By the End of the Quarter ";
+		}
+		if(linkId.equals("femPat60To179StartedEndQter")){
+			currentList=(List<Object[]>) map.get("femPat60To179StartedEndQterList");
+			title="Female Patients(Aged 60 to 179 months old) on ART By the end of the Quarter ";
 		}
 		
 		//________________________________________patients exited from care and lost to follow up_________________________________________________________________

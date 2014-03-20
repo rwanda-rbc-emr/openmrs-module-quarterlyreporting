@@ -129,10 +129,10 @@ public interface QuarterlyReportingService {
     
     public List<Integer> getPreARTpatientsTransferreIn(Date quarterFrom,Date quarterTo);
     
-    public List<Object[]> getNewEnrolled(Date quarterFrom, Date quarterTo,
-			String gender, Integer minAge, Integer maxAge);
-    
     public List<Integer> getAllPatientsTransferredIn(Date quarterFrom, Date quarterTo);
+    
+    public List<Object[]> getNewOnArtTransferInExcluded(Date quarterFrom,
+			Date quarterTo, String gender, Integer minAge, Integer maxAge);
 	
 	
 }
