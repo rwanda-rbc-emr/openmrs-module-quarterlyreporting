@@ -284,31 +284,23 @@ public class QuarterlyReportingDAOImpl implements QuarterReportingDAO {
 
 		if (gender != null) {
 			queryPortion.append(" FROM orders o ");
-//			queryPortion.append(" INNER JOIN drug_order dro on dro.order_id=o.order_id  ");
-			// queryPortion.append(" INNER JOIN drug drug on drug.drug_id=dro.drug_inventory_id  ");
 			queryPortion.append(" INNER JOIN patient pat on pat.patient_id=o.patient_id ");
 			queryPortion.append(" INNER JOIN patient_program pg on pat.patient_id=pg.patient_id ");
 			queryPortion.append(" INNER JOIN program gr on gr.program_id=pg.program_id AND gr.program_id = ");
 			queryPortion.append(Integer.parseInt(QuarterlyReportUtil.gpGetHIVProgramId()));
-//			queryPortion.append(getQueryPortionForProphylaxisConceptIds());
-//			queryPortion.append(getQueryPortionForTBDrugs());
 			queryPortion.append(" AND o.concept_id in( "+ QuarterlyReportUtil.gpGetARVConceptIds() + ") ");
 			queryPortion.append(" AND o.voided=0 AND pat.voided=0 AND pg.voided=0 ");
 			queryPortion.append(" INNER JOIN person p on o.patient_id = p.person_id   ");
 			queryPortion.append(" AND p.gender= '" + gender + "'");
 		} else {
 			queryPortion.append(" FROM orders o ");
-//			queryPortion.append(" INNER JOIN drug_order dro on dro.order_id=o.order_id  ");
-			// queryPortion.append(" INNER JOIN drug drug on drug.drug_id=dro.drug_inventory_id  ");
 			queryPortion.append(" INNER JOIN patient pat on pat.patient_id=o.patient_id ");
 			queryPortion.append(" INNER JOIN patient_program pg on pat.patient_id=pg.patient_id ");
 			queryPortion.append(" INNER JOIN program gr on gr.program_id=pg.program_id AND gr.program_id = ");
 			queryPortion.append(Integer.parseInt(QuarterlyReportUtil.gpGetHIVProgramId()));
-//			queryPortion.append(getQueryPortionForProphylaxisConceptIds());
-//			queryPortion.append(getQueryPortionForTBDrugs());
 			queryPortion.append(" AND o.concept_id in( "+ QuarterlyReportUtil.gpGetARVConceptIds() + ") ");
 			queryPortion.append(" AND o.voided=0 AND pat.voided=0 AND pg.voided=0 ");
-			queryPortion.append(" INNER JOIN person p on o.patient_id = p.person_id   ");
+			queryPortion.append(" INNER JOIN person p on o.patient_id = p.person_id   "); 
 		}
 		
 
@@ -320,6 +312,7 @@ public class QuarterlyReportingDAOImpl implements QuarterReportingDAO {
 				strBuffer.append("IF((select min(o.start_date)) < ");
 				strBuffer.append("'" + df.format(quarterFrom) + "'" + " , "	+ " true " + " ," + "false)  ");
 				strBuffer.append(queryPortion);
+				strBuffer.append(" and pg.date_enrolled <= '"+ df.format(quarterFrom) + "' AND ((pg.date_completed is null) or(cast(pg.date_completed as DATE)> ' " + df.format(quarterFrom) + " ')) ");
 				strBuffer.append(" group by o.patient_id ");
 
 				query = sessionFactory.getCurrentSession().createSQLQuery(
@@ -332,6 +325,7 @@ public class QuarterlyReportingDAOImpl implements QuarterReportingDAO {
 				strBuffer.append("IF((select min(o.start_date)) < ");
 				strBuffer.append("'" + df.format(quarterTo) + "'" + " , "+ " true " + " ," + "false) ");
 				strBuffer.append(queryPortion);
+				strBuffer.append(" and pg.date_enrolled <= '"+ df.format(quarterTo) + "' AND ((pg.date_completed is null) or(cast(pg.date_completed as DATE)> ' " + df.format(quarterTo) + " ')) ");
 				strBuffer.append(" group by o.patient_id ");
 
 				query = sessionFactory.getCurrentSession().createSQLQuery(
@@ -347,6 +341,7 @@ public class QuarterlyReportingDAOImpl implements QuarterReportingDAO {
 						+ df.format(quarterTo) + "'" + " , " + " true " + " ,"
 						+ "false)");
 				strBuffer.append(queryPortion);
+				strBuffer.append(" and pg.date_enrolled <= '"+ df.format(quarterTo) + "' AND ((pg.date_completed is null) or(cast(pg.date_completed as DATE)> ' " + df.format(quarterTo) + " ')) ");
 				strBuffer.append(" group by o.patient_id ");
 				
 
@@ -361,6 +356,7 @@ public class QuarterlyReportingDAOImpl implements QuarterReportingDAO {
 				strBuffer.append("'" + df.format(quarterTo) + "'" + " , "
 						+ " true" + " ," + "false) ");
 				strBuffer.append(queryPortion);
+				strBuffer.append(" and pg.date_enrolled <= '"+ df.format(quarterTo) + "' AND ((pg.date_completed is null) or(cast(pg.date_completed as DATE)> ' " + df.format(quarterTo) + " ')) ");
 				strBuffer.append(" group by o.patient_id ");
 
 				query = sessionFactory.getCurrentSession().createSQLQuery( 
@@ -1481,47 +1477,119 @@ public class QuarterlyReportingDAOImpl implements QuarterReportingDAO {
 		StringBuffer queryPortion = new StringBuffer();
 		SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd");
 		List<Object[]> objs = new ArrayList<Object[]>();
+		
+//		mariam
 
-			if (gender == null) {
-				queryPortion.append(" FROM orders o INNER JOIN drug_order dro ON dro.order_id=o.order_id ");
-				queryPortion.append(" INNER JOIN person p ON o.patient_id = p.person_id   ");
-				queryPortion.append(" AND o.concept_id IN ("+ QuarterlyReportUtil.gpGetARVConceptIds()+ ")  ");
-				queryPortion.append(" GROUP BY o.patient_id ");
-			} else {
-				queryPortion.append(" FROM orders o INNER JOIN drug_order dro ON dro.order_id=o.order_id ");
-				queryPortion.append(" INNER JOIN person p ON o.patient_id = p.person_id   ");
-				queryPortion.append(" AND o.concept_id IN ("+ QuarterlyReportUtil.gpGetARVConceptIds()+ ") ");
-				queryPortion.append(" AND p.gender='" + gender + "'  ");
-				queryPortion.append(" GROUP BY o.patient_id ");
-			}
+//			if (gender == null) {
+////				queryPortion.append(" FROM orders o INNER JOIN drug_order dro ON dro.order_id=o.order_id ");
+////				queryPortion.append(" INNER JOIN person p ON o.patient_id = p.person_id   ");
+////				queryPortion.append(" AND o.concept_id IN ("+ QuarterlyReportUtil.gpGetARVConceptIds()+ ")  ");
+////				queryPortion.append(" GROUP BY o.patient_id ");
+//				
+//				queryPortion.append(" FROM orders o ");
+//				queryPortion.append(" INNER JOIN patient pat on pat.patient_id=o.patient_id ");
+//				queryPortion.append(" INNER JOIN patient_program pg on pat.patient_id=pg.patient_id ");
+//				queryPortion.append(" INNER JOIN program gr on gr.program_id=pg.program_id AND gr.program_id = ");
+//				queryPortion.append(Integer.parseInt(QuarterlyReportUtil.gpGetHIVProgramId()));
+//				queryPortion.append(" AND o.concept_id in( "+ QuarterlyReportUtil.gpGetARVConceptIds() + ") ");
+//				queryPortion.append(" AND o.voided=0 AND pat.voided=0 AND pg.voided=0 ");
+//				queryPortion.append(" INNER JOIN person p on o.patient_id = p.person_id   ");
+//				queryPortion.append(" AND p.gender= '" + gender + "'");
+//				queryPortion.append(" GROUP BY o.patient_id ");
+//				
+//			} else {
+////				queryPortion.append(" FROM orders o INNER JOIN drug_order dro ON dro.order_id=o.order_id ");
+////				queryPortion.append(" INNER JOIN person p ON o.patient_id = p.person_id   ");
+////				queryPortion.append(" AND o.concept_id IN ("+ QuarterlyReportUtil.gpGetARVConceptIds()+ ") ");
+////				queryPortion.append(" AND p.gender='" + gender + "'  ");
+////				queryPortion.append(" GROUP BY o.patient_id ");
+//				
+//				queryPortion.append(" FROM orders o ");
+//				queryPortion.append(" INNER JOIN patient pat on pat.patient_id=o.patient_id ");
+//				queryPortion.append(" INNER JOIN patient_program pg on pat.patient_id=pg.patient_id ");
+//				queryPortion.append(" INNER JOIN program gr on gr.program_id=pg.program_id AND gr.program_id = ");
+//				queryPortion.append(Integer.parseInt(QuarterlyReportUtil.gpGetHIVProgramId()));
+//				queryPortion.append(" AND o.concept_id in( "+ QuarterlyReportUtil.gpGetARVConceptIds() + ") ");
+//				queryPortion.append(" AND o.voided=0 AND pat.voided=0 AND pg.voided=0 ");
+//				queryPortion.append(" INNER JOIN person p on o.patient_id = p.person_id   "); 
+//				queryPortion.append(" GROUP BY o.patient_id ");
+//			}	
 		
 		
-		if (startDate != null && endDate == null) {
-			strBuffer.append("SELECT o.patient_id , ");
-			strBuffer.append("IF((select min(o.start_date)) < ");
-			strBuffer.append("'" + df.format(startDate) + "'" + " , "
-					+ " true " + " ," + "false)");
-			strBuffer.append(queryPortion);
-
-		}
-		if (startDate == null && endDate != null) {
-			strBuffer.append("SELECT o.patient_id , ");
-			strBuffer.append("IF((select min(o.start_date)) < ");
-			strBuffer.append("'" + df.format(endDate) + "'" + " , " + " true "
-					+ " ," + "false) ");
-			strBuffer.append(queryPortion);
-
-		}
-		if (startDate != null && endDate != null) {
+		if (gender != null) {
 			strBuffer.append("SELECT o.patient_id , ");
 			strBuffer.append("IF((select min(o.start_date)) BETWEEN ");
-			strBuffer.append(" '" + df.format(startDate) + "' AND '"
-					+ df.format(endDate) + "' " + " , " + " true " + " ,"
-					+ "false) ");
-			strBuffer.append(queryPortion);
+			strBuffer.append(" '" + df.format(startDate) + "' AND '"+ df.format(endDate) + "' " + " , " + " true " + " ,"+ "false) ");
+			strBuffer.append(" FROM orders o ");
+			strBuffer.append(" INNER JOIN patient pat on pat.patient_id=o.patient_id ");
+			strBuffer.append(" INNER JOIN patient_program pg on pat.patient_id=pg.patient_id ");
+			strBuffer.append(" INNER JOIN program gr on gr.program_id=pg.program_id AND gr.program_id = ");
+			strBuffer.append(Integer.parseInt(QuarterlyReportUtil.gpGetHIVProgramId()));
+			strBuffer.append(" AND o.concept_id in( "+ QuarterlyReportUtil.gpGetARVConceptIds() + ") ");
+			strBuffer.append(" AND o.voided=0 AND pat.voided=0 AND pg.voided=0 ");
+			strBuffer.append(" INNER JOIN person p on o.patient_id = p.person_id   ");
+			strBuffer.append(" AND p.gender= '" + gender + "'");
+			strBuffer.append(" and pg.date_enrolled <= '"+ df.format(endDate) + "' AND ((pg.date_completed is null) or(cast(pg.date_completed as DATE)> ' " + df.format(endDate) + " ')) ");
+			strBuffer.append(" group by o.patient_id ");
+		} else {
+			strBuffer.append("SELECT o.patient_id , ");
+			strBuffer.append("IF((select min(o.start_date)) BETWEEN ");
+			strBuffer.append(" '" + df.format(startDate) + "' AND '"+ df.format(endDate) + "' " + " , " + " true " + " ,"+ "false) ");
+			strBuffer.append(" FROM orders o ");
+			strBuffer.append(" INNER JOIN patient pat on pat.patient_id=o.patient_id ");
+			strBuffer.append(" INNER JOIN patient_program pg on pat.patient_id=pg.patient_id ");
+			strBuffer.append(" INNER JOIN program gr on gr.program_id=pg.program_id AND gr.program_id = ");
+			strBuffer.append(Integer.parseInt(QuarterlyReportUtil.gpGetHIVProgramId()));
+			strBuffer.append(" AND o.concept_id in( "+ QuarterlyReportUtil.gpGetARVConceptIds() + ") ");
+			strBuffer.append(" AND o.voided=0 AND pat.voided=0 AND pg.voided=0 ");
+			strBuffer.append(" INNER JOIN person p on o.patient_id = p.person_id   ");
+			strBuffer.append(" and pg.date_enrolled <= '"+ df.format(endDate) + "' AND ((pg.date_completed is null) or(cast(pg.date_completed as DATE)> ' " + df.format(endDate) + " ')) ");
+			strBuffer.append(" group by o.patient_id ");
 		}
-
+		
+//		if (startDate != null && endDate == null) {
+//			strBuffer.append("SELECT o.patient_id , ");
+//			strBuffer.append("IF((select min(o.start_date)) < ");
+//			strBuffer.append("'" + df.format(startDate) + "'" + " , "
+//					+ " true " + " ," + "false)");
+//			strBuffer.append(queryPortion);
+//			strBuffer.append(" and pg.date_enrolled <= '"+ df.format(startDate) + "' AND ((pg.date_completed is null) or(cast(pg.date_completed as DATE)> ' " + df.format(startDate) + " ')) ");
+//			strBuffer.append(" group by o.patient_id ");
+//		}
+//		if (startDate == null && endDate != null) {
+//			strBuffer.append("SELECT o.patient_id , ");
+//			strBuffer.append("IF((select min(o.start_date)) < ");
+//			strBuffer.append("'" + df.format(endDate) + "'" + " , " + " true "
+//					+ " ," + "false) ");
+//			strBuffer.append(queryPortion);
+//			strBuffer.append(" and pg.date_enrolled <= '"+ df.format(endDate) + "' AND ((pg.date_completed is null) or(cast(pg.date_completed as DATE)> ' " + df.format(endDate) + " ')) ");
+//			strBuffer.append(" group by o.patient_id ");
+//		}
+//		if (startDate != null && endDate != null) {
+//			strBuffer.append("SELECT o.patient_id , ");
+//			strBuffer.append("IF((select min(o.start_date)) BETWEEN ");
+//			strBuffer.append(" '" + df.format(startDate) + "' AND '"
+//					+ df.format(endDate) + "' " + " , " + " true " + " ,"
+//					+ "false) ");
+//			strBuffer.append(queryPortion);
+//			strBuffer.append(" and pg.date_enrolled <= '"+ df.format(endDate) + "' AND ((pg.date_completed is null) or(cast(pg.date_completed as DATE)> ' " + df.format(endDate) + " ')) ");
+//			strBuffer.append(" group by o.patient_id ");
+//		}
+		
 		SQLQuery query = sessionFactory.getCurrentSession().createSQLQuery(strBuffer.toString()); 
+		
+		
+		//>>>>>>>>>>>>>>>>>>>>SEE IF PATIENTS IS NOT ART TRANFER-IN
+		SQLQuery transferInStr = sessionFactory.getCurrentSession().createSQLQuery
+		("SELECT DISTINCT o.person_id FROM obs o " +
+		"INNER JOIN person pe ON pe.person_id=o.person_id " +
+		"INNER JOIN patient pat ON pe.person_id=pat.patient_id " +
+		"INNER JOIN orders d ON d.patient_id=pat.patient_id " +
+		"AND o.concept_id= "+ Integer.parseInt(QuarterlyReportUtil.gpTransferInConceptId())+" AND value_coded=1065 " +
+		" AND o.obs_datetime BETWEEN  ' "+df.format(startDate)+"' AND ' "+df.format(endDate)+"' "+
+		" AND d.concept_id IN ("+QuarterlyReportUtil.gpGetARVConceptIds()+")");
+				
+		List<Integer> transferredInDuringQter = transferInStr.list(); 
 		
 		List<Object[]> newOnARTDuringTheQter = query.list();
 
@@ -1534,12 +1602,13 @@ public class QuarterlyReportingDAOImpl implements QuarterReportingDAO {
 			add++;
 			Integer id = (Integer) obj[0];
 			String booleanValue = obj[1].toString() + add + "";
-			patientStartedWhenMap.put(booleanValue, id);
+			patientStartedWhenMap.put(booleanValue, id); 
 		}
 
 		for (String key : patientStartedWhenMap.keySet()) { 
 			if (key.charAt(0) == '1') {
-				if (!patientsTransInDuringQter.contains(patientStartedWhenMap.get(key)))
+//				if (!patientsTransInDuringQter.contains(patientStartedWhenMap.get(key)))
+				if(!transferredInDuringQter.contains(patientStartedWhenMap.get(key))) 
 				patId1.add(patientStartedWhenMap.get(key));
 			}
 		}
