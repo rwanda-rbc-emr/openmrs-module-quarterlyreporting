@@ -26,7 +26,9 @@ public class RegimenHistoryHelper {
     }
     
     public void addComponent(DrugOrder order) {
-        addComponent(order.getConcept(), order.getStartDate(), order.isDiscontinued(new Date()) ? order.getDiscontinuedDate() : order.getAutoExpireDate());
+        addComponent(order.getConcept(), order.getEffectiveStartDate(), order.isDiscontinued(new Date()) ? order.getEffectiveStartDate() : order.getAutoExpireDate());
+       
+    
     }
     
     public SortedMap<Date, Set<Concept>> getAsRegimenList() {

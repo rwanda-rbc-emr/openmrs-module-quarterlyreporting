@@ -3070,7 +3070,7 @@ public class QuarterlyReportingDAOImpl implements QuarterReportingDAO {
 		List<Integer> regimenDrugs = new ArrayList<Integer>();
 
 		for (RegimenComponent rc : components) {
-			if (!rc.getDrugOrder().getDiscontinued())
+			if (!rc.getDrugOrder().isActive())
 				regimenDrugs.add(rc.getDrug().getDrugId());
 		}
 
@@ -3126,7 +3126,7 @@ public class QuarterlyReportingDAOImpl implements QuarterReportingDAO {
 		List<Integer> regimenDrugs = new ArrayList<Integer>();
 
 		for (RegimenComponent rc : components) {
-			if (!rc.getDrugOrder().getDiscontinued())
+			if (!rc.getDrugOrder().isActive())
 				regimenDrugs.add(rc.getDrug().getDrugId());
 		}
 
@@ -3159,7 +3159,7 @@ public class QuarterlyReportingDAOImpl implements QuarterReportingDAO {
 		List<Integer> regimenDrugs = new ArrayList<Integer>();
 
 		for (RegimenComponent rc : components) {
-			if (rc.getDrug()!=null && !rc.getDrugOrder().getDiscontinued())
+			if (rc.getDrug()!=null && !rc.getDrugOrder().isActive())
 ////				regimenDrugs.add(rc.getDrug().getDrugId());
 //				if(rc.getDrug()!=null)
 				regimenDrugs.add(rc.getDrug().getConcept().getConceptId());
