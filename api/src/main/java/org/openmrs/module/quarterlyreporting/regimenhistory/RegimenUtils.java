@@ -15,15 +15,15 @@ import org.openmrs.Patient;
 import org.openmrs.api.OrderService;
 import org.openmrs.api.context.Context;
 import org.openmrs.util.OpenmrsUtil;
-//import org.openmrs.module.mohorderentrybridge.api.MoHOrderEntryBridgeService;
+import org.openmrs.module.mohorderentrybridge.api.MoHOrderEntryBridgeService;
 
 public class RegimenUtils {
 
     protected final Log log = LogFactory.getLog(getClass());
     
     public static RegimenHistory getRegimenHistory(Patient patient) {
-     // return new RegimenHistory(Context.getService(MoHOrderEntryBridgeService.class).getDrugOrdersByPatient(patient));
-    	return null;
+     return new RegimenHistory(Context.getService(MoHOrderEntryBridgeService.class).getDrugOrdersByPatient(patient));
+    	
     }
     
     

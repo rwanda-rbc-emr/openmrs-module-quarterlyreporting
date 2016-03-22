@@ -3,33 +3,33 @@
 <module configVersion="1.2">
 	
 	<!-- quarterly reporting Module Properties -->
-	<id>quarterlyreporting</id>
-	<name>Quarterly HIV Care and ART Reporting</name>
-	<version>0.4.5-SNAPSHOT</version>
-	<package>org.openmrs.module.quarterlyreporting</package>
+	<id>@MODULE_ID@</id>
+	<name>@MODULE_NAME@</name>
+	<version>@MODULE_VERSION@</version>
+	<package>@MODULE_PACKAGE@</package>
 	<author>Mariam N.</author>
 	<description>
 			This is HIV Care and ART Quarterly Reporting System
 	</description>
 
-	<activator>org.openmrs.module.quarterlyreporting.QuarterlyReportActivator</activator>
+	<activator>@MODULE_PACKAGE@.QuarterlyReportActivator</activator>
 	
-	<!-- <updateURL>https://dev.openmrs.org/modules/download/quarterlyreporting/update.rdf</updateURL> -->
+	<!-- <updateURL>https://dev.openmrs.org/modules/download/@MODULE_ID@/update.rdf</updateURL> -->
 	<!-- /Base Module Properties -->
 	
-	<require_version>1.11.5</require_version>
+	<require_version>${openMRSVersion}</require_version>
 	
 	<!-- Extensions -->
 	<extension>
 		<point>org.openmrs.tracmodule.list</point>
-		<class>org.openmrs.module.quarterlyreporting.extension.html.AdminList</class>
+		<class>@MODULE_PACKAGE@.extension.html.AdminList</class>
 	</extension>
 	
 	
 	<!-- AOP
 	<advice>
 		<point>org.openmrs.api.FormService</point>
-		<class>org.openmrs.module.quarterlyreporting.advice.DuplicateFormAdvisor</class>
+		<class>@MODULE_PACKAGE@.advice.DuplicateFormAdvisor</class>
 	</advice>
 	 /AOP -->
 	
@@ -48,7 +48,7 @@
 
 
 	<globalProperty>
-		<property>quarterlyreporting.arvConceptIds</property>
+		<property>@MODULE_ID@.arvConceptIds</property>
 		<defaultValue>796,633,628,794,635,631,625,802,797,2203,1613,749,795,814,5424,792,5811,630,2833</defaultValue>
 		<description>
 			those are the concept Ids of ARVs 
@@ -56,7 +56,7 @@
 	</globalProperty>
 	
 	<globalProperty>
-		<property>quarterlyreporting.arvAndPreArvDrugConceptIds</property>
+		<property>@MODULE_ID@.arvAndPreArvDrugConceptIds</property>
 		<defaultValue>796,633,628,794,635,631,625,802,797,2203,1613,749,795,814,5424,792,5811,630,2833,916,8072</defaultValue>
 		<description>
 			those are the concept Ids of ARVs 
@@ -67,7 +67,7 @@
 	
 	
 	<globalProperty>
-		<property>quarterlyreporting.hivProgramId</property>
+		<property>@MODULE_ID@.hivProgramId</property>
 		<defaultValue>2</defaultValue>
 		<description>
 			HIV Program Id
@@ -75,7 +75,7 @@
 	</globalProperty>
 	
 	<globalProperty>
-		<property>quarterlyreporting.bactrimConceptIds</property>
+		<property>@MODULE_ID@.bactrimConceptIds</property>
 		<defaultValue>916,8072</defaultValue>
 		<description>
 			cotrimoxazole
@@ -85,7 +85,7 @@
 	
 	
 	<globalProperty>
-		<property>quarterlyreporting.prophylaxisDrugIds</property>
+		<property>@MODULE_ID@.prophylaxisDrugIds</property>
 		<defaultValue>22,23,24,27,37</defaultValue>
 		<description>
 			prophylaxis drug ids
@@ -93,7 +93,7 @@
 	</globalProperty>
 	
 	<globalProperty>
-		<property>quarterlyreporting.prophylaxisDrugConceptIds</property>
+		<property>@MODULE_ID@.prophylaxisDrugConceptIds</property>
 		<defaultValue>916,747,92</defaultValue>
 		<description>
 			prophylaxis drug concept ids
@@ -102,7 +102,7 @@
 	
 	
 	<globalProperty>
-		<property>quarterlyreporting.tbDrugIds</property>
+		<property>@MODULE_ID@.tbDrugIds</property>
 		<defaultValue>656,767,745,5829,438,1411,1417,1406,740,1418,755,955,1414,1413,1419,1415,1633,450,2459,2460</defaultValue>
 		<description>
 			TB drug's concept ids
@@ -110,7 +110,7 @@
 	</globalProperty>
 	
 	<globalProperty>
-		<property>quarterlyreporting.tbIds</property>
+		<property>@MODULE_ID@.tbIds</property>
 		<defaultValue>10,11,12,13</defaultValue>
 		<description>
 			TB drug's ids
@@ -119,7 +119,7 @@
 	
 	
 	<globalProperty>
-		<property>quarterlyreporting.exitedConceptId</property>
+		<property>@MODULE_ID@.exitedConceptId</property>
 		<defaultValue>1811</defaultValue>
 		<description>
 			concept Id for patients who have been exited from care
@@ -127,7 +127,7 @@
 	</globalProperty>
 	
 	<globalProperty>
-		<property>quarterlyreporting.CD4CountConceptId</property>
+		<property>@MODULE_ID@.CD4CountConceptId</property>
 		<defaultValue>5497</defaultValue>
 		<description>
 			concept Id for CD4 Count
@@ -137,7 +137,7 @@
 	
 	
 	<globalProperty>
-		<property>quarterlyreporting.returnVisitDateConceptId</property>
+		<property>@MODULE_ID@.returnVisitDateConceptId</property>
 		<defaultValue>5096</defaultValue>
 		<description>
 			concept Id for Return Visit Date
@@ -145,7 +145,7 @@
 	</globalProperty>
 	
 	<globalProperty>
-		<property>quarterlyreporting.transferInConceptId</property>
+		<property>@MODULE_ID@.transferInConceptId</property>
 		<defaultValue>2536</defaultValue>
 		<description>
 			concept Id for Transfer in
@@ -153,7 +153,7 @@
 	</globalProperty>
 	
 	<globalProperty>
-		<property>quarterlyreporting.transferInFromConceptId</property>
+		<property>@MODULE_ID@.transferInFromConceptId</property>
 		<defaultValue>1427</defaultValue>
 		<description>
 			concept Id for TRANSFER IN FROM
@@ -161,7 +161,7 @@
 	</globalProperty>	
 		
 	<require_modules>
-	    <require_module version="1.0-beta">
+	    <require_module version="${mohorderentrybridgeVersion}">
 			org.openmrs.module.mohorderentrybridge
 		</require_module>
 	</require_modules>
@@ -171,14 +171,14 @@
 	<dwr>
 		<allow>
 			<create creator="new" javascript="DWRFormEntryService">
-				<param name="class" value="org.openmrs.module.quarterlyreporting.web.DWRFormEntryService"/>
+				<param name="class" value="org.openmrs.module.@MODULE_ID@.web.DWRFormEntryService"/>
 				<include method="enterForm"/>
 			</create>
 		</allow>
 
 		<signatures>
 			<![CDATA[
-			import org.openmrs.module.quarterlyreporting.web.DWRFormEntryService;
+			import @MODULE_PACKAGE@.web.DWRFormEntryService;
 			DWRFormEntryService.enterForm(Integer patientId, Integer formId, boolean useEncounter, List<String> fields);
 			]]>
 		</signatures>	
@@ -189,14 +189,14 @@
 	<!-- Accessed through the url /pageContext()/moduleServlet/<moduleId>/<servlet-name> 
 	<servlet>
 		<servlet-name>formDownload</servlet-name>
-		<servlet-class>org.openmrs.module.quarterlyreporting.web.FormDownloadServlet</servlet-class>
+		<servlet-class>@MODULE_PACKAGE@.web.FormDownloadServlet</servlet-class>
 	</servlet>
 	-->
 	<!-- /Servlets -->
 	
 	
 	<!-- Internationalization -->
-	<!-- All message codes should start with quarterlyreporting.* -->
+	<!-- All message codes should start with @MODULE_ID@.* -->
 	<messages>
 		<lang>en</lang>
 		<file>messages.properties</file>

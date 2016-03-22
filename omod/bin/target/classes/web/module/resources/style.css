@@ -1,0 +1,21 @@
+.mainHeader{
+	font-size: 14px;
+	font-weight: bold;
+}
+
+.headers{
+	font-size: 11px;
+	font-weight: bold;
+}
+
+.categories{
+	font-size: 11px;
+}
+
+@media print {
+	#print_button, .boxHeader, .box
+	{
+	  display: none;
+	}
+}
+
