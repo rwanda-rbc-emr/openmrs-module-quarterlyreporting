@@ -10,7 +10,6 @@
 	<packaging>jar</packaging>
 	<name>Quarterly HIV Care and ART Reporting API</name>
 	<description>API project for Quarterly HIV Care and ART Reporting</description>
-
 	<dependencies>
 		<!-- 
 		Add other dependencies from lib:
