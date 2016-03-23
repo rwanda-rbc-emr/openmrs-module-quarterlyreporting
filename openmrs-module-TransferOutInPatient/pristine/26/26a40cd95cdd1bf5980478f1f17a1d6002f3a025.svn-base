@@ -1,0 +1,87 @@
+@MODULE_ID@.title=Quarterly HIV Care and ART Reporting
+@MODULE_ID@.shortTitle=Quarterly Reporting
+@MODULE_ID@.select=Select Period
+@MODULE_ID@.quarter=Quarter
+@MODULE_ID@.chooseQter=Select
+@MODULE_ID@.To=To
+@MODULE_ID@.year=Year
+@MODULE_ID@.findButton=Find
+@MODULE_ID@.printButton=Print
+@MODULE_ID@.qterBegin=Quarter beginning(dd-mm-yyyy)
+@MODULE_ID@.qterEnding=Quarter ending(dd-mm-yyyy)
+
+######################## table 1.0 ##########################################################################
+@MODULE_ID@.enrollmentAdult=HIV Palliative Care (non-ART and ART care)
+@MODULE_ID@.cumEnrolleeBegQter=Cumulative number enrolled in HIV care by the beginning of quarter
+@MODULE_ID@.newEnrolleesDuringQter=NEW enrollees in HIV care during the quarter
+@MODULE_ID@.cumEnrolleesEndQter=Cumulative number enrolled in HIV care by the end of the quarter
+@MODULE_ID@.totalReceivedHIVCareDuringQter=Total number who received HIV care during the quarter
+@MODULE_ID@.eligible=Number in HIV care during the quarter & eligible for ART, but NOT started ART by the end of the quarter
+@MODULE_ID@.totalReceivedCotrimoDuringQter=Total nber of patients receiving Cotrimo this quarter 
+
+######################## table 1.1 ##########################################################################
+@MODULE_ID@.enrollmentPediatric=Pediatric HIV Palliative Care (non ART and ART care)
+
+######################## table 2.0 ##########################################################################
+@MODULE_ID@.ARTCareAdult=ART Care
+@MODULE_ID@.cumStartedARTBegQter=Cumulative number started on ART by the beginning of the quarter 
+@MODULE_ID@.newAndTransfersDuringQter=Patients started on ART in program during the quarter (includes NEW and TRANSFERS)
+@MODULE_ID@.newOnARTEndeQter=Cumulative number started on ART by the end of the quarter 	
+@MODULE_ID@.newOnARTDuringQter=NEW Patients on ART during the quarter
+@MODULE_ID@.transferredDuringQter=Patients on ART who TRANSFERRED in during the quarter
+@MODULE_ID@.totalOnARTEndQter=Total number on ART at the end of the quarter (CURRENT) 
+@MODULE_ID@.pregnantFem=Pregnant females (subset of total)
+@MODULE_ID@.USDFunded=No. of persons on ART at the end of the quarter who were treated with USG-funded ART
+
+######################## table 2.1 ##########################################################################
+@MODULE_ID@.pediatricARTCare=Pediatric ART Care
+
+######################## table 6.0 ##########################################################################
+@MODULE_ID@.ARTCareFollowUpAdult=ART Care Follow-Up: Number of persons who started on ART at the facility in the EP program who were NOT on ART at the end of the quarter
+@MODULE_ID@.stoppedART=Stopped ART
+@MODULE_ID@.transOut=Transferred Out
+@MODULE_ID@.death=Death
+@MODULE_ID@.lost=Lost to follow up	
+@MODULE_ID@.ARTCareFollowUpPed=Pediatric ART Care Follow Up
+
+######################## table 4.1 and 4.2 ##################################################################
+@MODULE_ID@.adherenceSix=Change in CD4+ count and adherence to ART for 6-month cohort (Patients >6 years)
+@MODULE_ID@.adherenceTwelve=Change in CD4+ count and adherence to ART for 12-month cohort (Patients >6 years)
+@MODULE_ID@.baseline=Baseline
+@MODULE_ID@.months=months
+@MODULE_ID@.monthWhenCohortStarted=Months when cohort started ART
+@MODULE_ID@.numberInCohort=No of persons in cohort
+@MODULE_ID@.whoHaveCD4Count=No. in cohort who have CD4 count
+@MODULE_ID@.median=Median CD4+ count for cohort
+@MODULE_ID@.whoReceivedARVSixOutOfSix=No. in cohort who received ARVs for 6 out of 6 months
+@MODULE_ID@.whoReceivedARVTwelveOutOfTw=No.of persons in cohort who received ARVs for 12 out of 12 months
+
+######################## table 5 ##########################################################################
+@MODULE_ID@.patientsAndRegimens=No of patients on each regimen at the end of the quarter
+@MODULE_ID@.regimens=Regimens
+
+######################## categories : gender and age ######################################################
+@MODULE_ID@.maleZeroTo179=Males (0-179 months)
+@MODULE_ID@.maleOver180=Males (180+ months)
+@MODULE_ID@.maleZeroToElevMonths=Males (0-11 months)
+@MODULE_ID@.male12To23Months=Males (12-23 months)
+@MODULE_ID@.male24To59Months=Males (24-59 months)
+@MODULE_ID@.male60To179Months=Males (60-179 months)
+
+@MODULE_ID@.femaleZeroTo179=Females (0-179 months)
+@MODULE_ID@.femaleOver180=Females (180+ months)
+@MODULE_ID@.femaleZeroToElevMonths=Females (0-11 months)
+@MODULE_ID@.female12To23Months=Females (12-23 months)
+@MODULE_ID@.female24To59Months=Females (24-59 months)
+@MODULE_ID@.female60To179Months=Females (60-179 months)
+
+########################## months #########################################################################
+@MODULE_ID@.april=Apr
+@MODULE_ID@.jun=Jun
+@MODULE_ID@.jul=Jul
+
+
+
+
+
+
