@@ -2,7 +2,6 @@ package org.openmrs.module.quarterlyreporting.db.daoimpl;
 
 import java.io.IOException;
 import java.math.BigInteger;
-import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -15,7 +14,6 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
-import java.util.ListIterator;
 import java.util.Map;
 import java.util.Set;
 import java.util.SortedMap;
@@ -31,13 +29,9 @@ import org.hibernate.SQLQuery;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.openmrs.Concept;
-import org.openmrs.Drug;
-import org.openmrs.DrugOrder;
 import org.openmrs.Obs;
-import org.openmrs.Order;
 import org.openmrs.Patient;
 import org.openmrs.PatientProgram;
-import org.openmrs.api.ConceptService;
 import org.openmrs.api.context.Context;
 import org.openmrs.module.quarterlyreporting.QuarterlyReportUtil;
 import org.openmrs.module.quarterlyreporting.db.dao.QuarterReportingDAO;
@@ -46,8 +40,6 @@ import org.openmrs.module.quarterlyreporting.regimenhistory.RegimenComponent;
 import org.openmrs.module.quarterlyreporting.regimenhistory.RegimenHistory;
 import org.openmrs.module.quarterlyreporting.regimenhistory.RegimenUtils;
 import org.openmrs.module.quarterlyreporting.service.QuarterlyReportingService;
-
-import com.sun.xml.internal.bind.v2.TODO;
 
 public class QuarterlyReportingDAOImpl implements QuarterReportingDAO {
 
@@ -3070,7 +3062,7 @@ public class QuarterlyReportingDAOImpl implements QuarterReportingDAO {
 		List<Integer> regimenDrugs = new ArrayList<Integer>();
 
 		for (RegimenComponent rc : components) {
-			if (!rc.getDrugOrder().getDiscontinued())
+			if (rc.getDrugOrder().isActive())
 				regimenDrugs.add(rc.getDrug().getDrugId());
 		}
 
@@ -3126,7 +3118,7 @@ public class QuarterlyReportingDAOImpl implements QuarterReportingDAO {
 		List<Integer> regimenDrugs = new ArrayList<Integer>();
 
 		for (RegimenComponent rc : components) {
-			if (!rc.getDrugOrder().getDiscontinued())
+			if (rc.getDrugOrder().isActive())
 				regimenDrugs.add(rc.getDrug().getDrugId());
 		}
 
@@ -3159,7 +3151,7 @@ public class QuarterlyReportingDAOImpl implements QuarterReportingDAO {
 		List<Integer> regimenDrugs = new ArrayList<Integer>();
 
 		for (RegimenComponent rc : components) {
-			if (rc.getDrug()!=null && !rc.getDrugOrder().getDiscontinued())
+			if (rc.getDrug()!=null && rc.getDrugOrder().isActive())
 ////				regimenDrugs.add(rc.getDrug().getDrugId());
 //				if(rc.getDrug()!=null)
 				regimenDrugs.add(rc.getDrug().getConcept().getConceptId());

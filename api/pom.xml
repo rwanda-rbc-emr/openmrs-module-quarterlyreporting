@@ -10,7 +10,6 @@
 	<packaging>jar</packaging>
 	<name>Quarterly HIV Care and ART Reporting API</name>
 	<description>API project for Quarterly HIV Care and ART Reporting</description>
-
 	<dependencies>
 		<!-- 
 		Add other dependencies from lib:
@@ -25,10 +24,22 @@
 			<artifactId>openmrs-api</artifactId>
 			<type>jar</type>
 		</dependency>
+		
+		<dependency>
+ 			<groupId>org.openmrs.module</groupId>
+ 			<artifactId>mohorderentrybridge-api</artifactId>
+			<version>${mohorderentrybridgeVersion}</version>
+		    <scope>provided</scope>
+		</dependency>
 		<dependency>
 			<groupId>org.openmrs.web</groupId>
 			<artifactId>openmrs-web</artifactId>
 			<type>jar</type>
+		</dependency>
+		<dependency>
+			<groupId>junit</groupId>
+			<artifactId>junit</artifactId>
+			<version>4.12</version>
 		</dependency>
 	</dependencies>
 
