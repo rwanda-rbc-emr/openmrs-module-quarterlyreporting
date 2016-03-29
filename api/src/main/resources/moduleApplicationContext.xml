@@ -13,8 +13,7 @@
 	<bean parent="serviceContext">
 		<property name="moduleService">
 			<list>
-				<value>org.openmrs.module.quarterlyreporting.service.QuarterlyReportingService
-				</value>
+				<value>org.openmrs.module.quarterlyreporting.service.QuarterlyReportingService</value>
 				<bean
 					class="org.springframework.transaction.interceptor.TransactionProxyFactoryBean">
 					<property name="transactionManager">

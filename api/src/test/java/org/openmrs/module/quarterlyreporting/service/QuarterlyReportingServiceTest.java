@@ -8,7 +8,7 @@ import org.openmrs.api.context.Context;
 import org.openmrs.test.BaseModuleContextSensitiveTest;
 import org.springframework.test.context.ContextConfiguration;
 
-@Ignore
+//@Ignore
 @ContextConfiguration("file:src/main/resources/moduleApplicationContext.xml")//TODO just added for troubleshooting purposes, gets loaded automatically by openmrs
 public class QuarterlyReportingServiceTest extends BaseModuleContextSensitiveTest {
 

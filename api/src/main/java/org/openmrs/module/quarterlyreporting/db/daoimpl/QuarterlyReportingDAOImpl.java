@@ -280,7 +280,7 @@ public class QuarterlyReportingDAOImpl implements QuarterReportingDAO {
 		if (quarterFrom != null && quarterTo == null) {
 
 			strBuffer.append("SELECT o.patient_id , ");
-			strBuffer.append("IF((select min(o.start_date)) < ");
+			strBuffer.append("IF((select min(o.date_activated)) < ");
 			strBuffer.append("'" + df.format(quarterFrom) + "'" + " , " + " true " + " ," + "false)  ");
 			strBuffer.append(queryPortion);
 			strBuffer.append(" and pg.date_enrolled <= '" + df.format(quarterFrom)
@@ -294,7 +294,7 @@ public class QuarterlyReportingDAOImpl implements QuarterReportingDAO {
 		if (quarterFrom == null && quarterTo != null) {
 
 			strBuffer.append("SELECT o.patient_id , ");
-			strBuffer.append("IF((select min(o.start_date)) < ");
+			strBuffer.append("IF((select min(o.date_activated)) < ");
 			strBuffer.append("'" + df.format(quarterTo) + "'" + " , " + " true " + " ," + "false) ");
 			strBuffer.append(queryPortion);
 			strBuffer.append(" and pg.date_enrolled <= '" + df.format(quarterTo)
@@ -308,8 +308,8 @@ public class QuarterlyReportingDAOImpl implements QuarterReportingDAO {
 		if (quarterFrom != null && quarterTo != null) {
 
 			strBuffer.append("SELECT o.patient_id , ");
-			strBuffer.append("IF((select min(o.start_date)) >= ");
-			strBuffer.append("'" + df.format(quarterFrom) + "'" + " AND (select min(o.start_date)) <='"
+			strBuffer.append("IF((select min(o.date_activated)) >= ");
+			strBuffer.append("'" + df.format(quarterFrom) + "'" + " AND (select min(o.date_activated)) <='"
 					+ df.format(quarterTo) + "'" + " , " + " true " + " ," + "false)");
 			strBuffer.append(queryPortion);
 			strBuffer.append(" and pg.date_enrolled <= '" + df.format(quarterTo)
@@ -323,7 +323,7 @@ public class QuarterlyReportingDAOImpl implements QuarterReportingDAO {
 		if (quarterFrom == null && quarterTo == null) {
 			quarterTo = new Date();
 			strBuffer.append("SELECT o.patient_id , ");
-			strBuffer.append("IF((select min(o.start_date)) < ");
+			strBuffer.append("IF((select min(o.date_activated)) < ");
 			strBuffer.append("'" + df.format(quarterTo) + "'" + " , " + " true" + " ," + "false) ");
 			strBuffer.append(queryPortion);
 			strBuffer.append(" and pg.date_enrolled <= '" + df.format(quarterTo)
@@ -361,9 +361,9 @@ public class QuarterlyReportingDAOImpl implements QuarterReportingDAO {
 			SQLQuery query2 = null;
 			StringBuffer strbuf2 = new StringBuffer();
 
-			strbuf2.append("SELECT (MIN(o.start_date) - YEAR(s.birthdate)) * 12 ");
-			strbuf2.append(" + (MONTH(MIN(o.start_date)) - MONTH(s.birthdate)) ");
-			strbuf2.append("  - IF(DAYOFMONTH(MIN(o.start_date)) < DAYOFMONTH(s.birthdate),1,0) ");
+			strbuf2.append("SELECT (MIN(o.date_activated) - YEAR(s.birthdate)) * 12 ");
+			strbuf2.append(" + (MONTH(MIN(o.date_activated)) - MONTH(s.birthdate)) ");
+			strbuf2.append("  - IF(DAYOFMONTH(MIN(o.date_activated)) < DAYOFMONTH(s.birthdate),1,0) ");
 			strbuf2.append(" FROM  orders o ");
 			strbuf2.append(" INNER JOIN patient p on p.patient_id=o.patient_id ");
 			strbuf2.append(" INNER JOIN person s on s.person_id=p.patient_id  ");
@@ -484,7 +484,7 @@ public class QuarterlyReportingDAOImpl implements QuarterReportingDAO {
 										+ "inner join drug_order do on ord.order_id = do.order_id "
 										+ "inner join drug d on do.drug_inventory_id = d.drug_id "
 										+ "where d.concept_id in (" + QuarterlyReportUtil.gpGetARVConceptIds() + ") "
-										+ "and (cast(ord.start_date as DATE)) <= '" + df.format(endDate)
+										+ "and (cast(ord.date_activated as DATE)) <= '" + df.format(endDate)
 										+ "' and pg.program_id= " + programId
 										+ " and pg.date_completed is null and ord.patient_id =  " + patientId);
 
@@ -714,7 +714,7 @@ public class QuarterlyReportingDAOImpl implements QuarterReportingDAO {
 		StringBuffer strBuffer = new StringBuffer();
 		SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd");
 		strBuffer.append("SELECT o.patient_id, ");
-		strBuffer.append("IF((select min(o.start_date)) BETWEEN ");
+		strBuffer.append("IF((select min(o.date_activated)) BETWEEN ");
 		strBuffer.append("'" + df.format(start) + "'" + " AND " + "'" + df.format(end) + "'" + " , " + " true " + " ,"
 				+ "false)");
 		strBuffer.append(" FROM orders o ");
@@ -772,7 +772,7 @@ public class QuarterlyReportingDAOImpl implements QuarterReportingDAO {
 			portion.append(" AND ob.value_coded IN(1067,3580,3490) ");
 			portion.append(" INNER JOIN drug_order dr ON dr.order_id = o.order_id  ");
 			portion.append(" AND o.concept_id in (" + QuarterlyReportUtil.gpGetARVConceptIds() + ") ");
-			portion.append(" AND  o.discontinued='1' AND o.discontinued_date <= '" + df.format(quarterTo) + "'");
+			portion.append("AND o.date_stopped <= '" + df.format(quarterTo) + "'");
 
 		} else if (gender.equals("")) {
 			portion.append(" select DISTINCT p.patient_id FROM patient_program pg ");
@@ -784,7 +784,7 @@ public class QuarterlyReportingDAOImpl implements QuarterReportingDAO {
 			portion.append(" AND ob.value_coded IN(1067,3580,3490) ");
 			portion.append(" INNER JOIN drug_order dr ON dr.order_id = o.order_id ");
 			portion.append(" AND o.concept_id in (" + QuarterlyReportUtil.gpGetARVConceptIds() + ") ");
-			portion.append(" AND  o.discontinued='1' AND o.discontinued_date <= '" + df.format(quarterTo) + "'  ");
+			portion.append("AND o.date_stopped <= '" + df.format(quarterTo) + "'  ");
 		}
 
 		SQLQuery queryStop = sessionFactory.getCurrentSession().createSQLQuery(portion.toString());
@@ -819,9 +819,9 @@ public class QuarterlyReportingDAOImpl implements QuarterReportingDAO {
 			SQLQuery query2 = null;
 			StringBuffer strbuf2 = new StringBuffer();
 
-			strbuf2.append("SELECT (MIN(o.discontinued_date) - YEAR(s.birthdate)) * 12 ");
-			strbuf2.append(" + (MONTH(o.discontinued_date) - MONTH(s.birthdate)) ");
-			strbuf2.append("  - IF(DAYOFMONTH(o.discontinued_date) < DAYOFMONTH(s.birthdate),1,0) ");
+			strbuf2.append("SELECT (MIN(o.date_stopped) - YEAR(s.birthdate)) * 12 ");
+			strbuf2.append(" + (MONTH(o.date_stopped) - MONTH(s.birthdate)) ");
+			strbuf2.append("  - IF(DAYOFMONTH(o.date_stopped) < DAYOFMONTH(s.birthdate),1,0) ");
 			strbuf2.append(" FROM  orders o ");
 			strbuf2.append(" INNER JOIN patient p on p.patient_id=o.patient_id ");
 			strbuf2.append(" INNER JOIN person s on s.person_id=p.patient_id  ");
@@ -860,8 +860,8 @@ public class QuarterlyReportingDAOImpl implements QuarterReportingDAO {
 	public List<Object[]> getPatientsNoLongerPreg(Date endqter) {
 		SimpleDateFormat df = new SimpleDateFormat("dd-MM-yyyy");
 		SQLQuery queryNoLongerPreg = sessionFactory.getCurrentSession()
-				.createSQLQuery("select patient_id from orders where discontinued='1' "
-						+ "and discontinued_reason=1748 and discontinued_date<=' " + df.format(endqter) + "'");
+				.createSQLQuery("select patient_id from orders where date_stopped < 'CURDATE()' "
+						+ "and order_reason=1748 and date_stopped <=' " + df.format(endqter) + "'");
 		List<Integer> patsNoLongerPregnant = queryNoLongerPreg.list();
 		// log.info("ddddddddddddddddddddddddddddd "+patsNoLongerPregnant);
 		List<Object[]> obj = new ArrayList<Object[]>();
@@ -881,7 +881,7 @@ public class QuarterlyReportingDAOImpl implements QuarterReportingDAO {
 
 		try {
 			strb.append("SELECT DISTINCT o.patient_id , ");
-			strb.append("IF((select o.discontinued='1' and o.discontinued_date<='" + df.format(when) + "') , 1 , 0)");
+			strb.append("IF((select date_activated < 'CURDATE()' AND date_stopped > 'CURDATE()' and o.date_stopped<='" + df.format(when) + "') , 1 , 0)");
 			strb.append("FROM drug_order d ");
 			strb.append("INNER JOIN orders o on o.order_id=d.order_id ");
 			// strb.append("INNER JOIN drug g on g.drug_id=d.drug_inventory_id
@@ -1138,7 +1138,7 @@ public class QuarterlyReportingDAOImpl implements QuarterReportingDAO {
 		artBuf.append(Integer.parseInt(QuarterlyReportUtil.gpGetHIVProgramId()));
 		artBuf.append(" AND o.concept_id in( " + QuarterlyReportUtil.gpGetARVConceptIds() + ") ");
 		artBuf.append(" AND o.voided=0 AND pat.voided=0 AND pg.voided=0 ");
-		artBuf.append(" AND o.start_date <= '" + df.format(quarterTo) + "'");
+		artBuf.append(" AND o.date_activated <= '" + df.format(quarterTo) + "'");
 
 		SQLQuery artQuery = sessionFactory.getCurrentSession().createSQLQuery(artBuf.toString());
 		
@@ -1193,9 +1193,9 @@ public class QuarterlyReportingDAOImpl implements QuarterReportingDAO {
 			SQLQuery query2 = null;
 			StringBuffer strbuf2 = new StringBuffer();
 
-			strbuf2.append("SELECT (MIN(o.start_date) - YEAR(s.birthdate)) * 12 ");
-			strbuf2.append(" + (MONTH(MIN(o.start_date)) - MONTH(s.birthdate)) ");
-			strbuf2.append("  - IF(DAYOFMONTH(MIN(o.start_date)) < DAYOFMONTH(s.birthdate),1,0) ");
+			strbuf2.append("SELECT (MIN(o.date_activated) - YEAR(s.birthdate)) * 12 ");
+			strbuf2.append(" + (MONTH(MIN(o.date_activated)) - MONTH(s.birthdate)) ");
+			strbuf2.append("  - IF(DAYOFMONTH(MIN(o.date_activated)) < DAYOFMONTH(s.birthdate),1,0) ");
 			strbuf2.append(" FROM  orders o ");
 			strbuf2.append(" INNER JOIN patient p on p.patient_id=o.patient_id ");
 			strbuf2.append(" INNER JOIN person s on s.person_id=p.patient_id  ");
@@ -1265,7 +1265,7 @@ public class QuarterlyReportingDAOImpl implements QuarterReportingDAO {
 		List<Object[]> objs = new ArrayList<Object[]>();
 		if (gender != null) {
 			strBuffer.append("SELECT o.patient_id , ");
-			strBuffer.append("IF((select min(o.start_date)) BETWEEN ");
+			strBuffer.append("IF((select min(o.date_activated)) BETWEEN ");
 			strBuffer.append(" '" + df.format(startDate) + "' AND '" + df.format(endDate) + "' " + " , " + " true "
 					+ " ," + "false) ");
 			strBuffer.append(" FROM orders o ");
@@ -1283,7 +1283,7 @@ public class QuarterlyReportingDAOImpl implements QuarterReportingDAO {
 			strBuffer.append(" group by o.patient_id ");
 		} else {
 			strBuffer.append("SELECT o.patient_id , ");
-			strBuffer.append("IF((select min(o.start_date)) BETWEEN ");
+			strBuffer.append("IF((select min(o.date_activated)) BETWEEN ");
 			strBuffer.append(" '" + df.format(startDate) + "' AND '" + df.format(endDate) + "' " + " , " + " true "
 					+ " ," + "false) ");
 			strBuffer.append(" FROM orders o ");
@@ -1343,9 +1343,9 @@ public class QuarterlyReportingDAOImpl implements QuarterReportingDAO {
 			SQLQuery query2 = null;
 			StringBuffer strbuf2 = new StringBuffer();
 
-			strbuf2.append("SELECT (MIN(o.start_date) - YEAR(s.birthdate)) * 12 ");
-			strbuf2.append(" + (MONTH(MIN(o.start_date)) - MONTH(s.birthdate)) ");
-			strbuf2.append("  - IF(DAYOFMONTH(MIN(o.start_date))  < DAYOFMONTH(s.birthdate),1,0) ");
+			strbuf2.append("SELECT (MIN(o.date_activated) - YEAR(s.birthdate)) * 12 ");
+			strbuf2.append(" + (MONTH(MIN(o.date_activated)) - MONTH(s.birthdate)) ");
+			strbuf2.append("  - IF(DAYOFMONTH(MIN(o.date_activated))  < DAYOFMONTH(s.birthdate),1,0) ");
 			strbuf2.append(" FROM  orders o ");
 			strbuf2.append(" INNER JOIN patient p on p.patient_id=o.patient_id ");
 			strbuf2.append(" INNER JOIN person s on s.person_id=p.patient_id  ");
@@ -1506,8 +1506,8 @@ public class QuarterlyReportingDAOImpl implements QuarterReportingDAO {
 				StringBuffer strbuf = new StringBuffer();
 
 				strbuf.append(" SELECT DISTINCT d.drug_inventory_id, ");
-				strbuf.append(" IF(((o.start_date <='" + df.format(endDate) + "' AND o.discontinued=0) ");
-				strbuf.append(" OR (o.start_date <='" + df.format(endDate) + "' AND o.discontinued_date >='"
+				strbuf.append(" IF(((o.date_activated <='" + df.format(endDate) + "' AND (date_activated < 'CURDATE()' AND date_stopped > 'CURDATE()')) ");
+				strbuf.append(" OR (o.date_activated <='" + df.format(endDate) + "' AND o.date_stopped >='"
 						+ df.format(endDate) + "')),1,0) ");
 				strbuf.append(" FROM orders o ");
 				strbuf.append(" INNER JOIN drug_order d ON o.order_id=d.order_id AND o.patient_id= " + patientId);
@@ -1621,7 +1621,7 @@ public class QuarterlyReportingDAOImpl implements QuarterReportingDAO {
 		queryPortion.append(
 				"SELECT DISTINCT o.patient_id FROM orders o WHERE o.patient_id in(SELECT DISTINCT p.patient_id FROM patient p ");
 		queryPortion.append(
-				"INNER JOIN orders o ON p.patient_id = o.patient_id AND o.voided=0 AND p.voided=0 and o.discontinued=0 ");
+				"INNER JOIN orders o ON p.patient_id = o.patient_id AND o.voided=0 AND p.voided=0 and o.date_stopped < 'CURDATE()' ");
 		queryPortion.append(" INNER JOIN person ps on o.patient_id=ps.person_id ");
 		queryPortion.append(
 				" INNER JOIN drug_order dr ON dr.order_id = o.order_id " + checkInputDate(quarterStart, quarterEnd));
@@ -1651,14 +1651,14 @@ public class QuarterlyReportingDAOImpl implements QuarterReportingDAO {
 	public String checkInputDate(Date startDate, Date endDate) {
 		SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd");
 		if (startDate != null && endDate != null) {
-			return "AND (o.start_date BETWEEN '" + df.format(startDate) + "' AND '" + df.format(endDate) + "' )";
+			return "AND (o.date_activated BETWEEN '" + df.format(startDate) + "' AND '" + df.format(endDate) + "' )";
 		} else if (endDate == null && startDate != null) {
-			return "AND (o.start_date > '" + df.format(startDate) + "' )";
+			return "AND (o.date_activated > '" + df.format(startDate) + "' )";
 		} else if (startDate == null && endDate != null) {
-			return "AND (o.start_date < '" + df.format(endDate) + "' )";
+			return "AND (o.date_activated < '" + df.format(endDate) + "' )";
 		} else if (startDate == null && endDate == null) {
 			endDate = new Date();
-			return "AND (o.start_date < '" + df.format(endDate) + "' )";
+			return "AND (o.date_activated < '" + df.format(endDate) + "' )";
 		}
 		return "";
 
@@ -2063,8 +2063,8 @@ public class QuarterlyReportingDAOImpl implements QuarterReportingDAO {
 
 			// OPTION I. Consider patient drug orders by drug_inventory_id
 			strbuf.append(" SELECT DISTINCT d.drug_inventory_id, ");
-			strbuf.append(" IF((o.start_date <='" + df.format(endDate)
-					+ "' AND o.discontinued=0 OR o.discontinued_date >='" + df.format(endDate) + "') ");
+			strbuf.append(" IF((o.date_activated <='" + df.format(endDate)
+					+ "' AND (date_activated < 'CURDATE()' AND date_stopped > 'CURDATE()') OR o.date_stopped >='" + df.format(endDate) + "') ");
 			strbuf.append(" ,1,0) ");
 			strbuf.append(" FROM orders o ");
 			strbuf.append(" INNER JOIN patient pa on pa.patient_id=o.patient_id ");
@@ -2079,8 +2079,8 @@ public class QuarterlyReportingDAOImpl implements QuarterReportingDAO {
 
 			// OPTION III. Considider patient drug orders concept_id
 			strbuf1.append(" SELECT DISTINCT o.concept_id, ");
-			strbuf1.append(" IF((o.start_date <='" + df.format(endDate)
-					+ "' AND o.discontinued=0 OR o.discontinued_date>='" + df.format(endDate) + "') ");
+			strbuf1.append(" IF((o.date_activated <='" + df.format(endDate)
+					+ "' AND (date_activated < 'CURDATE()' AND date_stopped > 'CURDATE()') OR o.date_stopped>='" + df.format(endDate) + "') ");
 			strbuf1.append(" ,1,0) ");
 			strbuf1.append(" FROM orders o ");
 			strbuf1.append(" INNER JOIN patient pa on pa.patient_id=o.patient_id ");
@@ -2248,7 +2248,7 @@ public class QuarterlyReportingDAOImpl implements QuarterReportingDAO {
 
 		StringBuffer strbuf = new StringBuffer();
 
-		strbuf.append("SELECT min(o.start_date) FROM orders o  ");
+		strbuf.append("SELECT min(o.date_activated) FROM orders o  ");
 		strbuf.append("INNER JOIN drug_order dro on dro.order_id = o.order_id  AND ");
 		strbuf.append("o.concept_id NOT IN(" + QuarterlyReportUtil.gpGetProphylaxisDrugConceptIds() + ") ");
 		strbuf.append(" AND o.patient_id = ");
@@ -2582,7 +2582,7 @@ public class QuarterlyReportingDAOImpl implements QuarterReportingDAO {
 				+ " INNER JOIN person p on o.patient_id = p.person_id   "
 				+ " INNER JOIN obs obs on obs.person_id = p.person_id   " + " AND pg.date_enrolled < '"
 				+ df.format(quarterTo) + "'" + " AND en.encounter_datetime <= '" + df.format(quarterTo) + "' "
-				+ " AND o.start_date <= '" + df.format(quarterTo) + "' ");
+				+ " AND o.date_activated <= '" + df.format(quarterTo) + "' ");
 
 		List<Integer> patientIds = patientsOnDapsone.list();
 
@@ -2756,8 +2756,8 @@ public class QuarterlyReportingDAOImpl implements QuarterReportingDAO {
 				StringBuffer strbuf = new StringBuffer();
 
 				strbuf.append(" SELECT DISTINCT o.concept_id, ");
-				strbuf.append(" IF(((o.start_date <='" + df.format(endDate)
-						+ "' AND o.discontinued=0 OR o.discontinued_date>='" + df.format(endDate) + "' ) ");
+				strbuf.append(" IF(((o.date_activated <='" + df.format(endDate)
+						+ "' AND (date_activated < 'CURDATE()' AND date_stopped > 'CURDATE()') OR o.date_stopped>='" + df.format(endDate) + "' ) ");
 				strbuf.append("  ),1,0) ");
 				strbuf.append(" FROM orders o ");
 				strbuf.append(" INNER JOIN drug_order d ON o.order_id=d.order_id AND o.patient_id= " + patientId);
@@ -2830,7 +2830,7 @@ public class QuarterlyReportingDAOImpl implements QuarterReportingDAO {
 			queryPortion.append(" and o.concept_id in( " + QuarterlyReportUtil.gpCotrimoConceptIds() + ")");
 			queryPortion.append(
 					" and o.concept_id<>1811 and  (cast(obs.obs_datetime as DATE))<='" + df.format(quarterTo) + "' ");
-			// queryPortion.append(" and o.discontinued=0 ");
+			// queryPortion.append(" and o.date_stopped < 'CURDATE()' ");
 			queryPortion.append(" and pg.date_enrolled <= '" + df.format(quarterTo)
 					+ "' and (pg.date_completed is null OR pg.date_completed >= '" + df.format(quarterTo) + "') ");
 
@@ -2846,7 +2846,7 @@ public class QuarterlyReportingDAOImpl implements QuarterReportingDAO {
 			queryPortion.append(" and en.voided=0 and pg.voided=0 and pa.voided=0 and o.voided=0 ");
 			queryPortion.append(
 					" and o.concept_id<>1811 and  (cast(obs.obs_datetime as DATE))<='" + df.format(quarterTo) + "' ");
-			// queryPortion.append(" and o.discontinued=0 ");
+			// queryPortion.append(" and o.date_stopped < 'CURDATE()' ");
 			queryPortion.append(" and pg.date_enrolled <= '" + df.format(quarterTo)
 					+ "' and (pg.date_completed is null OR pg.date_completed >= '" + df.format(quarterTo) + "') ");
 
@@ -2903,8 +2903,8 @@ public class QuarterlyReportingDAOImpl implements QuarterReportingDAO {
 
 		StringBuffer strbuf = new StringBuffer();
 
-		strbuf.append("SELECT CAST(MIN(o.discontinued_date) AS DATE)  FROM orders o  ");
-		strbuf.append(" where o.discontinued='1' ");
+		strbuf.append("SELECT CAST(MIN(o.date_stopped) AS DATE)  FROM orders o  ");
+		strbuf.append(" where o.date_stopped < 'CURDATE()' ");
 		strbuf.append(" AND o.patient_id= " + p.getPatientId());
 
 		query = session.createSQLQuery(strbuf.toString());
@@ -2992,7 +2992,7 @@ public class QuarterlyReportingDAOImpl implements QuarterReportingDAO {
 				+ gpGetExitedFromCareConceptId() + " and ob.value_coded = 1744");
 		strBuf.append(" AND ob.obs_datetime <= '" + df.format(quarterTo) + "'");
 		strBuf.append(" AND ob.voided=0 AND ps.gender='" + gender + "'");
-		strBuf.append(" AND os.start_date <= '" + df.format(quarterTo) + "' ");
+		strBuf.append(" AND os.date_activated <= '" + df.format(quarterTo) + "' ");
 		strBuf.append(" AND os.concept_id IN (" + QuarterlyReportUtil.gpGetARVConceptIds() + ") ");
 
 		SQLQuery query = sessionFactory.getCurrentSession().createSQLQuery(strBuf.toString());
@@ -3065,7 +3065,7 @@ public class QuarterlyReportingDAOImpl implements QuarterReportingDAO {
 				+ gpGetExitedFromCareConceptId() + " and ob.value_coded = 1742");
 		strBuf.append(" AND ob.obs_datetime <= '" + df.format(quarterTo) + "'");
 		strBuf.append(" AND ob.voided=0 AND ps.gender='" + gender + "'");
-		strBuf.append(" AND os.start_date <= '" + df.format(quarterTo) + "' ");
+		strBuf.append(" AND os.date_activated <= '" + df.format(quarterTo) + "' ");
 		strBuf.append(" AND os.concept_id IN (" + QuarterlyReportUtil.gpGetARVConceptIds() + ") ");
 
 		SQLQuery query = sessionFactory.getCurrentSession().createSQLQuery(strBuf.toString());
@@ -3484,7 +3484,7 @@ public class QuarterlyReportingDAOImpl implements QuarterReportingDAO {
 
 		if (gender != null) {
 			strBuffer.append("SELECT o.patient_id , ");
-			strBuffer.append("IF((select min(o.start_date)) BETWEEN ");
+			strBuffer.append("IF((select min(o.date_activated)) BETWEEN ");
 			strBuffer.append("'" + df.format(quarterFrom) + "'" + " AND '" + df.format(quarterTo) + "'" + " , "
 					+ " true " + " ," + "false)");
 			strBuffer.append(" FROM orders o ");
@@ -3499,7 +3499,7 @@ public class QuarterlyReportingDAOImpl implements QuarterReportingDAO {
 			strBuffer.append(" group by o.patient_id ");
 		} else {
 			strBuffer.append("SELECT o.patient_id , ");
-			strBuffer.append("IF((select min(o.start_date)) BETWEEN ");
+			strBuffer.append("IF((select min(o.date_activated)) BETWEEN ");
 			strBuffer.append("'" + df.format(quarterFrom) + "'" + " AND '" + df.format(quarterTo) + "'" + " , "
 					+ " true " + " ," + "false)");
 			strBuffer.append(" FROM orders o ");
@@ -3567,9 +3567,9 @@ public class QuarterlyReportingDAOImpl implements QuarterReportingDAO {
 			SQLQuery query2 = null;
 			StringBuffer strbuf2 = new StringBuffer();
 
-			strbuf2.append("SELECT (MIN(o.start_date) - YEAR(s.birthdate)) * 12 ");
-			strbuf2.append(" + (MONTH(MIN(o.start_date)) - MONTH(s.birthdate)) ");
-			strbuf2.append("  - IF(DAYOFMONTH(MIN(o.start_date)) < DAYOFMONTH(s.birthdate),1,0) ");
+			strbuf2.append("SELECT (MIN(o.date_activated) - YEAR(s.birthdate)) * 12 ");
+			strbuf2.append(" + (MONTH(MIN(o.date_activated)) - MONTH(s.birthdate)) ");
+			strbuf2.append("  - IF(DAYOFMONTH(MIN(o.date_activated)) < DAYOFMONTH(s.birthdate),1,0) ");
 			strbuf2.append(" FROM  orders o ");
 			strbuf2.append(" INNER JOIN patient p on p.patient_id=o.patient_id ");
 			strbuf2.append(" INNER JOIN person s on s.person_id=p.patient_id  ");
