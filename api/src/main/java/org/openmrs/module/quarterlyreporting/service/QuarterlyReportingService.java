@@ -5,18 +5,17 @@ import java.text.ParseException;
 import java.util.Collection;
 import java.util.Date;
 import java.util.List;
-import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.openmrs.Concept;
-import org.openmrs.Obs;
-import org.openmrs.Order;
 import org.openmrs.Patient;
+import org.openmrs.api.OpenmrsService;
+import org.springframework.transaction.annotation.Transactional;
 
-
-public interface QuarterlyReportingService {
+@Transactional
+public interface QuarterlyReportingService extends OpenmrsService {
 
 	public List<Object[]> getPatientsEnrolled(Date quarterFrom, Date quarterTo,
 			String gender, Integer minAge, Integer maxAge);
@@ -133,6 +132,4 @@ public interface QuarterlyReportingService {
     
     public List<Object[]> getNewOnArtTransferInExcluded(Date quarterFrom,
 			Date quarterTo, String gender, Integer minAge, Integer maxAge);
-	
-	
 }

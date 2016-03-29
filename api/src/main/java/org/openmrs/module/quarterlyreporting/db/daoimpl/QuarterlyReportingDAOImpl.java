@@ -2,7 +2,6 @@ package org.openmrs.module.quarterlyreporting.db.daoimpl;
 
 import java.io.IOException;
 import java.math.BigInteger;
-import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -15,7 +14,6 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
-import java.util.ListIterator;
 import java.util.Map;
 import java.util.Set;
 import java.util.SortedMap;
@@ -31,13 +29,9 @@ import org.hibernate.SQLQuery;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.openmrs.Concept;
-import org.openmrs.Drug;
-import org.openmrs.DrugOrder;
 import org.openmrs.Obs;
-import org.openmrs.Order;
 import org.openmrs.Patient;
 import org.openmrs.PatientProgram;
-import org.openmrs.api.ConceptService;
 import org.openmrs.api.context.Context;
 import org.openmrs.module.quarterlyreporting.QuarterlyReportUtil;
 import org.openmrs.module.quarterlyreporting.db.dao.QuarterReportingDAO;
@@ -46,8 +40,6 @@ import org.openmrs.module.quarterlyreporting.regimenhistory.RegimenComponent;
 import org.openmrs.module.quarterlyreporting.regimenhistory.RegimenHistory;
 import org.openmrs.module.quarterlyreporting.regimenhistory.RegimenUtils;
 import org.openmrs.module.quarterlyreporting.service.QuarterlyReportingService;
-
-import com.sun.xml.internal.bind.v2.TODO;
 
 public class QuarterlyReportingDAOImpl implements QuarterReportingDAO {
 
@@ -73,8 +65,7 @@ public class QuarterlyReportingDAOImpl implements QuarterReportingDAO {
 	}
 
 	public String getQueryPortionForProphylaxis() {
-		List<String> gpProphylaxisDrugIds = QuarterlyReportUtil
-				.gpGetProphylaxisAsList();
+		List<String> gpProphylaxisDrugIds = QuarterlyReportUtil.gpGetProphylaxisAsList();
 		String quaryPortion = "";
 		for (String id : gpProphylaxisDrugIds) {
 			quaryPortion = quaryPortion + " AND dro.drug_inventory_id <> " + id;
@@ -84,8 +75,7 @@ public class QuarterlyReportingDAOImpl implements QuarterReportingDAO {
 	}
 
 	public String getQueryPortionForProphylaxisConceptIds() {
-		List<String> gpProphylaxisDrugIds = QuarterlyReportUtil
-				.gpGetProphylaxisAsList();
+		List<String> gpProphylaxisDrugIds = QuarterlyReportUtil.gpGetProphylaxisAsList();
 		String quaryPortion = "";
 		for (String id : gpProphylaxisDrugIds) {
 			quaryPortion = quaryPortion + " AND o.concept_id <> " + id;
@@ -95,8 +85,7 @@ public class QuarterlyReportingDAOImpl implements QuarterReportingDAO {
 	}
 
 	public String getQueryPortionForTBDrugs() {
-		List<String> gpTBDrugIds = QuarterlyReportUtil
-				.gpGetTBDrugsConceptIdsAsList();
+		List<String> gpTBDrugIds = QuarterlyReportUtil.gpGetTBDrugsConceptIdsAsList();
 		String quaryPortion = "";
 		for (String id : gpTBDrugIds) {
 			quaryPortion = quaryPortion + " AND o.concept_id <> " + id;
@@ -112,82 +101,74 @@ public class QuarterlyReportingDAOImpl implements QuarterReportingDAO {
 	 * @return String
 	 */
 	public Integer gpGetExitedFromCareConceptId() {
-		Integer exitedConcept = Integer.parseInt(QuarterlyReportUtil
-				.gpGetExitedFromCareConceptId());
+		Integer exitedConcept = Integer.parseInt(QuarterlyReportUtil.gpGetExitedFromCareConceptId());
 		return exitedConcept;
 	}
 
 	// table 1.0 and table 1.1
-	public List<Object[]> getPatientEnrolled(Date quarterFrom, Date quarterTo,String gender, Integer minAge, Integer maxAge) {
+	public List<Object[]> getPatientEnrolled(Date quarterFrom, Date quarterTo, String gender, Integer minAge,
+			Integer maxAge) {
 		SQLQuery query = null;
 
-		StringBuffer strbuf = new StringBuffer(); 
+		StringBuffer strbuf = new StringBuffer();
 
 		StringBuffer queryPortion = new StringBuffer();
 
 		SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd");
-		
+
 		Map<String, Integer> patientStartedWhenMap = new HashMap<String, Integer>();
 
-		queryPortion.append(" FROM patient_program pg "); 
+		queryPortion.append(" FROM patient_program pg ");
 		queryPortion.append(" INNER JOIN program pm on pg.program_id=pg.program_id ");
 		queryPortion.append("INNER JOIN patient pat on pat.patient_id = pg.patient_id ");
-		queryPortion.append("INNER JOIN person ps on ps.person_id=pat.patient_id and gender = '"+ gender + "' ");
-//		queryPortion.append(" INNER JOIN obs obs on obs.person_id=ps.person_id ");
-		queryPortion.append(" AND pg.program_id = "	+ QuarterlyReportUtil.gpGetHIVProgramId());
-
+		queryPortion.append("INNER JOIN person ps on ps.person_id=pat.patient_id and gender = '" + gender + "' ");
+		// queryPortion.append(" INNER JOIN obs obs on
+		// obs.person_id=ps.person_id ");
+		queryPortion.append(" AND pg.program_id = " + QuarterlyReportUtil.gpGetHIVProgramId());
 
 		if (quarterFrom != null && quarterTo == null) {
-//			strbuf.append(queryPortion);
-//			strbuf.append(" AND pg.date_enrolled < '");
-//			strbuf.append(df.format(quarterFrom) + "'");
-			
 			strbuf.append("SELECT pat.patient_id , ");
 			strbuf.append("IF((select min(pg.date_enrolled)) < ");
-			strbuf.append("'" + df.format(quarterFrom) + "'" + " , "	+ " true " + " ," + "false)  ");
+			strbuf.append("'" + df.format(quarterFrom) + "'" + " , " + " true " + " ," + "false)  ");
 			strbuf.append(queryPortion);
-//			strbuf.append(" and pg.date_enrolled <= '"+ df.format(quarterFrom) + "' and (pg.date_completed is null OR pg.date_completed >= '"+df.format(quarterFrom)+"') ");
-			strbuf.append(" and pg.date_enrolled <= '"+ df.format(quarterFrom) + "' AND ((pg.date_completed is null) or(cast(pg.date_completed as DATE)> ' " + df.format(quarterFrom) + " ')) ");
+			strbuf.append(" and pg.date_enrolled <= '" + df.format(quarterFrom)
+					+ "' AND ((pg.date_completed is null) or(cast(pg.date_completed as DATE)> ' "
+					+ df.format(quarterFrom) + " ')) ");
 			strbuf.append(" group by pat.patient_id ");
 
 		}
 		if (quarterFrom == null && quarterTo != null) {
-//			strbuf.append(queryPortion);
-//			strbuf.append(" AND pg.date_enrolled < '");
-//			strbuf.append(df.format(quarterTo) + "'");
-			
 			strbuf.append("SELECT pat.patient_id , ");
 			strbuf.append("IF((select min(pg.date_enrolled)) < ");
-			strbuf.append("'" + df.format(quarterTo) + "'" + " , "	+ " true " + " ," + "false)  ");
+			strbuf.append("'" + df.format(quarterTo) + "'" + " , " + " true " + " ," + "false)  ");
 			strbuf.append(queryPortion);
-//			strbuf.append(" and pg.date_enrolled <= '"+ df.format(quarterTo) + "' and (pg.date_completed is null OR pg.date_completed >= '"+df.format(quarterTo)+"') ");
-			strbuf.append(" and pg.date_enrolled <= '"+ df.format(quarterTo) + "' AND ((pg.date_completed is null) or(cast(pg.date_completed as DATE)> ' " + df.format(quarterTo) + " ')) ");
+			strbuf.append(" and pg.date_enrolled <= '" + df.format(quarterTo)
+					+ "' AND ((pg.date_completed is null) or(cast(pg.date_completed as DATE)> ' " + df.format(quarterTo)
+					+ " ')) ");
 			strbuf.append(" group by pat.patient_id ");
 		}
 		if (quarterFrom != null && quarterTo != null) {
-//			strbuf.append(queryPortion);
-//			strbuf.append(" AND pg.date_enrolled >= '");
-//			strbuf.append(df.format(quarterFrom) + "' AND pg.date_enrolled <= '");
-//			strbuf.append(df.format(quarterTo) + "'");
-			
+	
 			strbuf.append("SELECT pat.patient_id , ");
 			strbuf.append("IF((select min(pg.date_enrolled)) BETWEEN ");
-			strbuf.append("'" + df.format(quarterFrom) + "' AND '"+df.format(quarterTo)+"'" + " , "	+ " true " + " ," + "false)  ");
+			strbuf.append("'" + df.format(quarterFrom) + "' AND '" + df.format(quarterTo) + "'" + " , " + " true "
+					+ " ," + "false)  ");
 			strbuf.append(queryPortion);
-//			strbuf.append(" and pg.date_enrolled <= '"+ df.format(quarterTo) + "' and (pg.date_completed is null OR pg.date_completed >= '"+df.format(quarterTo)+"') ");
-			strbuf.append(" and pg.date_enrolled <= '"+ df.format(quarterTo) + "' AND ((pg.date_completed is null) or(cast(pg.date_completed as DATE)> ' " + df.format(quarterTo) + " ')) ");
+			// strbuf.append(" and pg.date_enrolled <= '"+ df.format(quarterTo)
+			// + "' and (pg.date_completed is null OR pg.date_completed >=
+			// '"+df.format(quarterTo)+"') ");
+			strbuf.append(" and pg.date_enrolled <= '" + df.format(quarterTo)
+					+ "' AND ((pg.date_completed is null) or(cast(pg.date_completed as DATE)> ' " + df.format(quarterTo)
+					+ " ')) ");
 			strbuf.append(" group by pat.patient_id ");
-			
-			log.info("rrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrr3 "+strbuf.toString());
+
+			log.info("rrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrr3 " + strbuf.toString());
 		}
-		
-		
-		
-		query = sessionFactory.getCurrentSession().createSQLQuery(
-				strbuf.toString());
-		
+
+		query = sessionFactory.getCurrentSession().createSQLQuery(strbuf.toString());
+
 		List<Object[]> records = query.list();
-		
+
 		List<Integer> patIds = new ArrayList<Integer>();
 
 		int add = 0;
@@ -199,18 +180,11 @@ public class QuarterlyReportingDAOImpl implements QuarterReportingDAO {
 			patientStartedWhenMap.put(booleanValue, id);
 		}
 
-		for (String key : patientStartedWhenMap.keySet()) { 
+		for (String key : patientStartedWhenMap.keySet()) {
 			if (key.charAt(0) == '1') {
 				patIds.add(patientStartedWhenMap.get(key));
 			}
 		}
-
-//		query = sessionFactory.getCurrentSession().createSQLQuery(
-//				strbuf.toString());
-
-//		List<Integer> patIds = new ArrayList<Integer>();
-//		patIds = query.list();
-
 		List<Integer> patIds2 = new ArrayList<Integer>();
 
 		int patientAge = 0;
@@ -227,50 +201,48 @@ public class QuarterlyReportingDAOImpl implements QuarterReportingDAO {
 			strbuf2.append(" INNER JOIN patient p on p.patient_id=s.person_id ");
 			strbuf2.append(" INNER JOIN patient_program pg on pg.patient_id=p.patient_id and p.patient_id= " + id);
 
-			query2 = sessionFactory.getCurrentSession().createSQLQuery(
-					strbuf2.toString());
+			query2 = sessionFactory.getCurrentSession().createSQLQuery(strbuf2.toString());
 
 			List<BigInteger> record = query2.list();
-			
-			if(record.get(0)!=null)
-			patientAge = record.get(0).intValue();
+
+			if (record.get(0) != null)
+				patientAge = record.get(0).intValue();
 
 			if (minAge != null && maxAge != null) {
 				if (patientAge >= minAge && patientAge <= maxAge)
 					patIds2.add(id);
-			}
-			else if (minAge != null && maxAge == null) {
+			} else if (minAge != null && maxAge == null) {
 				if (patientAge >= minAge)
 					patIds2.add(id);
 			}
 		}
 
 		QuarterlyReportingService service = Context.getService(QuarterlyReportingService.class);
-		
+
 		List<Object[]> objs = new ArrayList<Object[]>();
-		
+
 		List<Integer> transferreInPatients = new ArrayList<Integer>();
-		
-		if(quarterFrom!=null && quarterTo==null)
+
+		if (quarterFrom != null && quarterTo == null)
 			transferreInPatients = service.getAllPatientsTransferredIn(quarterFrom, null);
-		if(quarterFrom==null && quarterTo!=null)
+		if (quarterFrom == null && quarterTo != null)
 			transferreInPatients = service.getAllPatientsTransferredIn(null, quarterTo);
-		if(quarterFrom!=null && quarterTo!=null)
+		if (quarterFrom != null && quarterTo != null)
 			transferreInPatients = service.getAllPatientsTransferredIn(quarterFrom, quarterTo);
-		
+
 		for (Integer id : patIds2) {
 			Patient p = Context.getPatientService().getPatient(id);
-			if(!transferreInPatients.contains(id)){
-			objs.add(new Object[] {id,getWhenEnrolled(p),"Enrollment Date"});
+			if (!transferreInPatients.contains(id)) {
+				objs.add(new Object[] { id, getWhenEnrolled(p), "Enrollment Date" });
 			}
-			
-         }
+
+		}
 		return objs;
 	}
 
 	/*********************************************************************************************************************************/
-	public List<Object[]> getPatientsStartedART(Date quarterFrom,
-			Date quarterTo, String gender, Integer minAge, Integer maxAge) {
+	public List<Object[]> getPatientsStartedART(Date quarterFrom, Date quarterTo, String gender, Integer minAge,
+			Integer maxAge) {
 
 		Map<String, Integer> patientStartedWhenMap = new HashMap<String, Integer>();
 
@@ -288,7 +260,7 @@ public class QuarterlyReportingDAOImpl implements QuarterReportingDAO {
 			queryPortion.append(" INNER JOIN patient_program pg on pat.patient_id=pg.patient_id ");
 			queryPortion.append(" INNER JOIN program gr on gr.program_id=pg.program_id AND gr.program_id = ");
 			queryPortion.append(Integer.parseInt(QuarterlyReportUtil.gpGetHIVProgramId()));
-			queryPortion.append(" AND o.concept_id in( "+ QuarterlyReportUtil.gpGetARVConceptIds() + ") ");
+			queryPortion.append(" AND o.concept_id in( " + QuarterlyReportUtil.gpGetARVConceptIds() + ") ");
 			queryPortion.append(" AND o.voided=0 AND pat.voided=0 AND pg.voided=0 ");
 			queryPortion.append(" INNER JOIN person p on o.patient_id = p.person_id   ");
 			queryPortion.append(" AND p.gender= '" + gender + "'");
@@ -298,74 +270,72 @@ public class QuarterlyReportingDAOImpl implements QuarterReportingDAO {
 			queryPortion.append(" INNER JOIN patient_program pg on pat.patient_id=pg.patient_id ");
 			queryPortion.append(" INNER JOIN program gr on gr.program_id=pg.program_id AND gr.program_id = ");
 			queryPortion.append(Integer.parseInt(QuarterlyReportUtil.gpGetHIVProgramId()));
-			queryPortion.append(" AND o.concept_id in( "+ QuarterlyReportUtil.gpGetARVConceptIds() + ") ");
+			queryPortion.append(" AND o.concept_id in( " + QuarterlyReportUtil.gpGetARVConceptIds() + ") ");
 			queryPortion.append(" AND o.voided=0 AND pat.voided=0 AND pg.voided=0 ");
-			queryPortion.append(" INNER JOIN person p on o.patient_id = p.person_id   "); 
+			queryPortion.append(" INNER JOIN person p on o.patient_id = p.person_id   ");
 		}
-		
 
 		SQLQuery query = null;
-		
-			if (quarterFrom != null && quarterTo == null) {
-				
-				strBuffer.append("SELECT o.patient_id , ");
-				strBuffer.append("IF((select min(o.start_date)) < ");
-				strBuffer.append("'" + df.format(quarterFrom) + "'" + " , "	+ " true " + " ," + "false)  ");
-				strBuffer.append(queryPortion);
-				strBuffer.append(" and pg.date_enrolled <= '"+ df.format(quarterFrom) + "' AND ((pg.date_completed is null) or(cast(pg.date_completed as DATE)> ' " + df.format(quarterFrom) + " ')) ");
-				strBuffer.append(" group by o.patient_id ");
 
-				query = sessionFactory.getCurrentSession().createSQLQuery(
-						strBuffer.toString());
+		if (quarterFrom != null && quarterTo == null) {
 
-			}
-			if (quarterFrom == null && quarterTo != null) {
-				
-				strBuffer.append("SELECT o.patient_id , ");
-				strBuffer.append("IF((select min(o.start_date)) < ");
-				strBuffer.append("'" + df.format(quarterTo) + "'" + " , "+ " true " + " ," + "false) ");
-				strBuffer.append(queryPortion);
-				strBuffer.append(" and pg.date_enrolled <= '"+ df.format(quarterTo) + "' AND ((pg.date_completed is null) or(cast(pg.date_completed as DATE)> ' " + df.format(quarterTo) + " ')) ");
-				strBuffer.append(" group by o.patient_id ");
+			strBuffer.append("SELECT o.patient_id , ");
+			strBuffer.append("IF((select min(o.start_date)) < ");
+			strBuffer.append("'" + df.format(quarterFrom) + "'" + " , " + " true " + " ," + "false)  ");
+			strBuffer.append(queryPortion);
+			strBuffer.append(" and pg.date_enrolled <= '" + df.format(quarterFrom)
+					+ "' AND ((pg.date_completed is null) or(cast(pg.date_completed as DATE)> ' "
+					+ df.format(quarterFrom) + " ')) ");
+			strBuffer.append(" group by o.patient_id ");
 
-				query = sessionFactory.getCurrentSession().createSQLQuery(
-						strBuffer.toString());
+			query = sessionFactory.getCurrentSession().createSQLQuery(strBuffer.toString());
 
-			}
-			if (quarterFrom != null && quarterTo != null) {		
-				
-				strBuffer.append("SELECT o.patient_id , ");
-				strBuffer.append("IF((select min(o.start_date)) >= ");
-				strBuffer.append("'" + df.format(quarterFrom) + "'"
-						+ " AND (select min(o.start_date)) <='"
-						+ df.format(quarterTo) + "'" + " , " + " true " + " ,"
-						+ "false)");
-				strBuffer.append(queryPortion);
-				strBuffer.append(" and pg.date_enrolled <= '"+ df.format(quarterTo) + "' AND ((pg.date_completed is null) or(cast(pg.date_completed as DATE)> ' " + df.format(quarterTo) + " ')) ");
-				strBuffer.append(" group by o.patient_id ");
-				
+		}
+		if (quarterFrom == null && quarterTo != null) {
 
-				query = sessionFactory.getCurrentSession().createSQLQuery(
-						strBuffer.toString());
+			strBuffer.append("SELECT o.patient_id , ");
+			strBuffer.append("IF((select min(o.start_date)) < ");
+			strBuffer.append("'" + df.format(quarterTo) + "'" + " , " + " true " + " ," + "false) ");
+			strBuffer.append(queryPortion);
+			strBuffer.append(" and pg.date_enrolled <= '" + df.format(quarterTo)
+					+ "' AND ((pg.date_completed is null) or(cast(pg.date_completed as DATE)> ' " + df.format(quarterTo)
+					+ " ')) ");
+			strBuffer.append(" group by o.patient_id ");
 
-			}
-			if(quarterFrom==null && quarterTo==null){
-				quarterTo=new Date();
-				strBuffer.append("SELECT o.patient_id , ");
-				strBuffer.append("IF((select min(o.start_date)) < ");
-				strBuffer.append("'" + df.format(quarterTo) + "'" + " , "
-						+ " true" + " ," + "false) ");
-				strBuffer.append(queryPortion);
-				strBuffer.append(" and pg.date_enrolled <= '"+ df.format(quarterTo) + "' AND ((pg.date_completed is null) or(cast(pg.date_completed as DATE)> ' " + df.format(quarterTo) + " ')) ");
-				strBuffer.append(" group by o.patient_id ");
+			query = sessionFactory.getCurrentSession().createSQLQuery(strBuffer.toString());
 
-				query = sessionFactory.getCurrentSession().createSQLQuery( 
-						strBuffer.toString());
-			}
+		}
+		if (quarterFrom != null && quarterTo != null) {
 
+			strBuffer.append("SELECT o.patient_id , ");
+			strBuffer.append("IF((select min(o.start_date)) >= ");
+			strBuffer.append("'" + df.format(quarterFrom) + "'" + " AND (select min(o.start_date)) <='"
+					+ df.format(quarterTo) + "'" + " , " + " true " + " ," + "false)");
+			strBuffer.append(queryPortion);
+			strBuffer.append(" and pg.date_enrolled <= '" + df.format(quarterTo)
+					+ "' AND ((pg.date_completed is null) or(cast(pg.date_completed as DATE)> ' " + df.format(quarterTo)
+					+ " ')) ");
+			strBuffer.append(" group by o.patient_id ");
+
+			query = sessionFactory.getCurrentSession().createSQLQuery(strBuffer.toString());
+
+		}
+		if (quarterFrom == null && quarterTo == null) {
+			quarterTo = new Date();
+			strBuffer.append("SELECT o.patient_id , ");
+			strBuffer.append("IF((select min(o.start_date)) < ");
+			strBuffer.append("'" + df.format(quarterTo) + "'" + " , " + " true" + " ," + "false) ");
+			strBuffer.append(queryPortion);
+			strBuffer.append(" and pg.date_enrolled <= '" + df.format(quarterTo)
+					+ "' AND ((pg.date_completed is null) or(cast(pg.date_completed as DATE)> ' " + df.format(quarterTo)
+					+ " ')) ");
+			strBuffer.append(" group by o.patient_id ");
+
+			query = sessionFactory.getCurrentSession().createSQLQuery(strBuffer.toString());
+		}
 
 		List<Object[]> records = query.list();
-		
+
 		List<Integer> patId1 = new ArrayList<Integer>();
 
 		int add = 0;
@@ -377,65 +347,62 @@ public class QuarterlyReportingDAOImpl implements QuarterReportingDAO {
 			patientStartedWhenMap.put(booleanValue, id);
 		}
 
-		for (String key : patientStartedWhenMap.keySet()) { 
+		for (String key : patientStartedWhenMap.keySet()) {
 			if (key.charAt(0) == '1') {
 				patId1.add(patientStartedWhenMap.get(key));
 			}
 		}
-		double patientAge = 0 ;
+		double patientAge = 0;
 
-			List<Integer> patIds2 = new ArrayList<Integer>();
-			
-			for (Integer id : patId1) {
+		List<Integer> patIds2 = new ArrayList<Integer>();
 
-				SQLQuery query2 = null;
-				StringBuffer strbuf2 = new StringBuffer();
+		for (Integer id : patId1) {
 
-				strbuf2.append("SELECT (MIN(o.start_date) - YEAR(s.birthdate)) * 12 ");
-				strbuf2.append(" + (MONTH(MIN(o.start_date)) - MONTH(s.birthdate)) ");
-				strbuf2.append("  - IF(DAYOFMONTH(MIN(o.start_date)) < DAYOFMONTH(s.birthdate),1,0) ");
-				strbuf2.append(" FROM  orders o ");
-				strbuf2.append(" INNER JOIN patient p on p.patient_id=o.patient_id " );
-				strbuf2.append(" INNER JOIN person s on s.person_id=p.patient_id  ");
-				strbuf2.append(" AND p.patient_id= "+id);
+			SQLQuery query2 = null;
+			StringBuffer strbuf2 = new StringBuffer();
 
-				query2 = sessionFactory.getCurrentSession().createSQLQuery(
-						strbuf2.toString());
+			strbuf2.append("SELECT (MIN(o.start_date) - YEAR(s.birthdate)) * 12 ");
+			strbuf2.append(" + (MONTH(MIN(o.start_date)) - MONTH(s.birthdate)) ");
+			strbuf2.append("  - IF(DAYOFMONTH(MIN(o.start_date)) < DAYOFMONTH(s.birthdate),1,0) ");
+			strbuf2.append(" FROM  orders o ");
+			strbuf2.append(" INNER JOIN patient p on p.patient_id=o.patient_id ");
+			strbuf2.append(" INNER JOIN person s on s.person_id=p.patient_id  ");
+			strbuf2.append(" AND p.patient_id= " + id);
 
-				List<Double> record = query2.list(); 
+			query2 = sessionFactory.getCurrentSession().createSQLQuery(strbuf2.toString());
 
-				if(record.get(0)!=null)
+			List<Double> record = query2.list();
+
+			if (record.get(0) != null)
 				patientAge = record.get(0).intValue();
-				
-				if(patientAge<1)
-					patientAge=patientAge*(-1);
-				
-				if (minAge != null && maxAge != null) {
-					if (patientAge >= minAge && patientAge <= maxAge) 
-						patIds2.add(id);
-				}
-				else if (minAge != null && maxAge == null) {
-					if (patientAge >= minAge)
-						patIds2.add(id);
-				}
+
+			if (patientAge < 1)
+				patientAge = patientAge * (-1);
+
+			if (minAge != null && maxAge != null) {
+				if (patientAge >= minAge && patientAge <= maxAge)
+					patIds2.add(id);
+			} else if (minAge != null && maxAge == null) {
+				if (patientAge >= minAge)
+					patIds2.add(id);
 			}
-			for (Integer id : patIds2) {
-				Patient p = Context.getPatientService().getPatient(id);
-				Date when=getWhenPatientStarted(p);
-				if(when!=null)
-				objs.add(new Object[] { id, when,	"Start ARV" });
-				else
-					objs.add(new Object[] { id, "",	"Start ARV" });
-			}
+		}
+		for (Integer id : patIds2) {
+			Patient p = Context.getPatientService().getPatient(id);
+			Date when = getWhenPatientStarted(p);
+			if (when != null)
+				objs.add(new Object[] { id, when, "Start ARV" });
+			else
+				objs.add(new Object[] { id, "", "Start ARV" });
+		}
 		return objs;
 	}
 
 	/*************************************************************************************************************************************/
 	@Override
-	public List<Object[]> getAllPatientsEligibleForARVsButNotYetStarted(
-			int programId, Date startDate, Date endDate) {
+	public List<Object[]> getAllPatientsEligibleForARVsButNotYetStarted(int programId, Date startDate, Date endDate) {
 
-		Session session = getSessionFactory().getCurrentSession();
+		 Session session = getSessionFactory().getCurrentSession();
 
 		Date threeMonthsBeforeEndDate = getTreeMonthBefore(endDate);
 
@@ -443,25 +410,17 @@ public class QuarterlyReportingDAOImpl implements QuarterReportingDAO {
 
 		SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd");
 
-		SQLQuery query1 = session
-				.createSQLQuery("select DISTINCT pg.patient_id from patient_program pg "
-						+ "inner join person pe on pg.patient_id = pe.person_id "
-						+ "inner join patient pa on pg.patient_id = pa.patient_id "
-						+ "inner join obs o on pg.patient_id = o.person_id "
-						+ "inner join encounter en on pg.patient_id = en.patient_id "
-						+ "where o.concept_id <> "
-						+ gpGetExitedFromCareConceptId()
-						+ " and (pg.voided = 0 and pe.voided = 0 and o.voided = 0 "
-						+ " and pa.voided = 0 and en.voided = 0) and (o.concept_id =  "
-						+ Integer.parseInt(QuarterlyReportUtil
-								.gpGetCD4CountConceptId())
-						+ " and (cast(o.obs_datetime as DATE)) >= '"
-						+ df.format(startDate)
-						+ "' and (cast(o.obs_datetime as DATE)) <= '"
-						+ df.format(endDate)
-						+ "' ) "
-						+ "and pg.program_id= "
-						+ programId + " and pg.date_completed is null ");
+		SQLQuery query1 = session.createSQLQuery("select DISTINCT pg.patient_id from patient_program pg "
+				+ "inner join person pe on pg.patient_id = pe.person_id "
+				+ "inner join patient pa on pg.patient_id = pa.patient_id "
+				+ "inner join obs o on pg.patient_id = o.person_id "
+				+ "inner join encounter en on pg.patient_id = en.patient_id " + "where o.concept_id <> "
+				+ gpGetExitedFromCareConceptId() + " and (pg.voided = 0 and pe.voided = 0 and o.voided = 0 "
+				+ " and pa.voided = 0 and en.voided = 0) and (o.concept_id =  "
+				+ Integer.parseInt(QuarterlyReportUtil.gpGetCD4CountConceptId())
+				+ " and (cast(o.obs_datetime as DATE)) >= '" + df.format(startDate)
+				+ "' and (cast(o.obs_datetime as DATE)) <= '" + df.format(endDate) + "' ) " + "and pg.program_id= "
+				+ programId + " and pg.date_completed is null ");
 
 		List<Integer> patientIds1 = query1.list();
 
@@ -469,10 +428,8 @@ public class QuarterlyReportingDAOImpl implements QuarterReportingDAO {
 
 		for (Integer patientId : patientIds1) {
 
-			SQLQuery query2 = session
-					.createSQLQuery("select distinct o.person_id from obs o where o.concept_id = "
-							+ gpGetExitedFromCareConceptId()
-							+ " and o.person_id=" + patientId);
+			SQLQuery query2 = session.createSQLQuery("select distinct o.person_id from obs o where o.concept_id = "
+					+ gpGetExitedFromCareConceptId() + " and o.person_id=" + patientId);
 
 			List<Integer> patientIds2 = query2.list();
 
@@ -482,57 +439,38 @@ public class QuarterlyReportingDAOImpl implements QuarterReportingDAO {
 
 					SQLQuery query2Date = session
 							.createSQLQuery("select cast(max(obs_datetime) as DATE) from obs where concept_id = "
-									+ Integer.parseInt(QuarterlyReportUtil
-											.gpGetCD4CountConceptId())
-									+ " and (select cast(max(obs_datetime) as DATE)) >= '"
-									+ df.format(startDate)
-									+ "' and (select cast(max(obs_datetime) as DATE)) <= '"
-									+ df.format(endDate)
+									+ Integer.parseInt(QuarterlyReportUtil.gpGetCD4CountConceptId())
+									+ " and (select cast(max(obs_datetime) as DATE)) >= '" + df.format(startDate)
+									+ "' and (select cast(max(obs_datetime) as DATE)) <= '" + df.format(endDate)
 									+ "' and value_numeric is not null and concept_id <>  "
-									+ gpGetExitedFromCareConceptId()
-									+ " and voided=0 and person_id = "
-									+ patientId);
+									+ gpGetExitedFromCareConceptId() + " and voided=0 and person_id = " + patientId);
 
-					Date maxObsDateTimeCD4Count = (Date) query2Date
-							.uniqueResult();
+					Date maxObsDateTimeCD4Count = (Date) query2Date.uniqueResult();
 
-					String dateStr = "(" + maxObsDateTimeCD4Count.toString()
-							+ ")";
+					String dateStr = "(" + maxObsDateTimeCD4Count.toString() + ")";
 
-					SQLQuery query3 = session
-							.createSQLQuery("select value_numeric from obs where concept_id = "
-									+ Integer.parseInt(QuarterlyReportUtil
-											.gpGetCD4CountConceptId())
-									+ " and obs_datetime = '"
-									+ maxObsDateTimeCD4Count
-									+ "' and value_numeric is not null and concept_id <>  "
-									+ gpGetExitedFromCareConceptId()
-									+ " and voided=0 and person_id = "
-									+ patientId);
+					SQLQuery query3 = session.createSQLQuery("select value_numeric from obs where concept_id = "
+							+ Integer.parseInt(QuarterlyReportUtil.gpGetCD4CountConceptId()) + " and obs_datetime = '"
+							+ maxObsDateTimeCD4Count + "' and value_numeric is not null and concept_id <>  "
+							+ gpGetExitedFromCareConceptId() + " and voided=0 and person_id = " + patientId);
 
 					List<Double> maxValueNumericCD4Count = query3.list();
 
-					SQLQuery queryDate1 = session
-							.createSQLQuery("select cast(max(encounter_datetime)as DATE) from encounter where (select cast(max(encounter_datetime)as DATE))<= '"
-									+ df.format(endDate)
-									+ "' and patient_id = " + patientId);
+					SQLQuery queryDate1 = session.createSQLQuery(
+							"select cast(max(encounter_datetime)as DATE) from encounter where (select cast(max(encounter_datetime)as DATE))<= '"
+									+ df.format(endDate) + "' and patient_id = " + patientId);
 
 					List<Date> maxEnocunterDateTime = queryDate1.list();
 
-					SQLQuery queryDate2 = session
-							.createSQLQuery("select cast(max(value_datetime) as DATE )"
-									+ "from obs where (select cast(max(value_datetime)as DATE))<= '"
-									+ df.format(endDate)
-									+ "' and concept_id = "
-									+ Integer.parseInt(QuarterlyReportUtil
-											.gpGetReturnVisitDateConceptId())
-									+ " and value_numeric is not null and person_id = "
-									+ patientId);
+					SQLQuery queryDate2 = session.createSQLQuery("select cast(max(value_datetime) as DATE )"
+							+ "from obs where (select cast(max(value_datetime)as DATE))<= '" + df.format(endDate)
+							+ "' and concept_id = "
+							+ Integer.parseInt(QuarterlyReportUtil.gpGetReturnVisitDateConceptId())
+							+ " and value_numeric is not null and person_id = " + patientId);
 
 					maxReturnVisitDay = queryDate2.list();
 
-					Double val = (maxValueNumericCD4Count.size() > 0) ? maxValueNumericCD4Count
-							.get(0) : 400;
+					Double val = (maxValueNumericCD4Count.size() > 0) ? maxValueNumericCD4Count.get(0) : 400;
 
 					if (val < 350.0) {
 
@@ -545,16 +483,10 @@ public class QuarterlyReportingDAOImpl implements QuarterReportingDAO {
 										+ "inner join orders ord on pg.patient_id = ord.patient_id "
 										+ "inner join drug_order do on ord.order_id = do.order_id "
 										+ "inner join drug d on do.drug_inventory_id = d.drug_id "
-										+ "where d.concept_id in ("
-										+ QuarterlyReportUtil
-												.gpGetARVConceptIds()
-										+ ") "
-										+ "and (cast(ord.start_date as DATE)) <= '"
-										+ df.format(endDate)
-										+ "' and pg.program_id= "
-										+ programId
-										+ " and pg.date_completed is null and ord.patient_id =  "
-										+ patientId);
+										+ "where d.concept_id in (" + QuarterlyReportUtil.gpGetARVConceptIds() + ") "
+										+ "and (cast(ord.start_date as DATE)) <= '" + df.format(endDate)
+										+ "' and pg.program_id= " + programId
+										+ " and pg.date_completed is null and ord.patient_id =  " + patientId);
 
 						List<Integer> patientIds4 = query4.list();
 
@@ -562,48 +494,32 @@ public class QuarterlyReportingDAOImpl implements QuarterReportingDAO {
 
 							try {
 
-								if ((maxReturnVisitDay.get(0)) != null
-										&& maxEnocunterDateTime.get(0) != null) {
+								if ((maxReturnVisitDay.get(0)) != null && maxEnocunterDateTime.get(0) != null) {
 
-									if (((maxEnocunterDateTime.get(0).getTime()) >= threeMonthsBeforeEndDate
-											.getTime() && (maxEnocunterDateTime
-											.get(0).getTime()) <= endDate
-											.getTime())
-											|| ((maxReturnVisitDay.get(0)
-													.getTime()) >= threeMonthsBeforeEndDate
-													.getTime() && (maxReturnVisitDay
-													.get(0).getTime()) <= endDate
-													.getTime())) {
-										eligiblePatients.add(new Object[] {
-												patientId,
-												val.toString() + dateStr,
+									if (((maxEnocunterDateTime.get(0).getTime()) >= threeMonthsBeforeEndDate.getTime()
+											&& (maxEnocunterDateTime.get(0).getTime()) <= endDate.getTime())
+											|| ((maxReturnVisitDay.get(0).getTime()) >= threeMonthsBeforeEndDate
+													.getTime()
+													&& (maxReturnVisitDay.get(0).getTime()) <= endDate.getTime())) {
+										eligiblePatients.add(new Object[] { patientId, val.toString() + dateStr,
 												"CD4 COUNT(Date)" });
 									}
 								}
 
-								else if ((maxReturnVisitDay.get(0)) == null
-										&& maxEnocunterDateTime.get(0) != null) {
+								else if ((maxReturnVisitDay.get(0)) == null && maxEnocunterDateTime.get(0) != null) {
 
-									if ((maxEnocunterDateTime.get(0).getTime()) >= threeMonthsBeforeEndDate
-											.getTime()
-											&& (maxEnocunterDateTime.get(0)
-													.getTime()) <= endDate
-													.getTime()) {
+									if ((maxEnocunterDateTime.get(0).getTime()) >= threeMonthsBeforeEndDate.getTime()
+											&& (maxEnocunterDateTime.get(0).getTime()) <= endDate.getTime()) {
 
-										eligiblePatients.add(new Object[] {
-												patientId,
-												val.toString() + dateStr,
+										eligiblePatients.add(new Object[] { patientId, val.toString() + dateStr,
 												"CD4 COUNT(Date)" });
 
 									}
-								} else if ((maxReturnVisitDay.get(0).getTime() > endDate
-										.getTime())
+								} else if ((maxReturnVisitDay.get(0).getTime() > endDate.getTime())
 										&& maxReturnVisitDay.get(0) != null) {
 
-									eligiblePatients.add(new Object[] {
-											patientId,
-											val.toString() + dateStr,
-											"CD4 COUNT(Date)" });
+									eligiblePatients.add(
+											new Object[] { patientId, val.toString() + dateStr, "CD4 COUNT(Date)" });
 								}
 
 							}
@@ -642,42 +558,19 @@ public class QuarterlyReportingDAOImpl implements QuarterReportingDAO {
 	 * @return String
 	 */
 	public String getRegimensAsString(Set<RegimenComponent> regimens) {
-		// StringBuffer sb = new StringBuffer();
-		// RegimenComponent[] components = regimens
-		// .toArray(new RegimenComponent[0]);
-		//
-		// for (int r = 0; r < components.length; r++) {
-		// RegimenComponent reg = components[r];
-		// RegimenComponent nextReg = (r < components.length - 1) ? components[r
-		// + 1]
-		// : null;
-		//
-		// if (nextReg == null
-		// || !reg.getStartDate().equals(nextReg.getStartDate()))
-		// sb.append(reg.toString() + " ");
-		// else
-		// sb.append(reg.getDrug().getName() + "-");
-		// }
-		// return sb.toString();
 		StringBuffer sb = new StringBuffer();
-		RegimenComponent components[] = regimens
-				.toArray(new RegimenComponent[0]);
+		RegimenComponent components[] = regimens.toArray(new RegimenComponent[0]);
 		for (int r = 0; r < components.length; r++) {
 			RegimenComponent reg = components[r];
-			RegimenComponent nextReg = r >= components.length - 1 ? null
-					: components[r + 1];
-			if (nextReg == null
-					|| !reg.getStartDate().equals(nextReg.getStartDate()))
-				sb.append((new StringBuilder(String.valueOf(reg.toString())))
-						.append(" ").toString());
+			RegimenComponent nextReg = r >= components.length - 1 ? null : components[r + 1];
+			if (nextReg == null || !reg.getStartDate().equals(nextReg.getStartDate()))
+				sb.append((new StringBuilder(String.valueOf(reg.toString()))).append(" ").toString());
 
 			else {
 				if (reg.getDrug() != null)
-					sb.append((new StringBuilder(String.valueOf(reg.getDrug()
-							.getName()))).append("-").toString());
+					sb.append((new StringBuilder(String.valueOf(reg.getDrug().getName()))).append("-").toString());
 				else
-					sb.append((new StringBuilder(String.valueOf(reg
-							.getGeneric().getName()))).append("-").toString());
+					sb.append((new StringBuilder(String.valueOf(reg.getGeneric().getName()))).append("-").toString());
 			}
 		}
 
@@ -689,7 +582,8 @@ public class QuarterlyReportingDAOImpl implements QuarterReportingDAO {
 	// received encounter in the selected quarter
 	// age is calculated basing on when the patient's last encounter's date
 	@Override
-	public List<Object[]> getPatientsRecievedHIVCare(Date quarterFrom,Date quarterTo, String gender, Integer minAge, Integer maxAge) {
+	public List<Object[]> getPatientsRecievedHIVCare(Date quarterFrom, Date quarterTo, String gender, Integer minAge,
+			Integer maxAge) {
 
 		StringBuffer strBuffer = new StringBuffer();
 
@@ -699,61 +593,67 @@ public class QuarterlyReportingDAOImpl implements QuarterReportingDAO {
 
 		SimpleDateFormat df = new SimpleDateFormat("yyyyy-MM-dd");
 
-			if(gender!=null){ 
-				queryPortion.append("select distinct pg.patient_id from patient_program pg ");
-				queryPortion.append(" inner join person pe on pg.patient_id = pe.person_id ");
-				queryPortion.append(" and pe.gender = '" + gender + "'");
-				queryPortion.append(" inner join patient pa on pg.patient_id = pa.patient_id ");
-				queryPortion.append(" inner join orders o on o.patient_id = pa.patient_id ");
-				queryPortion.append(" inner join encounter en on pa.patient_id = en.patient_id ");
-				queryPortion.append(" inner join obs obs on obs.person_id = pe.person_id ");
-				queryPortion.append(" and pg.program_id =  "+ Integer.parseInt(QuarterlyReportUtil.gpGetHIVProgramId()));
-//				queryPortion.append(" and en.encounter_datetime <= ' "+df.format(quarterTo)+"'" );
-				queryPortion.append(" and en.voided=0 and pg.voided=0 and pa.voided=0 and o.voided=0 ");
-				queryPortion.append(" and o.concept_id<>1811 and  (cast(obs.obs_datetime as DATE))<='"+df.format(quarterTo)+"' ");
-				queryPortion.append(" and pg.date_enrolled <= '"+ df.format(quarterTo) + "' and (pg.date_completed is null OR pg.date_completed >= '"+df.format(quarterTo)+"') ");
-				}
-				else{
-					queryPortion.append("select distinct pg.patient_id from patient_program pg ");
-					queryPortion.append(" inner join person pe on pg.patient_id = pe.person_id ");
-					queryPortion.append(" inner join patient pa on pg.patient_id = pa.patient_id ");
-					queryPortion.append(" inner join orders o on o.patient_id = pa.patient_id ");
-//					queryPortion.append(" inner join encounter en on pa.patient_id = en.patient_id ");
-					queryPortion.append(" inner join obs obs on obs.person_id = pe.person_id ");
-					queryPortion.append(" and pg.program_id =  "+ Integer.parseInt(QuarterlyReportUtil.gpGetHIVProgramId()));
-					queryPortion.append(" and en.encounter_datetime <= ' "+df.format(quarterTo)+"'" );
-					queryPortion.append(" and en.voided=0 and pg.voided=0 and pa.voided=0 and o.voided=0 ");
-					queryPortion.append(" and o.concept_id<>1811 and (cast(obs.obs_datetime as DATE))<='"+df.format(quarterTo)+"' ");
-					queryPortion.append(" and pg.date_enrolled <= '"+ df.format(quarterTo) + "' and (pg.date_completed is null OR pg.date_completed >= '"+df.format(quarterTo)+"') ");
-				}
+		if (gender != null) {
+			queryPortion.append("select distinct pg.patient_id from patient_program pg ");
+			queryPortion.append(" inner join person pe on pg.patient_id = pe.person_id ");
+			queryPortion.append(" and pe.gender = '" + gender + "'");
+			queryPortion.append(" inner join patient pa on pg.patient_id = pa.patient_id ");
+			queryPortion.append(" inner join orders o on o.patient_id = pa.patient_id ");
+			queryPortion.append(" inner join encounter en on pa.patient_id = en.patient_id ");
+			queryPortion.append(" inner join obs obs on obs.person_id = pe.person_id ");
+			queryPortion.append(" and pg.program_id =  " + Integer.parseInt(QuarterlyReportUtil.gpGetHIVProgramId()));
+			// queryPortion.append(" and en.encounter_datetime <= '
+			// "+df.format(quarterTo)+"'" );
+			queryPortion.append(" and en.voided=0 and pg.voided=0 and pa.voided=0 and o.voided=0 ");
+			queryPortion.append(
+					" and o.concept_id<>1811 and  (cast(obs.obs_datetime as DATE))<='" + df.format(quarterTo) + "' ");
+			queryPortion.append(" and pg.date_enrolled <= '" + df.format(quarterTo)
+					+ "' and (pg.date_completed is null OR pg.date_completed >= '" + df.format(quarterTo) + "') ");
+		} else {
+			queryPortion.append("select distinct pg.patient_id from patient_program pg ");
+			queryPortion.append(" inner join person pe on pg.patient_id = pe.person_id ");
+			queryPortion.append(" inner join patient pa on pg.patient_id = pa.patient_id ");
+			queryPortion.append(" inner join orders o on o.patient_id = pa.patient_id ");
+			// queryPortion.append(" inner join encounter en on pa.patient_id =
+			// en.patient_id ");
+			queryPortion.append(" inner join obs obs on obs.person_id = pe.person_id ");
+			queryPortion.append(" and pg.program_id =  " + Integer.parseInt(QuarterlyReportUtil.gpGetHIVProgramId()));
+			queryPortion.append(" and en.encounter_datetime <= ' " + df.format(quarterTo) + "'");
+			queryPortion.append(" and en.voided=0 and pg.voided=0 and pa.voided=0 and o.voided=0 ");
+			queryPortion.append(
+					" and o.concept_id<>1811 and (cast(obs.obs_datetime as DATE))<='" + df.format(quarterTo) + "' ");
+			queryPortion.append(" and pg.date_enrolled <= '" + df.format(quarterTo)
+					+ "' and (pg.date_completed is null OR pg.date_completed >= '" + df.format(quarterTo) + "') ");
+		}
 
-				if (minAge != null && maxAge != null) {
-					strBuffer.append(queryPortion);
-					strBuffer.append(" AND TIMESTAMPDIFF(MONTH,pe.birthdate,CURDATE()) BETWEEN "+ minAge + " AND " + maxAge);
+		if (minAge != null && maxAge != null) {
+			strBuffer.append(queryPortion);
+			strBuffer.append(" AND TIMESTAMPDIFF(MONTH,pe.birthdate,CURDATE()) BETWEEN " + minAge + " AND " + maxAge);
 
-				}
-				if (minAge != null && maxAge == null) {
-					strBuffer.append(queryPortion);
-					strBuffer.append(" AND TIMESTAMPDIFF(MONTH,pe.birthdate,CURDATE()) >= "+ minAge);
-				}	
-				if (minAge == null && maxAge == null) {
-					strBuffer.append(queryPortion);
-				}	
-				
-//				log.info("zzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz "+strBuffer.toString());
-				
-				query = sessionFactory.getCurrentSession().createSQLQuery(
-						strBuffer.toString());
+		}
+		if (minAge != null && maxAge == null) {
+			strBuffer.append(queryPortion);
+			strBuffer.append(" AND TIMESTAMPDIFF(MONTH,pe.birthdate,CURDATE()) >= " + minAge);
+		}
+		if (minAge == null && maxAge == null) {
+			strBuffer.append(queryPortion);
+		}
 
-	
+		// log.info("zzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz
+		// "+strBuffer.toString());
+
+		query = sessionFactory.getCurrentSession().createSQLQuery(strBuffer.toString());
+
 		List<Integer> patientsReceivedHIVCare = query.list();
-		List<Integer> exitedInThePeriod = QuarterlyReportUtil.getConvertToType(getPatientsExitedInThePeriod(null, quarterTo)); 
-//		log.info("eaaaaaaaaaaaaaaaaaaaaaaaaaa "+exitedInThePeriod);
+		List<Integer> exitedInThePeriod = QuarterlyReportUtil
+				.getConvertToType(getPatientsExitedInThePeriod(null, quarterTo));
+		// log.info("eaaaaaaaaaaaaaaaaaaaaaaaaaa "+exitedInThePeriod);
 		List<Object[]> obj = new ArrayList<Object[]>();
 		for (Integer id : patientsReceivedHIVCare) {
-			Patient patient = Context.getPatientService().getPatient(id); 
-//			if(!exitedInThePeriod.contains(id))
-			obj.add(new Object[] {id,df.format(getMaxEncounter(patient, quarterTo)),"Last Encounter During The Quarter" });
+			Patient patient = Context.getPatientService().getPatient(id);
+			// if(!exitedInThePeriod.contains(id))
+			obj.add(new Object[] { id, df.format(getMaxEncounter(patient, quarterTo)),
+					"Last Encounter During The Quarter" });
 		}
 		return obj;
 	}
@@ -767,51 +667,39 @@ public class QuarterlyReportingDAOImpl implements QuarterReportingDAO {
 		SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd");
 		Map<String, Integer> patients = new HashMap<String, Integer>();
 
-//		Date threeMonthsBeforeEndDate = addDaysToDate(endDate, -92);
+		// Date threeMonthsBeforeEndDate = addDaysToDate(endDate, -92);
 
-		if (endDate == null) { 
+		if (endDate == null) {
 			endDate = new Date();
 		}
-		
-//		strBuffer.append("SELECT o.patient_id , ");
-//		strBuffer.append("IF(cast(max(value_datetime)as Date)  <= '"+ df.format(threeMonthsBeforeEndDate)+ "' AND ob.concept_id =  "
-//				+ Integer.parseInt(QuarterlyReportUtil.gpGetReturnVisitDateConceptId()));
-//		strBuffer.append(" OR (cast(max(e.encounter_datetime)as Date)) <= '"+ df.format(threeMonthsBeforeEndDate) + "' ");
-//		strBuffer.append(" , true,false) ");
-//		strBuffer.append(" FROM orders o ");
-//		strBuffer.append(" INNER JOIN patient p on p.patient_id = o.patient_id ");
-//		strBuffer.append(" INNER JOIN patient_program pg on pg.patient_id = p.patient_id ");
-//		strBuffer.append(" INNER JOIN program g on g.program_id = pg.program_id AND g.program_id = "+ Integer.parseInt(QuarterlyReportUtil.gpGetHIVProgramId()));
-//		strBuffer.append(" INNER JOIN encounter e on e.patient_id = p.patient_id ");
-//		strBuffer.append(" INNER JOIN obs ob on ob.encounter_id = e.encounter_id ");
-//		strBuffer.append(" GROUP BY o.patient_id ");
-		
-		strBuffer.append(" SELECT DISTINCT pa.patient_id FROM patient pa INNER JOIN person pe ON pa.patient_id = pe.person_id ");
-		strBuffer.append(" INNER JOIN obs ob ON ob.person_id = pe.person_id WHERE ob.concept_id =  "+gpGetExitedFromCareConceptId());
+
+		strBuffer.append(
+				" SELECT DISTINCT pa.patient_id FROM patient pa INNER JOIN person pe ON pa.patient_id = pe.person_id ");
+		strBuffer.append(" INNER JOIN obs ob ON ob.person_id = pe.person_id WHERE ob.concept_id =  "
+				+ gpGetExitedFromCareConceptId());
 		strBuffer.append(" AND value_coded=1743");
 		strBuffer.append(checkObsDate(null, endDate));
 
-		query = sessionFactory.getCurrentSession().createSQLQuery(
-				strBuffer.toString());
+		query = sessionFactory.getCurrentSession().createSQLQuery(strBuffer.toString());
 
 		List<Integer> records = query.list();
 
-//		int add = 0;
-//
-//		for (Object[] obj : records) {
-//			add++;
-//
-//			Integer id = (Integer) obj[0];
-//			String booleanValue = obj[1].toString() + add + "";
-//
-//			patients.put(booleanValue, id);
-//		}
-//		List<Integer> patientIds = new ArrayList<Integer>();
-//		for (String key : patients.keySet()) {
-//			if (key.charAt(0) == '1') {
-//				patientIds.add(patients.get(key));
-//			}
-//		}
+		// int add = 0;
+		//
+		// for (Object[] obj : records) {
+		// add++;
+		//
+		// Integer id = (Integer) obj[0];
+		// String booleanValue = obj[1].toString() + add + "";
+		//
+		// patients.put(booleanValue, id);
+		// }
+		// List<Integer> patientIds = new ArrayList<Integer>();
+		// for (String key : patients.keySet()) {
+		// if (key.charAt(0) == '1') {
+		// patientIds.add(patients.get(key));
+		// }
+		// }
 
 		return records;
 
@@ -822,29 +710,24 @@ public class QuarterlyReportingDAOImpl implements QuarterReportingDAO {
 	// its used to see the get the patients started ART at HC but who left at
 	// the end of quarter
 	//
-	public List<Integer> getAllNewPatientOnARTStartedAtTheOfQter(Date start,
-			Date end) {
+	public List<Integer> getAllNewPatientOnARTStartedAtTheOfQter(Date start, Date end) {
 		StringBuffer strBuffer = new StringBuffer();
 		SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd");
 		strBuffer.append("SELECT o.patient_id, ");
 		strBuffer.append("IF((select min(o.start_date)) BETWEEN ");
-		strBuffer.append("'" + df.format(start) + "'" + " AND " + "'"
-				+ df.format(end) + "'" + " , " + " true " + " ," + "false)");
+		strBuffer.append("'" + df.format(start) + "'" + " AND " + "'" + df.format(end) + "'" + " , " + " true " + " ,"
+				+ "false)");
 		strBuffer.append(" FROM orders o ");
 		strBuffer.append(" INNER JOIN patient p on o.patient_id=p.patient_id");
-		strBuffer
-				.append(" INNER JOIN obs obs on p.patient_id=obs.person_id and o.concept_id<> "
-						+ Integer.parseInt(QuarterlyReportUtil
-								.gpTransferInConceptId()));
-		strBuffer
-				.append(" INNER JOIN drug_order dro on dro.order_id=o.order_id ");
-		// strBuffer.append(" INNER JOIN drug d on dro.drug_inventory_id=d.drug_id ");
-		strBuffer.append(" AND o.concept_id in  ("
-				+ QuarterlyReportUtil.gpGetARVConceptIds() + ") ");
+		strBuffer.append(" INNER JOIN obs obs on p.patient_id=obs.person_id and o.concept_id<> "
+				+ Integer.parseInt(QuarterlyReportUtil.gpTransferInConceptId()));
+		strBuffer.append(" INNER JOIN drug_order dro on dro.order_id=o.order_id ");
+		// strBuffer.append(" INNER JOIN drug d on
+		// dro.drug_inventory_id=d.drug_id ");
+		strBuffer.append(" AND o.concept_id in  (" + QuarterlyReportUtil.gpGetARVConceptIds() + ") ");
 		strBuffer.append(" group by o.patient_id ");
 
-		SQLQuery newOnARTDuringTheQterQuery = sessionFactory
-				.getCurrentSession().createSQLQuery(strBuffer.toString());
+		SQLQuery newOnARTDuringTheQterQuery = sessionFactory.getCurrentSession().createSQLQuery(strBuffer.toString());
 
 		List<Object[]> newOnARTDuringTheQter = newOnARTDuringTheQterQuery.list();
 
@@ -872,63 +755,63 @@ public class QuarterlyReportingDAOImpl implements QuarterReportingDAO {
 	/*************************************************************************************************************/
 	// ///////////////////////who stopped all ART buy the end of the quarter
 	@Override
-	public List<Object[]> getPatientStoppeART(Date quarterFrom, Date quarterTo,String gender, Integer minAge, Integer maxAge,List<Object[]> patientIds) {
+	public List<Object[]> getPatientStoppeART(Date quarterFrom, Date quarterTo, String gender, Integer minAge,
+			Integer maxAge, List<Object[]> patientIds) {
 
 		List<Object[]> patientsStoppeARV = new ArrayList<Object[]>();
 		SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd");
-		
-
 
 		StringBuffer portion = new StringBuffer();
 		if (!gender.equals("")) {
 			portion.append(" select DISTINCT p.patient_id FROM patient_program pg ");
 			portion.append(" INNER JOIN patient p on p.patient_id=pg.patient_id ");
 			portion.append(" INNER JOIN orders o on o.patient_id = p.patient_id ");
-			portion.append(" INNER JOIN person pe on pe.person_id=p.patient_id and pe.gender = '"+ gender + "'");
-			portion.append(" INNER JOIN obs ob on ob.person_id=pe.person_id AND ob.concept_id = "+gpGetExitedFromCareConceptId());
+			portion.append(" INNER JOIN person pe on pe.person_id=p.patient_id and pe.gender = '" + gender + "'");
+			portion.append(" INNER JOIN obs ob on ob.person_id=pe.person_id AND ob.concept_id = "
+					+ gpGetExitedFromCareConceptId());
 			portion.append(" AND ob.value_coded IN(1067,3580,3490) ");
 			portion.append(" INNER JOIN drug_order dr ON dr.order_id = o.order_id  ");
-			portion.append(" AND o.concept_id in ("+ QuarterlyReportUtil.gpGetARVConceptIds() + ") ");
-			portion.append(" AND  o.discontinued='1' AND o.discontinued_date <= '"+ df.format(quarterTo) + "'");
-
+			portion.append(" AND o.concept_id in (" + QuarterlyReportUtil.gpGetARVConceptIds() + ") ");
+			portion.append(" AND  o.discontinued='1' AND o.discontinued_date <= '" + df.format(quarterTo) + "'");
 
 		} else if (gender.equals("")) {
-			portion.append(" select DISTINCT p.patient_id FROM patient_program pg "); 
+			portion.append(" select DISTINCT p.patient_id FROM patient_program pg ");
 			portion.append(" INNER JOIN patient p on p.patient_id=pg.patient_id ");
 			portion.append(" INNER JOIN orders o on o.patient_id = p.patient_id ");
 			portion.append(" INNER JOIN person pe on pe.person_id=p.patient_id ");
-			portion.append(" INNER JOIN obs ob on ob.person_id=pe.person_id AND ob.concept_id = "+gpGetExitedFromCareConceptId());
+			portion.append(" INNER JOIN obs ob on ob.person_id=pe.person_id AND ob.concept_id = "
+					+ gpGetExitedFromCareConceptId());
 			portion.append(" AND ob.value_coded IN(1067,3580,3490) ");
 			portion.append(" INNER JOIN drug_order dr ON dr.order_id = o.order_id ");
-			portion.append(" AND o.concept_id in ("+ QuarterlyReportUtil.gpGetARVConceptIds() + ") ");
-			portion.append(" AND  o.discontinued='1' AND o.discontinued_date <= '"+ df.format(quarterTo) + "'  ");
+			portion.append(" AND o.concept_id in (" + QuarterlyReportUtil.gpGetARVConceptIds() + ") ");
+			portion.append(" AND  o.discontinued='1' AND o.discontinued_date <= '" + df.format(quarterTo) + "'  ");
 		}
 
 		SQLQuery queryStop = sessionFactory.getCurrentSession().createSQLQuery(portion.toString());
-		
+
 		List<Integer> patientsWhoStopped1 = queryStop.list();
-		
+
 		List<Object> o = new ArrayList<Object>();
 		for (Integer id : patientsWhoStopped1) {
-			 o.add(new Object[] { id, "","" });
+			o.add(new Object[] { id, "", "" });
 		}
-		
+
 		List<Object[]> patsNoLongerPregnant = getPatientsNoLongerPreg(quarterTo);
-		
+
 		@SuppressWarnings("unchecked")
 		List<Object[]> noLongerPregAndStopped = (List<Object[]>) union(o, patsNoLongerPregnant);
-		
+
 		List<Integer> stoppedPatients = new ArrayList<Integer>();
 
-		
-		List<Integer> transOutPats = QuarterlyReportUtil.getConvertToType(getPatientsTransferredOut(quarterFrom, quarterTo, gender, minAge, maxAge));
-		
+		List<Integer> transOutPats = QuarterlyReportUtil
+				.getConvertToType(getPatientsTransferredOut(quarterFrom, quarterTo, gender, minAge, maxAge));
+
 		List<Integer> lostPatients = getPatientsLostOnFollowup(quarterTo);
 
-		List<Integer> exitedPatients = QuarterlyReportUtil.getConvertToType(getPatientsExitedInThePeriod(null, quarterTo));
-		
-		
-		int patientAge = 0 ;
+		List<Integer> exitedPatients = QuarterlyReportUtil
+				.getConvertToType(getPatientsExitedInThePeriod(null, quarterTo));
+
+		int patientAge = 0;
 
 		List<Integer> patIds2 = new ArrayList<Integer>();
 		for (Object[] id : noLongerPregAndStopped) {
@@ -940,54 +823,54 @@ public class QuarterlyReportingDAOImpl implements QuarterReportingDAO {
 			strbuf2.append(" + (MONTH(o.discontinued_date) - MONTH(s.birthdate)) ");
 			strbuf2.append("  - IF(DAYOFMONTH(o.discontinued_date) < DAYOFMONTH(s.birthdate),1,0) ");
 			strbuf2.append(" FROM  orders o ");
-			strbuf2.append(" INNER JOIN patient p on p.patient_id=o.patient_id " );
+			strbuf2.append(" INNER JOIN patient p on p.patient_id=o.patient_id ");
 			strbuf2.append(" INNER JOIN person s on s.person_id=p.patient_id  ");
-			strbuf2.append(" AND p.patient_id= "+id[0]);
+			strbuf2.append(" AND p.patient_id= " + id[0]);
 
 			query2 = sessionFactory.getCurrentSession().createSQLQuery(strbuf2.toString());
 
-			List<Double> record = query2.list(); 
+			List<Double> record = query2.list();
 
-			if(record.get(0)!=null)
-			patientAge = record.get(0).intValue();
-			
-			if(patientAge<1)
-				patientAge=patientAge*(-1);
-			
+			if (record.get(0) != null)
+				patientAge = record.get(0).intValue();
+
+			if (patientAge < 1)
+				patientAge = patientAge * (-1);
+
 			if (minAge != null && maxAge != null) {
 				if (patientAge >= minAge && patientAge <= maxAge)
-				if (!lostPatients.contains(id))
-					patIds2.add((Integer) id[0]);
-			}
-			else if (minAge != null && maxAge == null) {
+					if (!lostPatients.contains(id))
+						patIds2.add((Integer) id[0]);
+			} else if (minAge != null && maxAge == null) {
 				if (patientAge >= minAge)
-				if (!lostPatients.contains(id[0]))
-					patIds2.add((Integer) id[0]);
+					if (!lostPatients.contains(id[0]))
+						patIds2.add((Integer) id[0]);
 			}
 		}
-//		log.info("vpppppppppppppppppppppppppppppppp "+transOutPats);
+		// log.info("vpppppppppppppppppppppppppppppppp "+transOutPats);
 		for (Integer id : patIds2) {
-			if(!transOutPats.contains(id))
-			patientsStoppeARV.add(new Object[] { id, "","" });
+			if (!transOutPats.contains(id))
+				patientsStoppeARV.add(new Object[] { id, "", "" });
 		}
-		return patientsStoppeARV; 
+		return patientsStoppeARV;
 	}
 
 	/*************************************************************************************************************/
-	
-	public List<Object[]> getPatientsNoLongerPreg(Date endqter){
-		SimpleDateFormat df=new SimpleDateFormat("dd-MM-yyyy");
-		SQLQuery queryNoLongerPreg = sessionFactory.getCurrentSession().createSQLQuery("select patient_id from orders where discontinued='1' " +
-				"and discontinued_reason=1748 and discontinued_date<=' "+df.format(endqter)+"'");
-           List<Integer> patsNoLongerPregnant = queryNoLongerPreg.list();
-//           log.info("ddddddddddddddddddddddddddddd "+patsNoLongerPregnant);
-           List<Object[]> obj = new ArrayList<Object[]>();
-           for (Object[] ob : obj) {
-        	   obj.add(new Object[] { ob[0], "","" });
-	     	}
+
+	public List<Object[]> getPatientsNoLongerPreg(Date endqter) {
+		SimpleDateFormat df = new SimpleDateFormat("dd-MM-yyyy");
+		SQLQuery queryNoLongerPreg = sessionFactory.getCurrentSession()
+				.createSQLQuery("select patient_id from orders where discontinued='1' "
+						+ "and discontinued_reason=1748 and discontinued_date<=' " + df.format(endqter) + "'");
+		List<Integer> patsNoLongerPregnant = queryNoLongerPreg.list();
+		// log.info("ddddddddddddddddddddddddddddd "+patsNoLongerPregnant);
+		List<Object[]> obj = new ArrayList<Object[]>();
+		for (Object[] ob : obj) {
+			obj.add(new Object[] { ob[0], "", "" });
+		}
 		return obj;
 	}
-	
+
 	public Boolean isAllDrugsStopped(Patient patient, Date when) {
 
 		Boolean isStopped = false;
@@ -998,19 +881,17 @@ public class QuarterlyReportingDAOImpl implements QuarterReportingDAO {
 
 		try {
 			strb.append("SELECT DISTINCT o.patient_id , ");
-			strb.append("IF((select o.discontinued='1' and o.discontinued_date<='"
-					+ df.format(when) + "') , 1 , 0)");
+			strb.append("IF((select o.discontinued='1' and o.discontinued_date<='" + df.format(when) + "') , 1 , 0)");
 			strb.append("FROM drug_order d ");
 			strb.append("INNER JOIN orders o on o.order_id=d.order_id ");
-			// strb.append("INNER JOIN drug g on g.drug_id=d.drug_inventory_id ");
+			// strb.append("INNER JOIN drug g on g.drug_id=d.drug_inventory_id
+			// ");
 			strb.append(" AND o.patient_id= " + patient.getPatientId());
-			strb.append(" and o.concept_id IN ("
-					+ QuarterlyReportUtil.gpGetARVConceptIds() + ")");
+			strb.append(" and o.concept_id IN (" + QuarterlyReportUtil.gpGetARVConceptIds() + ")");
 
 			List<Integer> values = new ArrayList<Integer>();
 
-			query = sessionFactory.getCurrentSession().createSQLQuery(
-					strb.toString());
+			query = sessionFactory.getCurrentSession().createSQLQuery(strb.toString());
 
 			List<Object[]> records = query.list();
 
@@ -1033,28 +914,29 @@ public class QuarterlyReportingDAOImpl implements QuarterReportingDAO {
 
 	/********************************************************************************************************************/
 	@Override
-	public List<Object[]> getPatientExitedFromCare(Integer conceptId,Date quarterFrom, Date quarterTo, String gender, Integer minAge,Integer maxAge, List<Object[]> patientIds) {
+	public List<Object[]> getPatientExitedFromCare(Integer conceptId, Date quarterFrom, Date quarterTo, String gender,
+			Integer minAge, Integer maxAge, List<Object[]> patientIds) {
 
 		StringBuffer strBuf = new StringBuffer();
 
 		SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd");
 
-		strBuf.append(" SELECT DISTINCT pa.patient_id FROM patient pa inner join person ps on pa.patient_id=ps.person_id ");
-		strBuf.append(" INNER JOIN obs ob on ob.person_id=ps.person_id and ob.concept_id= "+ gpGetExitedFromCareConceptId() + " and ob.value_coded = "	+ conceptId);
+		strBuf.append(
+				" SELECT DISTINCT pa.patient_id FROM patient pa inner join person ps on pa.patient_id=ps.person_id ");
+		strBuf.append(" INNER JOIN obs ob on ob.person_id=ps.person_id and ob.concept_id= "
+				+ gpGetExitedFromCareConceptId() + " and ob.value_coded = " + conceptId);
 		strBuf.append(" AND ob.obs_datetime <= '" + df.format(quarterTo) + "'");
-		strBuf.append(" AND ob.voided=0 AND ps.gender='"+gender+"'");
-
+		strBuf.append(" AND ob.voided=0 AND ps.gender='" + gender + "'");
 
 		SQLQuery queryExited = sessionFactory.getCurrentSession().createSQLQuery(strBuf.toString());
-		
-		
+
 		List<Integer> patientsExited = queryExited.list();
 
 		List<Integer> lostPatients = getPatientsLostOnFollowup(quarterTo);
-		
+
 		List<Object[]> objs = new ArrayList<Object[]>();
-		
-		int patientAge = 0 ;
+
+		int patientAge = 0;
 
 		for (Object[] ob : patientIds) {
 			Patient patient = Context.getPatientService().getPatient((Integer) ob[0]);
@@ -1063,36 +945,34 @@ public class QuarterlyReportingDAOImpl implements QuarterReportingDAO {
 			Date deathdate = patient.getDeathDate();
 			Date transOutDate = getWhenTransOut(patient);
 			Date lostDate = getWhenLost(patient);
-			
-			if(deathdate!=null)
-		    cal =  deathdate;
-			else if(transOutDate!=null)
-			cal = transOutDate;
-			else if(lostDate!=null)
-				cal=lostDate;
-			
-			
-		    Date birthdate = patient.getBirthdate();
-		    
-		    try {
-		    	if(cal!=null)
-				patientAge = QuarterlyReportUtil.calculateAge(cal, birthdate);
+
+			if (deathdate != null)
+				cal = deathdate;
+			else if (transOutDate != null)
+				cal = transOutDate;
+			else if (lostDate != null)
+				cal = lostDate;
+
+			Date birthdate = patient.getBirthdate();
+
+			try {
+				if (cal != null)
+					patientAge = QuarterlyReportUtil.calculateAge(cal, birthdate);
 			} catch (ParseException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
-		    if(minAge!=null && maxAge!=null){
-		    	if(patientAge>=minAge && patientAge<=maxAge){
-			       if (patientsExited.contains(ob[0]))
-				     objs.add(new Object[] { ob[0], "", "" });
-		    	}
-		    }
-		    else if(minAge!=null && maxAge==null){
-		    	if(patientAge>=minAge){
-			       if (patientsExited.contains(ob[0]))
-				     objs.add(new Object[] { ob[0], "", "" });
-		    	}
-		    }
+			if (minAge != null && maxAge != null) {
+				if (patientAge >= minAge && patientAge <= maxAge) {
+					if (patientsExited.contains(ob[0]))
+						objs.add(new Object[] { ob[0], "", "" });
+				}
+			} else if (minAge != null && maxAge == null) {
+				if (patientAge >= minAge) {
+					if (patientsExited.contains(ob[0]))
+						objs.add(new Object[] { ob[0], "", "" });
+				}
+			}
 		}
 
 		return objs;
@@ -1101,8 +981,7 @@ public class QuarterlyReportingDAOImpl implements QuarterReportingDAO {
 
 	/********************************************************************************************************************/
 	@Override
-	public List<Object[]> getAllARVPatientsLostOnFollowUp(Date quarterFrom,
-			Date quarterTo, List<Object[]> patientIds) {
+	public List<Object[]> getAllARVPatientsLostOnFollowUp(Date quarterFrom, Date quarterTo, List<Object[]> patientIds) {
 
 		List<Object[]> patientIdsLost = new ArrayList<Object[]>();
 
@@ -1112,46 +991,32 @@ public class QuarterlyReportingDAOImpl implements QuarterReportingDAO {
 			quarterTo = new Date();
 		}
 
-		List<Object[]> deadPatientsObj = getPatientExitedFromCare(1742, null,
-				quarterTo, null, null, null, patientIds);
-		List<Object[]> transfOutPatientsObj = getPatientExitedFromCare(1744,
-				null, quarterTo, null, null, null, patientIds);
-		List<Object[]> patientsStoppedArvObj = getPatientStoppeART(null,
-				quarterTo, "", null, null, patientIds);
+		List<Object[]> deadPatientsObj = getPatientExitedFromCare(1742, null, quarterTo, null, null, null, patientIds);
+		List<Object[]> transfOutPatientsObj = getPatientExitedFromCare(1744, null, quarterTo, null, null, null,
+				patientIds);
+		List<Object[]> patientsStoppedArvObj = getPatientStoppeART(null, quarterTo, "", null, null, patientIds);
 
-		List<Integer> deadPatientIds = QuarterlyReportUtil
-				.getConvertToType(deadPatientsObj);
-		List<Integer> transfOutPatientIds = QuarterlyReportUtil
-				.getConvertToType(transfOutPatientsObj);
-		List<Integer> stoppedArvPatientIds = QuarterlyReportUtil
-				.getConvertToType(patientsStoppedArvObj);
+		List<Integer> deadPatientIds = QuarterlyReportUtil.getConvertToType(deadPatientsObj);
+		List<Integer> transfOutPatientIds = QuarterlyReportUtil.getConvertToType(transfOutPatientsObj);
+		List<Integer> stoppedArvPatientIds = QuarterlyReportUtil.getConvertToType(patientsStoppedArvObj);
 
 		for (Object[] id : patientIds) {
 
 			Integer patientId = (Integer) id[0];
 
-			SQLQuery queryDate1 = sessionFactory
-					.getCurrentSession()
-					.createSQLQuery(
-							"select cast(max(encounter_datetime)as DATE) from encounter where "
-									+ "(select(cast(max(encounter_datetime)as Date))) <= '"
-									+ QuarterlyReportUtil
-											.getDateFormat(quarterTo)
-									+ "' and patient_id = " + patientId);
+			SQLQuery queryDate1 = sessionFactory.getCurrentSession()
+					.createSQLQuery("select cast(max(encounter_datetime)as DATE) from encounter where "
+							+ "(select(cast(max(encounter_datetime)as Date))) <= '"
+							+ QuarterlyReportUtil.getDateFormat(quarterTo) + "' and patient_id = " + patientId);
 
 			Date maxEncounterDateTime = (Date) queryDate1.uniqueResult();
 
-			SQLQuery queryDate2 = sessionFactory
-					.getCurrentSession()
-					.createSQLQuery(
-							"select cast(max(value_datetime) as DATE ) "
-									+ "from obs where (select(cast(max(value_datetime)as Date))) <= '"
-									+ QuarterlyReportUtil
-											.getDateFormat(quarterTo)
-									+ "' and concept_id = "
-									+ Integer.parseInt(QuarterlyReportUtil
-											.gpGetReturnVisitDateConceptId())
-									+ " and person_id = " + patientId);
+			SQLQuery queryDate2 = sessionFactory.getCurrentSession()
+					.createSQLQuery("select cast(max(value_datetime) as DATE ) "
+							+ "from obs where (select(cast(max(value_datetime)as Date))) <= '"
+							+ QuarterlyReportUtil.getDateFormat(quarterTo) + "' and concept_id = "
+							+ Integer.parseInt(QuarterlyReportUtil.gpGetReturnVisitDateConceptId())
+							+ " and person_id = " + patientId);
 
 			Date maxReturnVisitDay = (Date) queryDate2.uniqueResult();
 
@@ -1159,12 +1024,10 @@ public class QuarterlyReportingDAOImpl implements QuarterReportingDAO {
 
 			if ((maxReturnVisitDay != null) && (maxEncounterDateTime != null)) {
 
-				if (((maxEncounterDateTime.getTime()) >= threeMonthsBeforeEndDate
-						.getTime() && (maxEncounterDateTime.getTime()) <= quarterTo
-						.getTime())
-						|| ((maxReturnVisitDay.getTime()) >= threeMonthsBeforeEndDate
-								.getTime() && (maxReturnVisitDay.getTime()) <= quarterTo
-								.getTime())) {
+				if (((maxEncounterDateTime.getTime()) >= threeMonthsBeforeEndDate.getTime()
+						&& (maxEncounterDateTime.getTime()) <= quarterTo.getTime())
+						|| ((maxReturnVisitDay.getTime()) >= threeMonthsBeforeEndDate.getTime()
+								&& (maxReturnVisitDay.getTime()) <= quarterTo.getTime())) {
 
 					notLostPatients.add(new Object[] { patientId, "", "" });
 
@@ -1175,18 +1038,14 @@ public class QuarterlyReportingDAOImpl implements QuarterReportingDAO {
 								// if(!isAllDrugsStopped(Context.getPatientService().getPatient(patientId),
 								// quarterTo))
 								// if(isLastRegimenProphy(Context.getPatientService().getPatient(patientId)))
-								patientIdsLost.add(new Object[] { patientId,
-										"", "" });
+								patientIdsLost.add(new Object[] { patientId, "", "" });
 				}
 			}
 
-			else if ((maxReturnVisitDay == null)
-					&& (maxEncounterDateTime != null)) {
+			else if ((maxReturnVisitDay == null) && (maxEncounterDateTime != null)) {
 
-				if ((maxEncounterDateTime.getTime()) >= threeMonthsBeforeEndDate
-						.getTime()
-						&& (maxEncounterDateTime.getTime()) <= quarterTo
-								.getTime()) {
+				if ((maxEncounterDateTime.getTime()) >= threeMonthsBeforeEndDate.getTime()
+						&& (maxEncounterDateTime.getTime()) <= quarterTo.getTime()) {
 					notLostPatients.add(new Object[] { patientId, "", "" });
 
 				} else {
@@ -1196,8 +1055,7 @@ public class QuarterlyReportingDAOImpl implements QuarterReportingDAO {
 								// if(!isAllDrugsStopped(Context.getPatientService().getPatient(patientId),
 								// quarterTo))
 								// if(isLastRegimenProphy(Context.getPatientService().getPatient(patientId)))
-								patientIdsLost.add(new Object[] { patientId,
-										"", "" });
+								patientIdsLost.add(new Object[] { patientId, "", "" });
 				}
 			}
 
@@ -1208,8 +1066,7 @@ public class QuarterlyReportingDAOImpl implements QuarterReportingDAO {
 							// if(!isAllDrugsStopped(Context.getPatientService().getPatient(patientId),
 							// quarterTo))
 							// if(isLastRegimenProphy(Context.getPatientService().getPatient(patientId)))
-							patientIdsLost
-									.add(new Object[] { patientId, "", "" });
+							patientIdsLost.add(new Object[] { patientId, "", "" });
 
 			}
 
@@ -1223,39 +1080,41 @@ public class QuarterlyReportingDAOImpl implements QuarterReportingDAO {
 	public Date getTreeMonthBefore(Date date) {
 
 		SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd");
-		Session session = getSessionFactory().getCurrentSession();
-		SQLQuery query = session.createSQLQuery("SELECT DATE_SUB(CAST('"
-				+ df.format(date) + "' AS DATE), INTERVAL 3 MONTH)");
+		 Session session = getSessionFactory().getCurrentSession();
+		SQLQuery query = session
+				.createSQLQuery("SELECT DATE_SUB(CAST('" + df.format(date) + "' AS DATE), INTERVAL 3 MONTH)");
 
 		return ((Date) query.uniqueResult());
 	}
+
 	/*******************************************************************************************************************************/
 
 	public Date getSixMonthBefore(Date date) {
 
 		SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd");
-		Session session = getSessionFactory().getCurrentSession();
-		SQLQuery query = session.createSQLQuery("SELECT DATE_SUB(CAST('"
-				+ df.format(date) + "' AS DATE), INTERVAL 6 MONTH)");
+		 Session session = getSessionFactory().getCurrentSession();
+		SQLQuery query = session
+				.createSQLQuery("SELECT DATE_SUB(CAST('" + df.format(date) + "' AS DATE), INTERVAL 6 MONTH)");
 
 		return ((Date) query.uniqueResult());
 	}
+
 	/*******************************************************************************************************************************/
 
 	public Date getTwelveMonthBefore(Date date) {
 
 		SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd");
-		Session session = getSessionFactory().getCurrentSession();
-		SQLQuery query = session.createSQLQuery("SELECT DATE_SUB(CAST('"
-				+ df.format(date) + "' AS DATE), INTERVAL 12 MONTH)");
+		 Session session = getSessionFactory().getCurrentSession();
+		SQLQuery query = session
+				.createSQLQuery("SELECT DATE_SUB(CAST('" + df.format(date) + "' AS DATE), INTERVAL 12 MONTH)");
 
 		return ((Date) query.uniqueResult());
 	}
 
 	/********************************************************************************************************************/
 	@Override
-	public List<Object[]> getPatientsTransferreIn(Date quarterFrom,
-			Date quarterTo, String gender, Integer minAge, Integer maxAge) {
+	public List<Object[]> getPatientsTransferreIn(Date quarterFrom, Date quarterTo, String gender, Integer minAge,
+			Integer maxAge) {
 
 		StringBuffer strBuf = new StringBuffer();
 
@@ -1268,184 +1127,110 @@ public class QuarterlyReportingDAOImpl implements QuarterReportingDAO {
 		}
 
 		List<Integer> patientsOnART = null;
-		SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd"); 
-		
+		SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd");
+
 		StringBuffer artBuf = new StringBuffer();
-		
+
 		artBuf.append("SELECT distinct o.patient_id FROM orders o  ");
 		artBuf.append(" INNER JOIN patient pat on pat.patient_id=o.patient_id ");
 		artBuf.append(" INNER JOIN patient_program pg on pat.patient_id=pg.patient_id ");
 		artBuf.append(" INNER JOIN program gr on gr.program_id=pg.program_id AND gr.program_id = ");
 		artBuf.append(Integer.parseInt(QuarterlyReportUtil.gpGetHIVProgramId()));
-		artBuf.append(" AND o.concept_id in( "+ QuarterlyReportUtil.gpGetARVConceptIds() + ") ");
+		artBuf.append(" AND o.concept_id in( " + QuarterlyReportUtil.gpGetARVConceptIds() + ") ");
 		artBuf.append(" AND o.voided=0 AND pat.voided=0 AND pg.voided=0 ");
-		artBuf.append(" AND o.start_date <= '"+df.format(quarterTo)+"'"); 
-		
+		artBuf.append(" AND o.start_date <= '" + df.format(quarterTo) + "'");
+
 		SQLQuery artQuery = sessionFactory.getCurrentSession().createSQLQuery(artBuf.toString());
 		
-//		List<Integer> artPatients = artQquery.list();
-
-//		if (getPatientsStartedART(quarterFrom, quarterTo, gender, minAge,maxAge) != null)
-//			patientsOnART = QuarterlyReportUtil.getConvertToType(getPatientsStartedART(quarterFrom,quarterTo, gender, minAge, maxAge));  
-
 		patientsOnART = artQuery.list();
-		
+
 		if (gender == null) {
-			queryPortion.append(" SELECT DISTINCT o.person_id FROM obs o ");  
+			queryPortion.append(" SELECT DISTINCT o.person_id FROM obs o ");
 			queryPortion.append(" INNER JOIN person pe ON pe.person_id=o.person_id ");
 			queryPortion.append(" INNER JOIN patient pa ON pa.patient_id=pe.person_id ");
-			queryPortion.append(" AND o.concept_id= "	+ Integer.parseInt(QuarterlyReportUtil.gpTransferInConceptId())+" AND o.value_coded=1065  ");
+			queryPortion.append(" AND o.concept_id= " + Integer.parseInt(QuarterlyReportUtil.gpTransferInConceptId())
+					+ " AND o.value_coded=1065  ");
 		} else {
 
 			queryPortion.append(" SELECT DISTINCT  o.person_id FROM obs o ");
 			queryPortion.append(" INNER JOIN person pe ON pe.person_id=o.person_id ");
 			queryPortion.append(" INNER JOIN patient pa ON pa.patient_id=pe.person_id ");
-			queryPortion.append(" AND o.concept_id= "	+ Integer.parseInt(QuarterlyReportUtil.gpTransferInConceptId())+" AND o.value_coded=1065 ");
-			queryPortion.append(" AND pe.gender = '" + gender + "' "); 
+			queryPortion.append(" AND o.concept_id= " + Integer.parseInt(QuarterlyReportUtil.gpTransferInConceptId())
+					+ " AND o.value_coded=1065 ");
+			queryPortion.append(" AND pe.gender = '" + gender + "' ");
 
 		}
 
 		if (quarterFrom != null && quarterTo != null) {
 			strBuf.append(queryPortion);
-			strBuf.append(" and o.obs_datetime BETWEEN  '"
-					+ df.format(quarterFrom) + "' ");
+			strBuf.append(" and o.obs_datetime BETWEEN  '" + df.format(quarterFrom) + "' ");
 			strBuf.append(" AND '" + df.format(quarterTo) + "' ");
 
 		}
 		if (quarterFrom != null && quarterTo == null) {
 			strBuf.append(queryPortion);
-			strBuf.append(" and o.obs_datetime <  '" + df.format(quarterFrom)	+ "' ");
+			strBuf.append(" and o.obs_datetime <  '" + df.format(quarterFrom) + "' ");
 
 		}
 		if (quarterFrom == null && quarterTo != null) {
 			strBuf.append(queryPortion);
-			strBuf.append(" and o.obs_datetime <  '" + df.format(quarterTo)+ "' ");
+			strBuf.append(" and o.obs_datetime <  '" + df.format(quarterTo) + "' ");
 
 		}
-		
-//		log.info("vvvvvvvvvvvvvvvvvvvvvvvvvvvv "+strBuf.toString());
 
-		SQLQuery query = sessionFactory.getCurrentSession().createSQLQuery(
-				strBuf.toString());
+		// log.info("vvvvvvvvvvvvvvvvvvvvvvvvvvvv "+strBuf.toString());
+
+		SQLQuery query = sessionFactory.getCurrentSession().createSQLQuery(strBuf.toString());
 
 		List<Integer> patientTransferIn = query.list();
 		List<Integer> patIds2 = new ArrayList<Integer>();
 
-//		for (Integer id : patientTransferIn) {
+		double patientAge = 0;
 
-//			SQLQuery query2 = null;
-//			StringBuffer strbuf2 = new StringBuffer();lll
-//
-//			if (minAge != null && maxAge != null) {
-//				strbuf2.append("SELECT p.patient_id , ");
-//				strbuf2.append(" IF((select min(o.start_date)))-(select min(s.birthdate)) BETWEEN "
-//						+ minAge + " AND " + maxAge + ",1,0)");
-//				strbuf2.append(" from patient p");
-//				strbuf2.append(" inner join orders o on o.patient_id=p.patient_id");
-//				strbuf2.append(" inner join person s on s.person_id=p.patient_id");
-//				strbuf2.append(" and p.patient_id= " + id);
-//			}
-//			if (minAge != null && maxAge == null) {
-//				strbuf2.append("SELECT p.patient_id , ");
-//				strbuf2.append(" IF((select min(o.start_date)))-(select min(s.birthdate)) >= "
-//						+ minAge + " ,1,0)");
-//				strbuf2.append(" from patient p");
-//				strbuf2.append(" inner join orders o on o.patient_id=p.patient_id");
-//				strbuf2.append(" inner join person s on s.person_id=p.patient_id");
-//				strbuf2.append(" and p.patient_id= " + id);
-//			}
-//			query2 = sessionFactory.getCurrentSession().createSQLQuery(
-//					strbuf2.toString());
-//
-//			List<Object[]> records = query2.list();
-//
-//			log.info("oooooooooooooooooooooooooooooooooooooooooooooo "
-//					+ strbuf2.toString());
-//
-//			int add = 0;
-//
-//			Map<String, Integer> patientIdsInMap = new HashMap<String, Integer>();
-//
-//			for (Object[] obj : records) {
-//				add++;
-//
-//				Integer patientId = (Integer) obj[0];
-//				String booleanValue = obj[1].toString() + add + "";
-//
-//				patientIdsInMap.put(booleanValue, patientId);
-//			}
-//
-//			for (String key : patientIdsInMap.keySet()) {
-//				if (key.charAt(0) == '1') {
-//					patIds2.add(patientIdsInMap.get(key));
-//				}
-//			}
-//		}
-//
-//		for (Integer id : patIds2) {
-//			Patient patient = Context.getPatientService().getPatient(id);
-//			Date whenTransferredInd = getMaxTransferInDate(patient,
-//					quarterFrom, quarterTo);
-//			if (patientsOnART.contains(id)) {
-//				if (whenTransferredInd != null) {
-//					objs.add(new Object[] { id, df.format(whenTransferredInd),
-//							"Transfer-In Date" });
-//				} else {
-//					objs.add(new Object[] { id, "-", "Transfer-In Date" });
-//				}
-//
-//			}
-//		}
+		// List<Integer> patIds2 = new ArrayList<Integer>();
+		for (Integer id : patientTransferIn) {
 
-			double patientAge = 0 ;
+			SQLQuery query2 = null;
+			StringBuffer strbuf2 = new StringBuffer();
 
-//				List<Integer> patIds2 = new ArrayList<Integer>();
-				for (Integer id : patientTransferIn) {
+			strbuf2.append("SELECT (MIN(o.start_date) - YEAR(s.birthdate)) * 12 ");
+			strbuf2.append(" + (MONTH(MIN(o.start_date)) - MONTH(s.birthdate)) ");
+			strbuf2.append("  - IF(DAYOFMONTH(MIN(o.start_date)) < DAYOFMONTH(s.birthdate),1,0) ");
+			strbuf2.append(" FROM  orders o ");
+			strbuf2.append(" INNER JOIN patient p on p.patient_id=o.patient_id ");
+			strbuf2.append(" INNER JOIN person s on s.person_id=p.patient_id  ");
+			strbuf2.append(" AND p.patient_id= " + id);
 
-					SQLQuery query2 = null;
-					StringBuffer strbuf2 = new StringBuffer();
+			query2 = sessionFactory.getCurrentSession().createSQLQuery(strbuf2.toString());
 
-					strbuf2.append("SELECT (MIN(o.start_date) - YEAR(s.birthdate)) * 12 ");
-					strbuf2.append(" + (MONTH(MIN(o.start_date)) - MONTH(s.birthdate)) ");
-					strbuf2.append("  - IF(DAYOFMONTH(MIN(o.start_date)) < DAYOFMONTH(s.birthdate),1,0) ");
-					strbuf2.append(" FROM  orders o ");
-					strbuf2.append(" INNER JOIN patient p on p.patient_id=o.patient_id " );
-					strbuf2.append(" INNER JOIN person s on s.person_id=p.patient_id  ");
-					strbuf2.append(" AND p.patient_id= "+id);
+			List<Double> record = query2.list();
 
-					query2 = sessionFactory.getCurrentSession().createSQLQuery(
-							strbuf2.toString());
+			if (record.get(0) != null)
+				patientAge = record.get(0).intValue();
 
-					List<Double> record = query2.list(); 
+			if (patientAge < 1)
+				patientAge = patientAge * (-1);
 
-					if(record.get(0)!=null)
-					patientAge = record.get(0).intValue();
-					
-					if(patientAge<1)
-						patientAge=patientAge*(-1);
-					
-					if (minAge != null && maxAge != null) {
-						if (patientAge >= minAge && patientAge <= maxAge)
-							patIds2.add(id);
-					}
-					else if (minAge != null && maxAge == null) {
-						if (patientAge >= minAge)
-							patIds2.add(id);
-					}
-				}
-				for (Integer id : patIds2) {
-				Patient patient = Context.getPatientService().getPatient(id);
-				Date whenTransferredInd = getMaxTransferInDate(patient,quarterFrom, quarterTo);
-				if (patientsOnART.contains(id)) {
-					if (whenTransferredInd != null) {
-						objs.add(new Object[] { id, df.format(whenTransferredInd),
-								"Transfer-In Date" });
-					} else {
-						objs.add(new Object[] { id, "-", "Transfer-In Date" });
-					}
-	
-				}
+			if (minAge != null && maxAge != null) {
+				if (patientAge >= minAge && patientAge <= maxAge)
+					patIds2.add(id);
+			} else if (minAge != null && maxAge == null) {
+				if (patientAge >= minAge)
+					patIds2.add(id);
 			}
+		}
+		for (Integer id : patIds2) {
+			Patient patient = Context.getPatientService().getPatient(id);
+			Date whenTransferredInd = getMaxTransferInDate(patient, quarterFrom, quarterTo);
+			if (patientsOnART.contains(id)) {
+				if (whenTransferredInd != null) {
+					objs.add(new Object[] { id, df.format(whenTransferredInd), "Transfer-In Date" });
+				} else {
+					objs.add(new Object[] { id, "-", "Transfer-In Date" });
+				}
+
+			}
+		}
 		return objs;
 	}
 
@@ -1454,14 +1239,13 @@ public class QuarterlyReportingDAOImpl implements QuarterReportingDAO {
 		StringBuffer strBuf = new StringBuffer();
 		SQLQuery query = null;
 		SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd");
-		strBuf.append("SELECT CAST(DATE_SUB( '" + df.format(quarterFrom) + "'"
-				+ " ,INTERVAL " + monthAgo + " MONTH)AS DATE)");
-		query = sessionFactory.getCurrentSession().createSQLQuery(
-				strBuf.toString());
+		strBuf.append("SELECT CAST(DATE_SUB( '" + df.format(quarterFrom) + "'" + " ,INTERVAL " + monthAgo
+				+ " MONTH)AS DATE)");
+		query = sessionFactory.getCurrentSession().createSQLQuery(strBuf.toString());
 		Date date = (Date) query.uniqueResult();
 
-		SQLQuery query1 = sessionFactory.getCurrentSession().createSQLQuery(
-				"SELECT LAST_DAY('" + df.format(date) + "');");
+		SQLQuery query1 = sessionFactory.getCurrentSession()
+				.createSQLQuery("SELECT LAST_DAY('" + df.format(date) + "');");
 
 		Date lastDay = (Date) query1.uniqueResult();
 		return lastDay;
@@ -1469,128 +1253,66 @@ public class QuarterlyReportingDAOImpl implements QuarterReportingDAO {
 
 	/********************************************************************************************************************/
 	@Override
-	public List<Object[]> getNewPatientsOver6YearsOnART(Date startDate,Date endDate, String gender, Integer minAge, Integer maxAge) {
+	public List<Object[]> getNewPatientsOver6YearsOnART(Date startDate, Date endDate, String gender, Integer minAge,
+			Integer maxAge) {
 		StringBuffer strBuffer = new StringBuffer();
 
-		List<Integer> patientsTransInDuringQter = QuarterlyReportUtil.getConvertToType(getPatientsTransferreIn(startDate, endDate,null, null, null));
-		
+		List<Integer> patientsTransInDuringQter = QuarterlyReportUtil
+				.getConvertToType(getPatientsTransferreIn(startDate, endDate, null, null, null));
+
 		StringBuffer queryPortion = new StringBuffer();
 		SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd");
 		List<Object[]> objs = new ArrayList<Object[]>();
-		
-//		mariam
-
-//			if (gender == null) {
-////				queryPortion.append(" FROM orders o INNER JOIN drug_order dro ON dro.order_id=o.order_id ");
-////				queryPortion.append(" INNER JOIN person p ON o.patient_id = p.person_id   ");
-////				queryPortion.append(" AND o.concept_id IN ("+ QuarterlyReportUtil.gpGetARVConceptIds()+ ")  ");
-////				queryPortion.append(" GROUP BY o.patient_id ");
-//				
-//				queryPortion.append(" FROM orders o ");
-//				queryPortion.append(" INNER JOIN patient pat on pat.patient_id=o.patient_id ");
-//				queryPortion.append(" INNER JOIN patient_program pg on pat.patient_id=pg.patient_id ");
-//				queryPortion.append(" INNER JOIN program gr on gr.program_id=pg.program_id AND gr.program_id = ");
-//				queryPortion.append(Integer.parseInt(QuarterlyReportUtil.gpGetHIVProgramId()));
-//				queryPortion.append(" AND o.concept_id in( "+ QuarterlyReportUtil.gpGetARVConceptIds() + ") ");
-//				queryPortion.append(" AND o.voided=0 AND pat.voided=0 AND pg.voided=0 ");
-//				queryPortion.append(" INNER JOIN person p on o.patient_id = p.person_id   ");
-//				queryPortion.append(" AND p.gender= '" + gender + "'");
-//				queryPortion.append(" GROUP BY o.patient_id ");
-//				
-//			} else {
-////				queryPortion.append(" FROM orders o INNER JOIN drug_order dro ON dro.order_id=o.order_id ");
-////				queryPortion.append(" INNER JOIN person p ON o.patient_id = p.person_id   ");
-////				queryPortion.append(" AND o.concept_id IN ("+ QuarterlyReportUtil.gpGetARVConceptIds()+ ") ");
-////				queryPortion.append(" AND p.gender='" + gender + "'  ");
-////				queryPortion.append(" GROUP BY o.patient_id ");
-//				
-//				queryPortion.append(" FROM orders o ");
-//				queryPortion.append(" INNER JOIN patient pat on pat.patient_id=o.patient_id ");
-//				queryPortion.append(" INNER JOIN patient_program pg on pat.patient_id=pg.patient_id ");
-//				queryPortion.append(" INNER JOIN program gr on gr.program_id=pg.program_id AND gr.program_id = ");
-//				queryPortion.append(Integer.parseInt(QuarterlyReportUtil.gpGetHIVProgramId()));
-//				queryPortion.append(" AND o.concept_id in( "+ QuarterlyReportUtil.gpGetARVConceptIds() + ") ");
-//				queryPortion.append(" AND o.voided=0 AND pat.voided=0 AND pg.voided=0 ");
-//				queryPortion.append(" INNER JOIN person p on o.patient_id = p.person_id   "); 
-//				queryPortion.append(" GROUP BY o.patient_id ");
-//			}	
-		
-		
 		if (gender != null) {
 			strBuffer.append("SELECT o.patient_id , ");
 			strBuffer.append("IF((select min(o.start_date)) BETWEEN ");
-			strBuffer.append(" '" + df.format(startDate) + "' AND '"+ df.format(endDate) + "' " + " , " + " true " + " ,"+ "false) ");
+			strBuffer.append(" '" + df.format(startDate) + "' AND '" + df.format(endDate) + "' " + " , " + " true "
+					+ " ," + "false) ");
 			strBuffer.append(" FROM orders o ");
 			strBuffer.append(" INNER JOIN patient pat on pat.patient_id=o.patient_id ");
 			strBuffer.append(" INNER JOIN patient_program pg on pat.patient_id=pg.patient_id ");
 			strBuffer.append(" INNER JOIN program gr on gr.program_id=pg.program_id AND gr.program_id = ");
 			strBuffer.append(Integer.parseInt(QuarterlyReportUtil.gpGetHIVProgramId()));
-			strBuffer.append(" AND o.concept_id in( "+ QuarterlyReportUtil.gpGetARVConceptIds() + ") ");
+			strBuffer.append(" AND o.concept_id in( " + QuarterlyReportUtil.gpGetARVConceptIds() + ") ");
 			strBuffer.append(" AND o.voided=0 AND pat.voided=0 AND pg.voided=0 ");
 			strBuffer.append(" INNER JOIN person p on o.patient_id = p.person_id   ");
 			strBuffer.append(" AND p.gender= '" + gender + "'");
-			strBuffer.append(" and pg.date_enrolled <= '"+ df.format(endDate) + "' AND ((pg.date_completed is null) or(cast(pg.date_completed as DATE)> ' " + df.format(endDate) + " ')) ");
+			strBuffer.append(" and pg.date_enrolled <= '" + df.format(endDate)
+					+ "' AND ((pg.date_completed is null) or(cast(pg.date_completed as DATE)> ' " + df.format(endDate)
+					+ " ')) ");
 			strBuffer.append(" group by o.patient_id ");
 		} else {
 			strBuffer.append("SELECT o.patient_id , ");
 			strBuffer.append("IF((select min(o.start_date)) BETWEEN ");
-			strBuffer.append(" '" + df.format(startDate) + "' AND '"+ df.format(endDate) + "' " + " , " + " true " + " ,"+ "false) ");
+			strBuffer.append(" '" + df.format(startDate) + "' AND '" + df.format(endDate) + "' " + " , " + " true "
+					+ " ," + "false) ");
 			strBuffer.append(" FROM orders o ");
 			strBuffer.append(" INNER JOIN patient pat on pat.patient_id=o.patient_id ");
 			strBuffer.append(" INNER JOIN patient_program pg on pat.patient_id=pg.patient_id ");
 			strBuffer.append(" INNER JOIN program gr on gr.program_id=pg.program_id AND gr.program_id = ");
 			strBuffer.append(Integer.parseInt(QuarterlyReportUtil.gpGetHIVProgramId()));
-			strBuffer.append(" AND o.concept_id in( "+ QuarterlyReportUtil.gpGetARVConceptIds() + ") ");
+			strBuffer.append(" AND o.concept_id in( " + QuarterlyReportUtil.gpGetARVConceptIds() + ") ");
 			strBuffer.append(" AND o.voided=0 AND pat.voided=0 AND pg.voided=0 ");
 			strBuffer.append(" INNER JOIN person p on o.patient_id = p.person_id   ");
-			strBuffer.append(" and pg.date_enrolled <= '"+ df.format(endDate) + "' AND ((pg.date_completed is null) or(cast(pg.date_completed as DATE)> ' " + df.format(endDate) + " ')) ");
+			strBuffer.append(" and pg.date_enrolled <= '" + df.format(endDate)
+					+ "' AND ((pg.date_completed is null) or(cast(pg.date_completed as DATE)> ' " + df.format(endDate)
+					+ " ')) ");
 			strBuffer.append(" group by o.patient_id ");
 		}
-		
-//		if (startDate != null && endDate == null) {
-//			strBuffer.append("SELECT o.patient_id , ");
-//			strBuffer.append("IF((select min(o.start_date)) < ");
-//			strBuffer.append("'" + df.format(startDate) + "'" + " , "
-//					+ " true " + " ," + "false)");
-//			strBuffer.append(queryPortion);
-//			strBuffer.append(" and pg.date_enrolled <= '"+ df.format(startDate) + "' AND ((pg.date_completed is null) or(cast(pg.date_completed as DATE)> ' " + df.format(startDate) + " ')) ");
-//			strBuffer.append(" group by o.patient_id ");
-//		}
-//		if (startDate == null && endDate != null) {
-//			strBuffer.append("SELECT o.patient_id , ");
-//			strBuffer.append("IF((select min(o.start_date)) < ");
-//			strBuffer.append("'" + df.format(endDate) + "'" + " , " + " true "
-//					+ " ," + "false) ");
-//			strBuffer.append(queryPortion);
-//			strBuffer.append(" and pg.date_enrolled <= '"+ df.format(endDate) + "' AND ((pg.date_completed is null) or(cast(pg.date_completed as DATE)> ' " + df.format(endDate) + " ')) ");
-//			strBuffer.append(" group by o.patient_id ");
-//		}
-//		if (startDate != null && endDate != null) {
-//			strBuffer.append("SELECT o.patient_id , ");
-//			strBuffer.append("IF((select min(o.start_date)) BETWEEN ");
-//			strBuffer.append(" '" + df.format(startDate) + "' AND '"
-//					+ df.format(endDate) + "' " + " , " + " true " + " ,"
-//					+ "false) ");
-//			strBuffer.append(queryPortion);
-//			strBuffer.append(" and pg.date_enrolled <= '"+ df.format(endDate) + "' AND ((pg.date_completed is null) or(cast(pg.date_completed as DATE)> ' " + df.format(endDate) + " ')) ");
-//			strBuffer.append(" group by o.patient_id ");
-//		}
-		
-		SQLQuery query = sessionFactory.getCurrentSession().createSQLQuery(strBuffer.toString()); 
-		
-		
-		//>>>>>>>>>>>>>>>>>>>>SEE IF PATIENTS IS NOT ART TRANFER-IN
-		SQLQuery transferInStr = sessionFactory.getCurrentSession().createSQLQuery
-		("SELECT DISTINCT o.person_id FROM obs o " +
-		"INNER JOIN person pe ON pe.person_id=o.person_id " +
-		"INNER JOIN patient pat ON pe.person_id=pat.patient_id " +
-		"INNER JOIN orders d ON d.patient_id=pat.patient_id " +
-		"AND o.concept_id= "+ Integer.parseInt(QuarterlyReportUtil.gpTransferInConceptId())+" AND value_coded=1065 " +
-		" AND o.obs_datetime BETWEEN  ' "+df.format(startDate)+"' AND ' "+df.format(endDate)+"' "+
-		" AND d.concept_id IN ("+QuarterlyReportUtil.gpGetARVConceptIds()+")");
-				
-		List<Integer> transferredInDuringQter = transferInStr.list(); 
-		
+		SQLQuery query = sessionFactory.getCurrentSession().createSQLQuery(strBuffer.toString());
+
+		// >>>>>>>>>>>>>>>>>>>>SEE IF PATIENTS IS NOT ART TRANFER-IN
+		SQLQuery transferInStr = sessionFactory.getCurrentSession()
+				.createSQLQuery("SELECT DISTINCT o.person_id FROM obs o "
+						+ "INNER JOIN person pe ON pe.person_id=o.person_id "
+						+ "INNER JOIN patient pat ON pe.person_id=pat.patient_id "
+						+ "INNER JOIN orders d ON d.patient_id=pat.patient_id " + "AND o.concept_id= "
+						+ Integer.parseInt(QuarterlyReportUtil.gpTransferInConceptId()) + " AND value_coded=1065 "
+						+ " AND o.obs_datetime BETWEEN  ' " + df.format(startDate) + "' AND ' " + df.format(endDate)
+						+ "' " + " AND d.concept_id IN (" + QuarterlyReportUtil.gpGetARVConceptIds() + ")");
+
+		List<Integer> transferredInDuringQter = transferInStr.list();
+
 		List<Object[]> newOnARTDuringTheQter = query.list();
 
 		List<Integer> patId1 = new ArrayList<Integer>();
@@ -1602,46 +1324,46 @@ public class QuarterlyReportingDAOImpl implements QuarterReportingDAO {
 			add++;
 			Integer id = (Integer) obj[0];
 			String booleanValue = obj[1].toString() + add + "";
-			patientStartedWhenMap.put(booleanValue, id); 
+			patientStartedWhenMap.put(booleanValue, id);
 		}
 
-		for (String key : patientStartedWhenMap.keySet()) { 
+		for (String key : patientStartedWhenMap.keySet()) {
 			if (key.charAt(0) == '1') {
-//				if (!patientsTransInDuringQter.contains(patientStartedWhenMap.get(key)))
-				if(!transferredInDuringQter.contains(patientStartedWhenMap.get(key))) 
-				patId1.add(patientStartedWhenMap.get(key));
+				// if
+				// (!patientsTransInDuringQter.contains(patientStartedWhenMap.get(key)))
+				if (!transferredInDuringQter.contains(patientStartedWhenMap.get(key)))
+					patId1.add(patientStartedWhenMap.get(key));
 			}
 		}
-		double patientAge = 0 ;
+		double patientAge = 0;
 
-			List<Integer> patIds2 = new ArrayList<Integer>();
-			for (Integer id : patId1) {
+		List<Integer> patIds2 = new ArrayList<Integer>();
+		for (Integer id : patId1) {
 
-				SQLQuery query2 = null;
-				StringBuffer strbuf2 = new StringBuffer();
+			SQLQuery query2 = null;
+			StringBuffer strbuf2 = new StringBuffer();
 
-				strbuf2.append("SELECT (MIN(o.start_date) - YEAR(s.birthdate)) * 12 ");
-				strbuf2.append(" + (MONTH(MIN(o.start_date)) - MONTH(s.birthdate)) ");
-				strbuf2.append("  - IF(DAYOFMONTH(MIN(o.start_date))  < DAYOFMONTH(s.birthdate),1,0) ");
-				strbuf2.append(" FROM  orders o ");
-				strbuf2.append(" INNER JOIN patient p on p.patient_id=o.patient_id " );
-				strbuf2.append(" INNER JOIN person s on s.person_id=p.patient_id  ");
-				strbuf2.append(" AND p.patient_id= "+id);
+			strbuf2.append("SELECT (MIN(o.start_date) - YEAR(s.birthdate)) * 12 ");
+			strbuf2.append(" + (MONTH(MIN(o.start_date)) - MONTH(s.birthdate)) ");
+			strbuf2.append("  - IF(DAYOFMONTH(MIN(o.start_date))  < DAYOFMONTH(s.birthdate),1,0) ");
+			strbuf2.append(" FROM  orders o ");
+			strbuf2.append(" INNER JOIN patient p on p.patient_id=o.patient_id ");
+			strbuf2.append(" INNER JOIN person s on s.person_id=p.patient_id  ");
+			strbuf2.append(" AND p.patient_id= " + id);
 
-				query2 = sessionFactory.getCurrentSession().createSQLQuery(
-						strbuf2.toString());
+			query2 = sessionFactory.getCurrentSession().createSQLQuery(strbuf2.toString());
 
-				List<Double> record = query2.list(); 
+			List<Double> record = query2.list();
 
-				if(record.get(0)!=null)
+			if (record.get(0) != null)
 				patientAge = record.get(0).intValue();
-				
-				if((patientAge/12)>6){
-					Patient p = Context.getPatientService().getPatient(id);
-					Date when = getWhenPatientStarted(p);
-					objs.add(new Object[] { p.getPatientId(),df.format(when), "Start ARVs" });
 
-				}
+			if ((patientAge / 12) > 6) {
+				Patient p = Context.getPatientService().getPatient(id);
+				Date when = getWhenPatientStarted(p);
+				objs.add(new Object[] { p.getPatientId(), df.format(when), "Start ARVs" });
+
+			}
 		}
 
 		return objs;
@@ -1651,11 +1373,9 @@ public class QuarterlyReportingDAOImpl implements QuarterReportingDAO {
 	/********************************************************************************************************************/
 	// will be used to get number of patients on a date but who have concept
 	// like CD4 Count
-	public List<Integer> getPatientsWthConcept(List<Integer> patients,
-			int conceptId, Date date) {
+	public List<Integer> getPatientsWthConcept(List<Integer> patients, int conceptId, Date date) {
 
-		List<Integer> patientsWithCD4Count = getAllPatientWithObs(conceptId,
-				date);
+		List<Integer> patientsWithCD4Count = getAllPatientWithObs(conceptId, date);
 		List<Integer> newOnARTWithConcept = new ArrayList<Integer>();
 
 		for (Integer patientId : patients) {
@@ -1675,18 +1395,15 @@ public class QuarterlyReportingDAOImpl implements QuarterReportingDAO {
 		SQLQuery query = null;
 
 		strBuffer.append(" select DISTINCT p.patient_id, ");
-		strBuffer.append(" IF(obs.obs_datetime <= " + "'" + df.format(obsdate)
-				+ "'" + " , " + " true " + " ," + "false)");
-		strBuffer
-				.append(" FROM obs obs INNER JOIN person ps on ps.person_id=obs.person_id ");
+		strBuffer.append(
+				" IF(obs.obs_datetime <= " + "'" + df.format(obsdate) + "'" + " , " + " true " + " ," + "false)");
+		strBuffer.append(" FROM obs obs INNER JOIN person ps on ps.person_id=obs.person_id ");
 		strBuffer.append(" INNER JOIN patient p on p.patient_id=ps.person_id ");
-		strBuffer
-				.append(" AND DATE_FORMAT(FROM_DAYS(TO_DAYS(NOW())-TO_DAYS(ps.birthdate)), '%Y')+0 >= 6 ");
+		strBuffer.append(" AND DATE_FORMAT(FROM_DAYS(TO_DAYS(NOW())-TO_DAYS(ps.birthdate)), '%Y')+0 >= 6 ");
 		strBuffer.append(" AND  obs.concept_id=  " + conceptId);
 		strBuffer.append(" ORDER BY obs.obs_datetime ASC ");
 
-		query = sessionFactory.getCurrentSession().createSQLQuery(
-				strBuffer.toString());
+		query = sessionFactory.getCurrentSession().createSQLQuery(strBuffer.toString());
 
 		List<Object[]> newOnARTDuringTheQter = query.list();
 
@@ -1704,8 +1421,7 @@ public class QuarterlyReportingDAOImpl implements QuarterReportingDAO {
 		List<Integer> patientIds = new ArrayList<Integer>();
 		for (String key : newPatientsMap.keySet()) {
 			if (key.charAt(0) == '1') {
-				Patient patient = Context.getPatientService().getPatient(
-						newPatientsMap.get(key));
+				Patient patient = Context.getPatientService().getPatient(newPatientsMap.get(key));
 
 				patientIds.add(patient.getPatientId());
 			}
@@ -1717,8 +1433,7 @@ public class QuarterlyReportingDAOImpl implements QuarterReportingDAO {
 	/*****************************************************************************************************************************************/
 
 	@Override
-	public List<Integer> getAllPatientWithObsInPeriod(int conceptId,
-			Date startDate, Date endDate) {
+	public List<Integer> getAllPatientWithObsInPeriod(int conceptId, Date startDate, Date endDate) {
 		List<Integer> patientIds = new ArrayList<Integer>();
 		SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd");
 		try {
@@ -1728,20 +1443,15 @@ public class QuarterlyReportingDAOImpl implements QuarterReportingDAO {
 
 			// if (startDate!=null && endDate!=null && conceptId!=0) {
 			strBuffer.append(" select DISTINCT p.patient_id, ");
-			strBuffer.append(" IF(obs.obs_datetime BETWEEN '"
-					+ df.format(startDate) + "' AND '" + df.format(endDate)
+			strBuffer.append(" IF(obs.obs_datetime BETWEEN '" + df.format(startDate) + "' AND '" + df.format(endDate)
 					+ "' , " + " true " + " ," + "false)");
-			strBuffer
-					.append(" FROM obs obs INNER JOIN person ps on ps.person_id=obs.person_id ");
-			strBuffer
-					.append(" INNER JOIN patient p on p.patient_id=ps.person_id ");
-			strBuffer
-					.append(" AND DATE_FORMAT(FROM_DAYS(TO_DAYS(NOW())-TO_DAYS(ps.birthdate)), '%Y')+0 >= 6 ");
+			strBuffer.append(" FROM obs obs INNER JOIN person ps on ps.person_id=obs.person_id ");
+			strBuffer.append(" INNER JOIN patient p on p.patient_id=ps.person_id ");
+			strBuffer.append(" AND DATE_FORMAT(FROM_DAYS(TO_DAYS(NOW())-TO_DAYS(ps.birthdate)), '%Y')+0 >= 6 ");
 			strBuffer.append(" AND  obs.concept_id=  " + conceptId);
 			strBuffer.append(" ORDER BY obs.obs_datetime ASC ");
 
-			query = sessionFactory.getCurrentSession().createSQLQuery(
-					strBuffer.toString());
+			query = sessionFactory.getCurrentSession().createSQLQuery(strBuffer.toString());
 
 			List<Object[]> newOnARTDuringTheQter = query.list();
 
@@ -1782,8 +1492,7 @@ public class QuarterlyReportingDAOImpl implements QuarterReportingDAO {
 
 	/********************************************************************************************************************/
 	@Override
-	public List<Object[]> getPatientOnAllDrugs(List<Integer> listDrugIds,
-			List<Integer> patientIds, Date endDate) {
+	public List<Object[]> getPatientOnAllDrugs(List<Integer> listDrugIds, List<Integer> patientIds, Date endDate) {
 
 		List<Object[]> objects = new ArrayList<Object[]>();
 
@@ -1791,50 +1500,21 @@ public class QuarterlyReportingDAOImpl implements QuarterReportingDAO {
 		SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd");
 		try {
 			for (Integer patientId : patientIds) {
-				// Patient p =
-				// Context.getPatientService().getPatient(patientId);
-				// List<Regimen> patientRegimens = new ArrayList<Regimen>();
-				//
-				// patientRegimens = RegimenUtils.getRegimenHistory(p)
-				// .getRegimenList();
-				//
-				// Set<RegimenComponent> regimenComponents = new
-				// HashSet<RegimenComponent>();
-				//
-				// regimenSize = patientRegimens.size() - 1;
-				//
-				// Set<RegimenComponent> componentsStopped = new
-				// HashSet<RegimenComponent>();
-				//
-				// regimenComponents = patientRegimens.get(regimenSize)
-				// .getComponents();
-				//
-				// List<Integer> regimenDrugs = new ArrayList<Integer>();
-				//
-				// for (RegimenComponent rc : regimenComponents) {
-				// regimenDrugs.add(rc.getDrug().getDrugId());
-				// }
-				// for (Integer g : listDrugIds)
-				// if (g == null) {
-				// listDrugIds.remove(null);
-				// }
-
 				SQLQuery query = null;
-				Session session = sessionFactory.getCurrentSession();
+				 Session session = sessionFactory.getCurrentSession();
 
 				StringBuffer strbuf = new StringBuffer();
 
 				strbuf.append(" SELECT DISTINCT d.drug_inventory_id, ");
-				strbuf.append(" IF(((o.start_date <='" + df.format(endDate)	+ "' AND o.discontinued=0) ");
-				strbuf.append(" OR (o.start_date <='" + df.format(endDate)
-						+ "' AND o.discontinued_date >='" + df.format(endDate)
-						+ "')),1,0) ");
+				strbuf.append(" IF(((o.start_date <='" + df.format(endDate) + "' AND o.discontinued=0) ");
+				strbuf.append(" OR (o.start_date <='" + df.format(endDate) + "' AND o.discontinued_date >='"
+						+ df.format(endDate) + "')),1,0) ");
 				strbuf.append(" FROM orders o ");
-				strbuf.append(" INNER JOIN drug_order d ON o.order_id=d.order_id AND o.patient_id= "
-						+ patientId);
-				strbuf.append(" AND o.concept_id IN("+QuarterlyReportUtil.gpGetARVConceptIds()+ ")"
-//				strbuf.append(" AND o.concept_id NOT IN("+ QuarterlyReportUtil.gpGetProphylaxisDrugConceptIds()	+ ")"
-						);
+				strbuf.append(" INNER JOIN drug_order d ON o.order_id=d.order_id AND o.patient_id= " + patientId);
+				strbuf.append(" AND o.concept_id IN(" + QuarterlyReportUtil.gpGetARVConceptIds() + ")"
+				// strbuf.append(" AND o.concept_id NOT IN("+
+				// QuarterlyReportUtil.gpGetProphylaxisDrugConceptIds() + ")"
+				);
 
 				query = session.createSQLQuery(strbuf.toString());
 
@@ -1861,11 +1541,9 @@ public class QuarterlyReportingDAOImpl implements QuarterReportingDAO {
 
 				if (getPatientsOnAll(listDrugIds, regimenDrugs)) {
 					// patientOnDrugs.add(p.getPatientId());
-					Patient patient = Context.getPatientService().getPatient(
-							patientId);
+					Patient patient = Context.getPatientService().getPatient(patientId);
 					Date when = getWhenPatientStarted(patient);
-					objects.add(new Object[] { patient.getPatientId(),
-							df.format(when), "Start ARV" });
+					objects.add(new Object[] { patient.getPatientId(), df.format(when), "Start ARV" });
 
 				}
 			}
@@ -1884,16 +1562,12 @@ public class QuarterlyReportingDAOImpl implements QuarterReportingDAO {
 	 * @param regimenDrugs
 	 * @return boolean value
 	 */
-	public boolean getPatientsOnAll(List<Integer> drugSelected,
-			List<Integer> regimenDrugs) {
+	public boolean getPatientsOnAll(List<Integer> drugSelected, List<Integer> regimenDrugs) {
 		boolean found = false;
 
-		if (regimenDrugs.size() >= drugSelected.size()
-				&& regimenDrugs.containsAll(drugSelected)) {
+		if (regimenDrugs.size() >= drugSelected.size() && regimenDrugs.containsAll(drugSelected)) {
 			for (Integer r : regimenDrugs) {
-				if (drugSelected.contains(r)
-						|| QuarterlyReportUtil.gpGetProphylaxisAsIntegers()
-								.contains(r)
+				if (drugSelected.contains(r) || QuarterlyReportUtil.gpGetProphylaxisAsIntegers().contains(r)
 						|| QuarterlyReportUtil.gpGetTBDrugIds().contains(r)) {
 					found = true;
 				} else {
@@ -1915,11 +1589,13 @@ public class QuarterlyReportingDAOImpl implements QuarterReportingDAO {
 	 * @param regimenDrugs
 	 * @return boolean value
 	 */
-	public boolean getPatientsOnAllByConceptIds(List<Integer> drugSelectedByConcept,List<Integer> regimenDrugsByConcept) {
+	public boolean getPatientsOnAllByConceptIds(List<Integer> drugSelectedByConcept,
+			List<Integer> regimenDrugsByConcept) {
 		boolean found = false;
-		if (regimenDrugsByConcept.size() >= drugSelectedByConcept.size()&& regimenDrugsByConcept.containsAll(drugSelectedByConcept)) {
+		if (regimenDrugsByConcept.size() >= drugSelectedByConcept.size()
+				&& regimenDrugsByConcept.containsAll(drugSelectedByConcept)) {
 			for (Integer r : regimenDrugsByConcept) {
-				if (drugSelectedByConcept.contains(r)|| QuarterlyReportUtil.gpGetProphylaxisConceptIds().contains(r)
+				if (drugSelectedByConcept.contains(r) || QuarterlyReportUtil.gpGetProphylaxisConceptIds().contains(r)
 						|| QuarterlyReportUtil.gpGetTBDrugIds().contains(r)) {
 					found = true;
 				} else {
@@ -1933,8 +1609,8 @@ public class QuarterlyReportingDAOImpl implements QuarterReportingDAO {
 	}
 
 	/*********************************************************************************************************************/
-	public List<Integer> getPatientOnARTDuringTheQter(Date quarterStart,
-			Date quarterEnd, Integer minAge, Integer maxAge) {
+	public List<Integer> getPatientOnARTDuringTheQter(Date quarterStart, Date quarterEnd, Integer minAge,
+			Integer maxAge) {
 		SQLQuery query = null;
 
 		List<Integer> records = null;
@@ -1942,37 +1618,29 @@ public class QuarterlyReportingDAOImpl implements QuarterReportingDAO {
 
 		StringBuffer queryPortion = new StringBuffer();
 
-		queryPortion
-				.append("SELECT DISTINCT o.patient_id FROM orders o WHERE o.patient_id in(SELECT DISTINCT p.patient_id FROM patient p ");
-		queryPortion
-				.append("INNER JOIN orders o ON p.patient_id = o.patient_id AND o.voided=0 AND p.voided=0 and o.discontinued=0 ");
-		queryPortion
-				.append(" INNER JOIN person ps on o.patient_id=ps.person_id ");
-		queryPortion
-				.append(" INNER JOIN drug_order dr ON dr.order_id = o.order_id "
-						+ checkInputDate(quarterStart, quarterEnd));
-		queryPortion
-				.append(" INNER JOIN drug d on d.drug_id= dr.drug_inventory_id ");
-		queryPortion.append(" AND o.concept_id IN ("
-				+ QuarterlyReportUtil.gpGetARVConceptIds() + ") ");
+		queryPortion.append(
+				"SELECT DISTINCT o.patient_id FROM orders o WHERE o.patient_id in(SELECT DISTINCT p.patient_id FROM patient p ");
+		queryPortion.append(
+				"INNER JOIN orders o ON p.patient_id = o.patient_id AND o.voided=0 AND p.voided=0 and o.discontinued=0 ");
+		queryPortion.append(" INNER JOIN person ps on o.patient_id=ps.person_id ");
+		queryPortion.append(
+				" INNER JOIN drug_order dr ON dr.order_id = o.order_id " + checkInputDate(quarterStart, quarterEnd));
+		queryPortion.append(" INNER JOIN drug d on d.drug_id= dr.drug_inventory_id ");
+		queryPortion.append(" AND o.concept_id IN (" + QuarterlyReportUtil.gpGetARVConceptIds() + ") ");
 
 		if (minAge != null && maxAge != null) {
 			strBuffer.append(queryPortion);
-			strBuffer
-					.append(" AND DATE_FORMAT(FROM_DAYS(TO_DAYS(NOW())-TO_DAYS(ps.birthdate)), '%Y')+0 BETWEEN  "
-							+ minAge + " AND " + maxAge + " )");
+			strBuffer.append(" AND DATE_FORMAT(FROM_DAYS(TO_DAYS(NOW())-TO_DAYS(ps.birthdate)), '%Y')+0 BETWEEN  "
+					+ minAge + " AND " + maxAge + " )");
 
 		}
 		if (minAge != null && maxAge == null) {
 			strBuffer.append(queryPortion);
-			strBuffer
-					.append(" AND DATE_FORMAT(FROM_DAYS(TO_DAYS(NOW())-TO_DAYS(ps.birthdate)), '%Y')+0 >=  "
-							+ minAge + " )");
+			strBuffer.append(
+					" AND DATE_FORMAT(FROM_DAYS(TO_DAYS(NOW())-TO_DAYS(ps.birthdate)), '%Y')+0 >=  " + minAge + " )");
 		}
 
-
-		query = sessionFactory.getCurrentSession().createSQLQuery(
-				strBuffer.toString());
+		query = sessionFactory.getCurrentSession().createSQLQuery(strBuffer.toString());
 
 		records = query.list();
 
@@ -1983,8 +1651,7 @@ public class QuarterlyReportingDAOImpl implements QuarterReportingDAO {
 	public String checkInputDate(Date startDate, Date endDate) {
 		SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd");
 		if (startDate != null && endDate != null) {
-			return "AND (o.start_date BETWEEN '" + df.format(startDate)
-					+ "' AND '" + df.format(endDate) + "' )";
+			return "AND (o.start_date BETWEEN '" + df.format(startDate) + "' AND '" + df.format(endDate) + "' )";
 		} else if (endDate == null && startDate != null) {
 			return "AND (o.start_date > '" + df.format(startDate) + "' )";
 		} else if (startDate == null && endDate != null) {
@@ -1999,8 +1666,7 @@ public class QuarterlyReportingDAOImpl implements QuarterReportingDAO {
 
 	/*********************************************************************************************************************/
 	@Override
-	public void exportQuarterlyData(HttpServletRequest request,
-			HttpServletResponse response, List<Patient> patients,
+	public void exportQuarterlyData(HttpServletRequest request, HttpServletResponse response, List<Patient> patients,
 			String filename, String title) throws IOException {
 		ServletOutputStream op = response.getOutputStream();
 		List<Object[]> listPatientHistory = new ArrayList<Object[]>();
@@ -2009,8 +1675,7 @@ public class QuarterlyReportingDAOImpl implements QuarterReportingDAO {
 		Patient patientsObj = new Patient();
 
 		response.setContentType("text/plain");
-		response.setHeader("Content-Disposition", "attachment; filename=\""
-				+ filename + "\"");
+		response.setHeader("Content-Disposition", "attachment; filename=\"" + filename + "\"");
 
 		if (Context.hasPrivilege("View Patient Names"))
 			op.print("TRACnet ID,COHORT ID,FAMILY NAME,GIVEN NAME,GENDER,AGE,PROGRAM(Enrollment Date-dd/mm/yyyy");
@@ -2020,8 +1685,8 @@ public class QuarterlyReportingDAOImpl implements QuarterReportingDAO {
 		HashMap<Patient, List<Regimen>> patientRegLists = new HashMap<Patient, List<Regimen>>();
 		int maxRegHistorySize = 1;
 
-		Concept CD4CountConcept = Context.getConceptService().getConcept(
-				Integer.parseInt(QuarterlyReportUtil.gpGetCD4CountConceptId()));
+		Concept CD4CountConcept = Context.getConceptService()
+				.getConcept(Integer.parseInt(QuarterlyReportUtil.gpGetCD4CountConceptId()));
 		Concept hivViralLoad = Context.getConceptService().getConcept(856);
 		Concept weightConcept = Context.getConceptService().getConcept(5089);
 
@@ -2035,8 +1700,7 @@ public class QuarterlyReportingDAOImpl implements QuarterReportingDAO {
 			if (regimenList.size() > maxRegHistorySize)
 				maxRegHistorySize = regimenList.size();
 
-			List<String> patientCD4Count = getAllPatientObsList(patient,
-					CD4CountConcept);
+			List<String> patientCD4Count = getAllPatientObsList(patient, CD4CountConcept);
 			List<String> patientVL = getAllPatientObsList(patient, hivViralLoad);
 
 			if (patientCD4Count.size() > patientMaxCD4Count) {
@@ -2064,19 +1728,15 @@ public class QuarterlyReportingDAOImpl implements QuarterReportingDAO {
 
 		op.println();
 
-		QuarterlyReportingService service = Context
-				.getService(QuarterlyReportingService.class);
+		QuarterlyReportingService service = Context.getService(QuarterlyReportingService.class);
 
 		for (Patient patient : patients) {
-			listPatientHistory.add(new Object[] {
-					patient,
-					Context.getProgramWorkflowService().getPatientPrograms(
-							patient, null, null, null, null, null, false),
-					patientRegLists.get(patient),
-					service.getAllPatientObs(patient, CD4CountConcept),
+			listPatientHistory.add(new Object[] { patient,
+					Context.getProgramWorkflowService().getPatientPrograms(patient, null, null, null, null, null,
+							false),
+					patientRegLists.get(patient), service.getAllPatientObs(patient, CD4CountConcept),
 					service.getAllPatientObsList(patient, hivViralLoad),
-					service.getAllPatientObsList(patient, weightConcept),
-					patient.getPatientIdentifier(4) });
+					service.getAllPatientObsList(patient, weightConcept), patient.getPatientIdentifier(4) });
 
 		}
 
@@ -2085,17 +1745,12 @@ public class QuarterlyReportingDAOImpl implements QuarterReportingDAO {
 				patientsObj = (Patient) objects[0];
 
 				if (Context.hasPrivilege("View Patient Names")) {
-					op.print(patientsObj.getPatientIdentifier() + ","
-							+ patientsObj.getPatientIdentifier(4) + ","
-							+ patientsObj.getGivenName() + ","
-							+ patientsObj.getFamilyName() + ","
-							+ patientsObj.getGender() + ","
-							+ patientsObj.getAge());
+					op.print(patientsObj.getPatientIdentifier() + "," + patientsObj.getPatientIdentifier(4) + ","
+							+ patientsObj.getGivenName() + "," + patientsObj.getFamilyName() + ","
+							+ patientsObj.getGender() + "," + patientsObj.getAge());
 				} else {
-					op.print(patientsObj.getPatientIdentifier() + ","
-							+ patientsObj.getPatientIdentifier(4) + ","
-							+ patientsObj.getGender() + ","
-							+ patientsObj.getAge());
+					op.print(patientsObj.getPatientIdentifier() + "," + patientsObj.getPatientIdentifier(4) + ","
+							+ patientsObj.getGender() + "," + patientsObj.getAge());
 				}
 
 				String patientProgramsAsString = "";
@@ -2104,18 +1759,14 @@ public class QuarterlyReportingDAOImpl implements QuarterReportingDAO {
 				for (PatientProgram patientProgram : patientPrograms) {
 
 					if (patientProgram.getDateEnrolled() != null) {
-						pPrograms.add(patientProgram.getProgram().getName()
-								+ " ("
-								+ QuarterlyReportUtil
-										.getDateFormat(patientProgram
-												.getDateEnrolled()) + ")");
+						pPrograms.add(patientProgram.getProgram().getName() + " ("
+								+ QuarterlyReportUtil.getDateFormat(patientProgram.getDateEnrolled()) + ")");
 					} else {
 						pPrograms.add(patientProgram.getProgram().getName());
 					}
 					patientProgramsAsString = getStringFromArrayListOfString(pPrograms);
-					patientProgramsAsString = patientProgramsAsString
-							.substring(0,
-									patientProgramsAsString.lastIndexOf(";"));
+					patientProgramsAsString = patientProgramsAsString.substring(0,
+							patientProgramsAsString.lastIndexOf(";"));
 				}
 
 				op.print("," + patientProgramsAsString);
@@ -2128,8 +1779,7 @@ public class QuarterlyReportingDAOImpl implements QuarterReportingDAO {
 				String lastVL = null;
 				if (HIViralLoads != null && HIViralLoads.size() != 0) {
 					firstVL = HIViralLoads.get(0).toString();
-					lastVL = HIViralLoads.get(HIViralLoads.size() - 1)
-							.toString();
+					lastVL = HIViralLoads.get(HIViralLoads.size() - 1).toString();
 				} else {
 					firstVL = "-";
 					lastVL = "-";
@@ -2140,8 +1790,7 @@ public class QuarterlyReportingDAOImpl implements QuarterReportingDAO {
 
 				if (patientWeights != null && patientWeights.size() != 0) {
 					firstWeight = patientWeights.get(0).toString();
-					lastWeight = patientWeights.get(patientWeights.size() - 1)
-							.toString();
+					lastWeight = patientWeights.get(patientWeights.size() - 1).toString();
 				} else {
 					firstWeight = "-";
 					lastWeight = "-";
@@ -2171,8 +1820,7 @@ public class QuarterlyReportingDAOImpl implements QuarterReportingDAO {
 				SimpleDateFormat f = new SimpleDateFormat("dd/MM/yyyy");
 				Set<RegimenComponent> componentsStopped = new HashSet<RegimenComponent>();
 
-				RegimenHistory history = RegimenUtils
-						.getRegimenHistory(patientsObj);
+				RegimenHistory history = RegimenUtils.getRegimenHistory(patientsObj);
 				List<Regimen> regimens = history.getRegimenList();
 
 				for (Regimen r : regimens) {
@@ -2183,8 +1831,7 @@ public class QuarterlyReportingDAOImpl implements QuarterReportingDAO {
 					}
 					for (RegimenComponent rc : regimenComponent) {
 						if (rc.getStopDate() != null)
-							if (rc.getStopDate().getTime() <= r.getStartDate()
-									.getTime()) {
+							if (rc.getStopDate().getTime() <= r.getStartDate().getTime()) {
 								componentsStopped.add(rc);
 
 							}
@@ -2195,12 +1842,11 @@ public class QuarterlyReportingDAOImpl implements QuarterReportingDAO {
 					patRegimens = getRegimensAsString(regimenComponent);
 
 					if (!patRegimens.toString().equals("")) {
-						op.print(emptyStr + f.format(r.getStartDate()) + ","
-								+ f.format(r.getEndDate()) + "," + patRegimens);
+						op.print(emptyStr + f.format(r.getStartDate()) + "," + f.format(r.getEndDate()) + ","
+								+ patRegimens);
 						op.println();
 					} else {
-						op.print(emptyStr + f.format(r.getStartDate()) + ","
-								+ f.format(r.getEndDate()) + "," + "-");
+						op.print(emptyStr + f.format(r.getStartDate()) + "," + f.format(r.getEndDate()) + "," + "-");
 						op.println();
 					}
 
@@ -2229,12 +1875,11 @@ public class QuarterlyReportingDAOImpl implements QuarterReportingDAO {
 			StringBuffer strb = new StringBuffer();
 
 			strb.append(" SELECT DISTINCT obs.value_numeric ");
-			strb.append(" FROM obs obs WHERE obs.person_id = " + patientId
-					+ " AND obs.concept_id= " + concept.getConceptId());
+			strb.append(" FROM obs obs WHERE obs.person_id = " + patientId + " AND obs.concept_id= "
+					+ concept.getConceptId());
 			strb.append(" ORDER BY obs.value_numeric ASC ");
 
-			query = sessionFactory.getCurrentSession().createSQLQuery(
-					strb.toString());
+			query = sessionFactory.getCurrentSession().createSQLQuery(strb.toString());
 
 			List<Double> patientObs = query.list();
 			if (patientObs != null)
@@ -2254,21 +1899,6 @@ public class QuarterlyReportingDAOImpl implements QuarterReportingDAO {
 	/*********************************************************************************************************************/
 	@Override
 	public double calculateMedian(List<Double> a) {
-		// double res=0;
-		// try {
-		// double[] b = new double[a.length];
-		// System.arraycopy(a, 0, b, 0, b.length);
-		// Arrays.sort(b);
-		//
-		// if (a.length % 2 == 0) {
-		// res=(b[(b.length / 2) - 1] + b[b.length / 2]) / 2.0;
-		// } else {
-		// res= b[b.length / 2];
-		// }
-		// } catch (Exception e) {
-		// // TODO: handle exception
-		// }
-		// return res;
 		Collections.sort(a);
 		double lower = 0;
 		double upper = 0;
@@ -2283,14 +1913,12 @@ public class QuarterlyReportingDAOImpl implements QuarterReportingDAO {
 			return (lower + upper) / 2.0;
 		}
 
-
 	}
 
 	/*********************************************************************************************************************/
 	@Override
 	// who have done PHARMACY VISITE n months out of n
-	public List<Object[]> getPatientsReceivedARVsForXmonthOutOfXmonth(
-			List<Object[]> patientIds, Integer n) {
+	public List<Object[]> getPatientsReceivedARVsForXmonthOutOfXmonth(List<Object[]> patientIds, Integer n) {
 
 		List<Object[]> patients = new ArrayList<Object[]>();
 
@@ -2306,7 +1934,7 @@ public class QuarterlyReportingDAOImpl implements QuarterReportingDAO {
 			}
 			if (hasPharmacyVisitInThePeriod(Context.getPatientService().getPatient((Integer) id[0]), nMonths) == true) {
 				Patient p = Context.getPatientService().getPatient((Integer) id[0]);
-				patients.add(new Object[] { id[0],sdf.format(getWhenPatientStarted(p)), "Start ARVs" });
+				patients.add(new Object[] { id[0], sdf.format(getWhenPatientStarted(p)), "Start ARVs" });
 			}
 
 		}
@@ -2316,7 +1944,7 @@ public class QuarterlyReportingDAOImpl implements QuarterReportingDAO {
 	/***************************************************************************************************************************/
 	public Boolean hasPharmacyVisitInThePeriod(Patient p, List<Date> nMonths) {
 		SQLQuery query = null;
-		Session session = sessionFactory.getCurrentSession();
+		 Session session = sessionFactory.getCurrentSession();
 		SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd");
 		List<Obs> obs = null;
 		List<Integer> checkList = new ArrayList<Integer>();
@@ -2327,13 +1955,9 @@ public class QuarterlyReportingDAOImpl implements QuarterReportingDAO {
 			 * see if the patient had pharmacy visit between a given month and
 			 * the next month
 			 */
-			query = session
-					.createSQLQuery("SELECT concept_id FROM obs where person_id= "
-							+ p.getPatientId()
-							+ " AND concept_id=6189 AND value_coded=6191 AND obs_datetime BETWEEN '"
-							+ df.format(nMonths.get(i))
-							+ "' AND '"
-							+ df.format(nMonths.get(i + 1)) + "'");
+			query = session.createSQLQuery("SELECT concept_id FROM obs where person_id= " + p.getPatientId()
+					+ " AND concept_id=6189 AND value_coded=6191 AND obs_datetime BETWEEN '" + df.format(nMonths.get(i))
+					+ "' AND '" + df.format(nMonths.get(i + 1)) + "'");
 
 			obs = query.list();
 
@@ -2360,12 +1984,10 @@ public class QuarterlyReportingDAOImpl implements QuarterReportingDAO {
 		SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd");
 
 		queryPortion.append(" SELECT DISTINCT pa.patient_id FROM patient pa ");
-		queryPortion
-				.append(" INNER JOIN patient_program pg on pg.patient_id=pa.patient_id and pg.program_id=1 ");
-		queryPortion
-				.append(" INNER JOIN person ps on ps.person_id=pa.patient_id and ps.gender='f' ");
-		queryPortion
-				.append(" INNER JOIN obs ob on ob.person_id=ps.person_id AND pg.date_completed is null AND pg.voided=0");
+		queryPortion.append(" INNER JOIN patient_program pg on pg.patient_id=pa.patient_id and pg.program_id=1 ");
+		queryPortion.append(" INNER JOIN person ps on ps.person_id=pa.patient_id and ps.gender='f' ");
+		queryPortion.append(
+				" INNER JOIN obs ob on ob.person_id=ps.person_id AND pg.date_completed is null AND pg.voided=0");
 
 		// List<Integer>
 		// newPatientsOnART=QuarterlyReportUtil.getConvertToType(getNewPatientsOnART(null,
@@ -2373,23 +1995,19 @@ public class QuarterlyReportingDAOImpl implements QuarterReportingDAO {
 
 		if (quarterStart != null && quarterEnd == null) {
 			strb.append(queryPortion);
-			strb.append(" AND pg.date_enrolled < '" + df.format(quarterStart)
-					+ "' ");
+			strb.append(" AND pg.date_enrolled < '" + df.format(quarterStart) + "' ");
 		}
 		if (quarterStart == null && quarterEnd != null) {
 			strb.append(queryPortion);
-			strb.append(" AND pg.date_enrolled < '" + df.format(quarterEnd)
-					+ "' ");
+			strb.append(" AND pg.date_enrolled < '" + df.format(quarterEnd) + "' ");
 		}
 		if (quarterStart != null && quarterEnd != null) {
 			strb.append(queryPortion);
-			strb.append(" AND pg.date_enrolled BETWEEN '"
-					+ df.format(quarterStart) + "' AND '"
-					+ df.format(quarterEnd) + "' ");
+			strb.append(" AND pg.date_enrolled BETWEEN '" + df.format(quarterStart) + "' AND '" + df.format(quarterEnd)
+					+ "' ");
 		}
 
-		query = sessionFactory.getCurrentSession().createSQLQuery(
-				strb.toString());
+		query = sessionFactory.getCurrentSession().createSQLQuery(strb.toString());
 
 		List<Integer> pregnantPatientIds = query.list();
 
@@ -2405,23 +2023,17 @@ public class QuarterlyReportingDAOImpl implements QuarterReportingDAO {
 	/***************************************************************************************************************************/
 	@SuppressWarnings("unchecked")
 	@Override
-	public Collection<Object[]> SubtractACollection(Collection<Object[]> coll1,Collection<Object[]> coll2) {
+	public Collection<Object[]> SubtractACollection(Collection<Object[]> coll1, Collection<Object[]> coll2) {
 
 		List<Integer> list1 = QuarterlyReportUtil.getConvertToType((List<Object[]>) coll1);
 		List<Integer> list2 = QuarterlyReportUtil.getConvertToType((List<Object[]>) coll2);
-//		
-////		List<Integer> remain = new ArrayList<Integer>();
-//
+		//
+		//// List<Integer> remain = new ArrayList<Integer>();
+		//
 		List<Object[]> objects = new ArrayList<Object[]>();
-//
+		//
 		SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd");
-//
-//		Set result = new HashSet(list1);
-//		result.removeAll(list2);
-//		List<Integer> res = new ArrayList(result);
-		
 		List<Integer> activePatientsOnART = QuarterlyReportUtil.subtract(list1, list2);
-		
 
 		for (Integer id : activePatientsOnART) {
 			Date start = getWhenPatientStarted(Context.getPatientService().getPatient(id));
@@ -2431,89 +2043,61 @@ public class QuarterlyReportingDAOImpl implements QuarterReportingDAO {
 				objects.add(new Object[] { id, "", "Start ARVs" });
 		}
 
-
-		
 		return objects;
 	}
 
 	/***************************************************************************************************************************/
 	@Override
-	public List<List<Integer>> getRegimenComposition(List<Integer> patientIds,
-			Date endDate) {
+	public List<List<Integer>> getRegimenComposition(List<Integer> patientIds, Date endDate) {
 
 		List<List<Integer>> listOfRegimens = new ArrayList<List<Integer>>();
 
 		SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd");
 		for (Integer id : patientIds) {
-
-			// List<Regimen> regimens =
-			// RegimenUtils.getRegimenHistory(Context.getPatientService().getPatient(id))
-			// .getRegimenList();
-			// Set<RegimenComponent> components = new
-			// HashSet<RegimenComponent>();
-			//
-			// if(regimens.size()!=0)
-			// components = regimens.get(regimens.size()-1).getComponents();
-			//
-			// List<Integer> regimenDrugs = new ArrayList<Integer>();
-			//
-			// for (RegimenComponent rc : components) {
-			// // if(rc.getDrug().getDrugId()!=22 &&
-			// rc.getDrug().getDrugId()!=23 &&rc.getDrug().getDrugId()!=24 &&
-			// rc.getDrug().getDrugId()!=27 &&rc.getDrug().getDrugId()!=37)
-			// // if(rc.getDrug().getDrugId()!=10 &&rc.getDrug().getDrugId()!=11
-			// &&rc.getDrug().getDrugId()!=12 &&rc.getDrug().getDrugId()!=13)
-			// if(!QuarterlyReportUtil.gpGetProphylaxisAsIntegers().contains(rc.getDrug().getDrugId()))
-			// if(!QuarterlyReportUtil.gpGetTBDrugIds().contains(rc.getDrug().getDrugId()))
-			// if(rc.getStopDate()==null)
-			// regimenDrugs.add(rc.getDrug().getDrugId());
-			//
-			// }
-			//
-			// if(regimenDrugs.size()>=3)
-			// listOfRegimens.add(regimenDrugs);
-
 			SQLQuery query = null;
 			SQLQuery query1 = null;
-			Session session = sessionFactory.getCurrentSession();
+			 Session session = sessionFactory.getCurrentSession();
 
 			StringBuffer strbuf = new StringBuffer();
 			StringBuffer strbuf1 = new StringBuffer();
 
 			// OPTION I. Consider patient drug orders by drug_inventory_id
 			strbuf.append(" SELECT DISTINCT d.drug_inventory_id, ");
-			strbuf.append(" IF((o.start_date <='" + df.format(endDate)+ "' AND o.discontinued=0 OR o.discontinued_date >='" + df.format(endDate)+ "') "); 
+			strbuf.append(" IF((o.start_date <='" + df.format(endDate)
+					+ "' AND o.discontinued=0 OR o.discontinued_date >='" + df.format(endDate) + "') ");
 			strbuf.append(" ,1,0) ");
 			strbuf.append(" FROM orders o ");
 			strbuf.append(" INNER JOIN patient pa on pa.patient_id=o.patient_id ");
 			strbuf.append(" INNER JOIN person ps on ps.person_id=pa.patient_id ");
 			strbuf.append(" INNER JOIN obs obs on obs.person_id=ps.person_id ");
-			strbuf.append(" INNER JOIN drug_order d ON o.order_id=d.order_id AND o.patient_id= "+ id);
-			strbuf.append(" AND o.concept_id IN("+ QuarterlyReportUtil.gpGetARVConceptIds() + ")");
-//			strbuf.append(" AND d.drug_inventory_id NOT IN("+ QuarterlyReportUtil.gpGetProphylaxisDrugIds() + ")");
-			
+			strbuf.append(" INNER JOIN drug_order d ON o.order_id=d.order_id AND o.patient_id= " + id);
+			strbuf.append(" AND o.concept_id IN(" + QuarterlyReportUtil.gpGetARVConceptIds() + ")");
+			// strbuf.append(" AND d.drug_inventory_id NOT IN("+
+			// QuarterlyReportUtil.gpGetProphylaxisDrugIds() + ")");
+
 			query = session.createSQLQuery(strbuf.toString());
 
 			// OPTION III. Considider patient drug orders concept_id
 			strbuf1.append(" SELECT DISTINCT o.concept_id, ");
-			strbuf1.append(" IF((o.start_date <='" + df.format(endDate)+ "' AND o.discontinued=0 OR o.discontinued_date>='"+df.format(endDate)+"') ");
+			strbuf1.append(" IF((o.start_date <='" + df.format(endDate)
+					+ "' AND o.discontinued=0 OR o.discontinued_date>='" + df.format(endDate) + "') ");
 			strbuf1.append(" ,1,0) ");
 			strbuf1.append(" FROM orders o ");
 			strbuf1.append(" INNER JOIN patient pa on pa.patient_id=o.patient_id ");
 			strbuf1.append(" INNER JOIN person ps on ps.person_id=pa.patient_id ");
 			strbuf1.append(" INNER JOIN obs obs on obs.person_id=ps.person_id ");
-			strbuf1.append(" INNER JOIN drug_order d ON o.order_id=d.order_id AND o.patient_id= "+ id);
-			strbuf1.append(" AND o.concept_id IN("+ QuarterlyReportUtil.gpGetARVConceptIds() + ")");
-			strbuf1.append(" AND o.concept_id "); 
-			
-			
-//			log.info("wwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwww "+QuarterlyReportUtil.gpGetARVConceptIds());
-			
+			strbuf1.append(" INNER JOIN drug_order d ON o.order_id=d.order_id AND o.patient_id= " + id);
+			strbuf1.append(" AND o.concept_id IN(" + QuarterlyReportUtil.gpGetARVConceptIds() + ")");
+			strbuf1.append(" AND o.concept_id ");
+
+			// log.info("wwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwww
+			// "+QuarterlyReportUtil.gpGetARVConceptIds());
+
 			query1 = session.createSQLQuery(strbuf1.toString());
 
 			List<Object[]> records = query1.list();
-//			if (query.list().size() == 0)
-//				records = query1.list();
+			// if (query.list().size() == 0)
+			// records = query1.list();
 
 			Map<String, Integer> map = new HashMap<String, Integer>();
 			List<Integer> drugOfEachPatients = new ArrayList<Integer>();
@@ -2528,15 +2112,16 @@ public class QuarterlyReportingDAOImpl implements QuarterReportingDAO {
 
 				map.put(booleanValue, id1);
 			}
-			
+
 			for (String key : map.keySet()) {
-//				log.info("tttttttttttttttttttttttttttttttttttttttmap "+map.size());
+				// log.info("tttttttttttttttttttttttttttttttttttttttmap
+				// "+map.size());
 				if (key.charAt(0) == '1') {
 					drugOfEachPatients.add(map.get(key));
 				}
-//				else if(key.charAt(0)=='0' &&  map.size()<=4)
-//					drugOfEachPatients.add(map.get(key));
-				
+				// else if(key.charAt(0)=='0' && map.size()<=4)
+				// drugOfEachPatients.add(map.get(key));
+
 			}
 			// if(drugOfEachPatients.size()>=2)
 			listOfRegimens.add(drugOfEachPatients);
@@ -2554,23 +2139,27 @@ public class QuarterlyReportingDAOImpl implements QuarterReportingDAO {
 		int count = 1;
 		try {
 			for (Integer id : composition) {
-//				if (Context.getConceptService().getDrug(id) != null) {
-//					regimenName += Context.getConceptService().getDrug(id).getName();
-//					regimenName += count < composition.size() ? "+" : "";
-//				} else {
-					// arrangement(I had to get the drug generic instead of using
-					// the element at index 0)
-					// log.info("mmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmm "+Context.getConceptService().getConcept(id).getName());
-//					regimenName += Context.getConceptService().getDrugsByConcept(Context.getConceptService().getConcept(id)).get(0).getConcept().getName();
-//					regimenName += Context.getConceptService().getDrug(id).getConcept().getName();
-					regimenName += Context.getConceptService().getConcept(id).getName();
-					regimenName += count < composition.size() ? "+" : "";
-//				}
+				// if (Context.getConceptService().getDrug(id) != null) {
+				// regimenName +=
+				// Context.getConceptService().getDrug(id).getName();
+				// regimenName += count < composition.size() ? "+" : "";
+				// } else {
+				// arrangement(I had to get the drug generic instead of using
+				// the element at index 0)
+				// log.info("mmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmm
+				// "+Context.getConceptService().getConcept(id).getName());
+				// regimenName +=
+				// Context.getConceptService().getDrugsByConcept(Context.getConceptService().getConcept(id)).get(0).getConcept().getName();
+				// regimenName +=
+				// Context.getConceptService().getDrug(id).getConcept().getName();
+				regimenName += Context.getConceptService().getConcept(id).getName();
+				regimenName += count < composition.size() ? "+" : "";
+				// }
 
 				count++;
 			}
 		} catch (IndexOutOfBoundsException e) {
-			log.info("ssssssssssssssssssssssssError "+e.getMessage());
+			log.info("ssssssssssssssssssssssssError " + e.getMessage());
 		}
 		return regimenName;
 	}
@@ -2599,10 +2188,9 @@ public class QuarterlyReportingDAOImpl implements QuarterReportingDAO {
 		String values = new String();
 
 		if (c != null && p != null)
-			query = sessionFactory.getCurrentSession().createSQLQuery(
-					"(select obs_datetime,value_numeric from obs where  person_id= "
-							+ p.getPatientId() + " and concept_id= "
-							+ c.getConceptId() + ")ORDER BY obs_datetime asc");
+			query = sessionFactory.getCurrentSession()
+					.createSQLQuery("(select obs_datetime,value_numeric from obs where  person_id= " + p.getPatientId()
+							+ " and concept_id= " + c.getConceptId() + ")ORDER BY obs_datetime asc");
 
 		List<Object[]> obj = query.list();
 
@@ -2630,10 +2218,9 @@ public class QuarterlyReportingDAOImpl implements QuarterReportingDAO {
 		Date whenPatientHasStarted = getWhenPatientStarted(p);
 
 		if (c != null && p != null) {
-			query = sessionFactory.getCurrentSession().createSQLQuery(
-					"(select obs_datetime,value_numeric from obs where  person_id= "
-							+ p.getPatientId() + " and concept_id= "
-							+ c.getConceptId() + " )ORDER BY obs_datetime asc");
+			query = sessionFactory.getCurrentSession()
+					.createSQLQuery("(select obs_datetime,value_numeric from obs where  person_id= " + p.getPatientId()
+							+ " and concept_id= " + c.getConceptId() + " )ORDER BY obs_datetime asc");
 		}
 		List<Object[]> obj = query.list();
 
@@ -2646,12 +2233,10 @@ public class QuarterlyReportingDAOImpl implements QuarterReportingDAO {
 
 			cd4CountAndDateSorted.put(date, conceptValue);
 
-			conceptValueAndDate.add(cd4CountAndDateSorted.get(date) + "("
-					+ df.format(date) + ")");
+			conceptValueAndDate.add(cd4CountAndDateSorted.get(date) + "(" + df.format(date) + ")");
 		}
 
-		cd4CountAndDateSorted = getSubMap(cd4CountAndDateSorted,
-				whenPatientHasStarted);
+		cd4CountAndDateSorted = getSubMap(cd4CountAndDateSorted, whenPatientHasStarted);
 		return conceptValueAndDate;
 	}
 
@@ -2659,14 +2244,13 @@ public class QuarterlyReportingDAOImpl implements QuarterReportingDAO {
 	@Override
 	public Date getWhenPatientStarted(Patient patient) {
 		SQLQuery query = null;
-		Session session = sessionFactory.getCurrentSession();
+		 Session session = sessionFactory.getCurrentSession();
 
 		StringBuffer strbuf = new StringBuffer();
 
 		strbuf.append("SELECT min(o.start_date) FROM orders o  ");
 		strbuf.append("INNER JOIN drug_order dro on dro.order_id = o.order_id  AND ");
-		strbuf.append("o.concept_id NOT IN("
-				+ QuarterlyReportUtil.gpGetProphylaxisDrugConceptIds() + ") ");
+		strbuf.append("o.concept_id NOT IN(" + QuarterlyReportUtil.gpGetProphylaxisDrugConceptIds() + ") ");
 		strbuf.append(" AND o.patient_id = ");
 		strbuf.append(patient.getPatientId());
 
@@ -2688,8 +2272,7 @@ public class QuarterlyReportingDAOImpl implements QuarterReportingDAO {
 	 * @param date
 	 *            i.e when the patient has started the treatment return a submap
 	 */
-	public SortedMap<Date, Double> getSubMap(SortedMap<Date, Double> map,
-			Date dateToSearch) {
+	public SortedMap<Date, Double> getSubMap(SortedMap<Date, Double> map, Date dateToSearch) {
 		SortedMap<Date, Double> newMap = new TreeMap<Date, Double>();
 
 		Iterator it = map.keySet().iterator();
@@ -2729,13 +2312,12 @@ public class QuarterlyReportingDAOImpl implements QuarterReportingDAO {
 	public Date getDateInterval(Date baseline, Integer months) {
 		SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd");
 		SQLQuery query = null;
-		Session session = sessionFactory.getCurrentSession();
+		 Session session = sessionFactory.getCurrentSession();
 
 		StringBuffer strbuf = new StringBuffer();
 
 		// SELECT DATE_SUB('2004-01-01', INTERVAL 6 MONTH);
-		strbuf.append("SELECT CAST(DATE_SUB( '" + df.format(baseline)
-				+ "', INTERVAL " + months + " MONTH) AS DATE )");
+		strbuf.append("SELECT CAST(DATE_SUB( '" + df.format(baseline) + "', INTERVAL " + months + " MONTH) AS DATE )");
 
 		query = session.createSQLQuery(strbuf.toString());
 
@@ -2748,12 +2330,11 @@ public class QuarterlyReportingDAOImpl implements QuarterReportingDAO {
 	@Override
 	public Date getXMonthAfterDate(Date baseline, Integer months) {
 		SQLQuery query = null;
-		Session session = sessionFactory.getCurrentSession();
+		 Session session = sessionFactory.getCurrentSession();
 
 		StringBuffer strbuf = new StringBuffer();
 		SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd");
-		strbuf.append("SELECT CAST(DATE_ADD('" + df.format(baseline)
-				+ "', INTERVAL " + months + " MONTH) AS DATE) ");
+		strbuf.append("SELECT CAST(DATE_ADD('" + df.format(baseline) + "', INTERVAL " + months + " MONTH) AS DATE) ");
 
 		query = session.createSQLQuery(strbuf.toString());
 
@@ -2766,11 +2347,10 @@ public class QuarterlyReportingDAOImpl implements QuarterReportingDAO {
 	@Override
 	public Date getTwoWeeksAfterDate(Date baseline, Integer week) {
 		SQLQuery query = null;
-		Session session = sessionFactory.getCurrentSession();
+		 Session session = sessionFactory.getCurrentSession();
 		SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd");
 		StringBuffer strbuf = new StringBuffer();
-		strbuf.append("SELECT CAST(DATE_ADD('" + df.format(baseline)
-				+ "', INTERVAL " + week + " WEEK) AS DATE)");
+		strbuf.append("SELECT CAST(DATE_ADD('" + df.format(baseline) + "', INTERVAL " + week + " WEEK) AS DATE)");
 
 		query = session.createSQLQuery(strbuf.toString());
 
@@ -2782,45 +2362,35 @@ public class QuarterlyReportingDAOImpl implements QuarterReportingDAO {
 	/*********************************************************************************************************************************/
 
 	@Override
-	public List<Object[]> getPatientsExitedInThePeriod(Date startDate,Date endDate) { 
+	public List<Object[]> getPatientsExitedInThePeriod(Date startDate, Date endDate) {
 		SQLQuery patientsExitedInThePeriodQuery = null;
-//		List<Object[]> patientsExitedInThePeriod = new ArrayList<Object[]>();
+		// List<Object[]> patientsExitedInThePeriod = new ArrayList<Object[]>();
 		if (startDate != null && endDate != null)
-		 patientsExitedInThePeriodQuery = sessionFactory
-					.getCurrentSession()
-					.createSQLQuery(
-							"SELECT DISTINCT pa.patient_id FROM patient pa INNER JOIN person pe ON pa.patient_id = pe.person_id "
-									+ "INNER JOIN orders z on z.patient_id=pa.patient_id " 
-									+ " INNER JOIN obs ob ON ob.person_id = pe.person_id " 
-									+ " AND z.concept_id IN ("+QuarterlyReportUtil.gpGetARVConceptIds()+")"
-									+ " AND ob.concept_id =  "+ gpGetExitedFromCareConceptId()
-									+ checkObsDate(startDate, endDate));
-		
-		
+			patientsExitedInThePeriodQuery = sessionFactory.getCurrentSession().createSQLQuery(
+					"SELECT DISTINCT pa.patient_id FROM patient pa INNER JOIN person pe ON pa.patient_id = pe.person_id "
+							+ "INNER JOIN orders z on z.patient_id=pa.patient_id "
+							+ " INNER JOIN obs ob ON ob.person_id = pe.person_id " + " AND z.concept_id IN ("
+							+ QuarterlyReportUtil.gpGetARVConceptIds() + ")" + " AND ob.concept_id =  "
+							+ gpGetExitedFromCareConceptId() + checkObsDate(startDate, endDate));
+
 		else if (startDate == null && endDate != null)
-			patientsExitedInThePeriodQuery = sessionFactory
-					.getCurrentSession()
-					.createSQLQuery(
-							"SELECT DISTINCT pa.patient_id FROM patient pa INNER JOIN person pe ON pa.patient_id = pe.person_id "
-									+ "INNER JOIN orders z on z.patient_id=pa.patient_id " 
-									+ " INNER JOIN obs ob ON ob.person_id = pe.person_id " 
-									+ " AND z.concept_id IN ("+QuarterlyReportUtil.gpGetARVConceptIds()+")"
-									+ " AND ob.concept_id =  "+ gpGetExitedFromCareConceptId()
-									+ checkObsDate(null, endDate));
+			patientsExitedInThePeriodQuery = sessionFactory.getCurrentSession().createSQLQuery(
+					"SELECT DISTINCT pa.patient_id FROM patient pa INNER JOIN person pe ON pa.patient_id = pe.person_id "
+							+ "INNER JOIN orders z on z.patient_id=pa.patient_id "
+							+ " INNER JOIN obs ob ON ob.person_id = pe.person_id " + " AND z.concept_id IN ("
+							+ QuarterlyReportUtil.gpGetARVConceptIds() + ")" + " AND ob.concept_id =  "
+							+ gpGetExitedFromCareConceptId() + checkObsDate(null, endDate));
 
 		List<Integer> records = patientsExitedInThePeriodQuery.list();
-		
+
 		List<Object[]> obj = new ArrayList<Object[]>();
-		
+
 		for (Integer id : records) {
-			obj.add(new Object[] { id, "",	"" });
+			obj.add(new Object[] { id, "", "" });
 		}
 
 		return obj;
-		
-		
-		
-		
+
 	}
 
 	/*****************************************************************************************************************************************/
@@ -2835,8 +2405,7 @@ public class QuarterlyReportingDAOImpl implements QuarterReportingDAO {
 
 		SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd");
 		if (startDate != null && endDate != null) {
-			return " AND (ob.obs_datetime BETWEEN '" + df.format(startDate)
-					+ "' AND '" + df.format(endDate) + "' )";
+			return " AND (ob.obs_datetime BETWEEN '" + df.format(startDate) + "' AND '" + df.format(endDate) + "' )";
 		} else if (endDate == null && startDate != null) {
 			return " AND (ob.obs_datetime < '" + df.format(startDate) + "' )";
 		} else if (startDate == null && endDate != null) {
@@ -2853,11 +2422,10 @@ public class QuarterlyReportingDAOImpl implements QuarterReportingDAO {
 	public Date getFirstDayOfMonth(Date date) {
 		SQLQuery query = null;
 		Date dat = null;
-		Session session = sessionFactory.getCurrentSession();
+		 Session session = sessionFactory.getCurrentSession();
 		StringBuffer strbuf = new StringBuffer();
 		SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd");
-		strbuf.append("SELECT CAST(DATE_SUB('" + df.format(date)
-				+ "',INTERVAL (DAY('" + df.format(date)
+		strbuf.append("SELECT CAST(DATE_SUB('" + df.format(date) + "',INTERVAL (DAY('" + df.format(date)
 				+ "')-1) DAY) AS DATE) ");
 		query = session.createSQLQuery(strbuf.toString());
 		dat = (Date) query.uniqueResult();
@@ -2868,92 +2436,61 @@ public class QuarterlyReportingDAOImpl implements QuarterReportingDAO {
 	/*************************************************************************************************************************/
 	@SuppressWarnings("null")
 	@Override
-	public List<Object[]> getCD4CountAfterXMonths(List<Object[]> patientIds,int xthMonth) {
+	public List<Object[]> getCD4CountAfterXMonths(List<Object[]> patientIds, int xthMonth) {
 		SQLQuery query = null;
-		SQLQuery maxObsDateQuery =null;
+		SQLQuery maxObsDateQuery = null;
 		List<Object[]> objects = null;
 
-		// CD4 M0 
+		// CD4 M0
 		Date arvStartedDate = null;
 		Date sixMonthsAfterARVDate = null;
 
 		// CD4 M12
 		Date twlvMonthsAfterARVDate = null;
 
-			for (Object[] id : patientIds) {
-				
-				arvStartedDate = getWhenPatientStarted(Context.getPatientService().getPatient((Integer) id[0]));
-				sixMonthsAfterARVDate = getSixMonthBefore(arvStartedDate);
-				twlvMonthsAfterARVDate = getXMonthAfterDate(sixMonthsAfterARVDate, 6);
+		for (Object[] id : patientIds) {
 
+			arvStartedDate = getWhenPatientStarted(Context.getPatientService().getPatient((Integer) id[0]));
+			sixMonthsAfterARVDate = getSixMonthBefore(arvStartedDate);
+			twlvMonthsAfterARVDate = getXMonthAfterDate(sixMonthsAfterARVDate, 6);
 
-				if (xthMonth == 6) {
-					query = sessionFactory
-							.getCurrentSession()
-							.createSQLQuery(
-									"select MAX(obs_datetime) from obs where  person_id= "
-											+ id[0]
-											+ " and concept_id = "
-											+ QuarterlyReportUtil
-													.gpGetCD4CountConceptId()
-											+ " and obs_datetime <= '"
-											+ QuarterlyReportUtil
-													.getDateFormat(arvStartedDate)
-											+ "' ");
+			if (xthMonth == 6) {
+				query = sessionFactory.getCurrentSession()
+						.createSQLQuery("select MAX(obs_datetime) from obs where  person_id= " + id[0]
+								+ " and concept_id = " + QuarterlyReportUtil.gpGetCD4CountConceptId()
+								+ " and obs_datetime <= '" + QuarterlyReportUtil.getDateFormat(arvStartedDate) + "' ");
 
-				}
-				if (xthMonth == 12) {
-					query = sessionFactory
-							.getCurrentSession()
-							.createSQLQuery(
-									"select MAX(obs_datetime) from obs where  person_id = "
-											+ id[0]
-											+ " and concept_id = "
-											+ QuarterlyReportUtil
-													.gpGetCD4CountConceptId()
-											+ " and obs_datetime BETWEEN '"
-											+ QuarterlyReportUtil
-													.getDateFormat(sixMonthsAfterARVDate)
-											+ "'"
-											+ " AND '"
-											+ QuarterlyReportUtil
-													.getDateFormat(twlvMonthsAfterARVDate)
-											+ "'");
-
-				}
-//				 log.info("uuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuqqq "+query.toString());
-//				 log.info("uuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuustart "+arvStartedDate);
-//				 log.info("uuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuusixMonthsAfterARVDate "+sixMonthsAfterARVDate);
-//				 log.info("uuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuutwlvMonthsAfterARVDate "+twlvMonthsAfterARVDate);
-					
-		     List<Date> date= query.list();
-
-		     Date d=null;
-		     SQLQuery cd4Value = null;
-		     
-		     if(date!=null){
-		    	 d=date.get(0);
-		     
-		      cd4Value = sessionFactory
-						.getCurrentSession()
-						.createSQLQuery(
-								"SELECT bs.value_numeric FROM obs bs " +
-								"where bs.person_id = " + id[0] +
-								" and bs.concept_id= "+QuarterlyReportUtil.gpGetCD4CountConceptId() 
-								+ " AND bs.obs_datetime = '"
-								+ QuarterlyReportUtil.getDateFormat(d)
-								+ "'"
-								);
-		    
-//		    log.info("uuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuu2 "+cd4Value.list().get(0));
-//		    log.info("ppppppppppppppppppppppppppppppppppppppp "+id[0]);
-		    
-//		    objects.add(new Object[] { id[0], "","" });
-		    
-		     }
-		    if(cd4Value!=null)
-		    	objects.add(new Object[] { id[0], "","" });
 			}
+			if (xthMonth == 12) {
+				query = sessionFactory.getCurrentSession().createSQLQuery(
+						"select MAX(obs_datetime) from obs where  person_id = " + id[0] + " and concept_id = "
+								+ QuarterlyReportUtil.gpGetCD4CountConceptId() + " and obs_datetime BETWEEN '"
+								+ QuarterlyReportUtil.getDateFormat(sixMonthsAfterARVDate) + "'" + " AND '"
+								+ QuarterlyReportUtil.getDateFormat(twlvMonthsAfterARVDate) + "'");
+			}
+			List<Date> date = query.list();
+
+			Date d = null;
+			SQLQuery cd4Value = null;
+
+			if (date != null) {
+				d = date.get(0);
+
+				cd4Value = sessionFactory.getCurrentSession()
+						.createSQLQuery("SELECT bs.value_numeric FROM obs bs " + "where bs.person_id = " + id[0]
+								+ " and bs.concept_id= " + QuarterlyReportUtil.gpGetCD4CountConceptId()
+								+ " AND bs.obs_datetime = '" + QuarterlyReportUtil.getDateFormat(d) + "'");
+
+				// log.info("uuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuu2
+				// "+cd4Value.list().get(0));
+				// log.info("ppppppppppppppppppppppppppppppppppppppp "+id[0]);
+
+				// objects.add(new Object[] { id[0], "","" });
+
+			}
+			if (cd4Value != null)
+				objects.add(new Object[] { id[0], "", "" });
+		}
 
 		return objects;
 	}
@@ -2962,7 +2499,7 @@ public class QuarterlyReportingDAOImpl implements QuarterReportingDAO {
 	@Override
 	public Date getWhenEnrolled(Patient p) {
 		SQLQuery query = null;
-		Session session = sessionFactory.getCurrentSession();
+		 Session session = sessionFactory.getCurrentSession();
 
 		StringBuffer strbuf = new StringBuffer();
 
@@ -2982,7 +2519,7 @@ public class QuarterlyReportingDAOImpl implements QuarterReportingDAO {
 	@Override
 	public Date getMaxEncounter(Patient p, Date maxDate) {
 		SQLQuery query = null;
-		Session session = sessionFactory.getCurrentSession();
+		 Session session = sessionFactory.getCurrentSession();
 		SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd");
 		StringBuffer strbuf = new StringBuffer();
 
@@ -3000,14 +2537,14 @@ public class QuarterlyReportingDAOImpl implements QuarterReportingDAO {
 	@Override
 	public Date getMaxTransferInDate(Patient p, Date minDate, Date maxDate) {
 		SQLQuery query = null;
-		Session session = sessionFactory.getCurrentSession();
+		 Session session = sessionFactory.getCurrentSession();
 		SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd");
 		StringBuffer strbuf = new StringBuffer();
 
 		strbuf.append(" SELECT MAX(obs_datetime) FROM obs o  ");
-		strbuf.append(" where concept_id = "+ QuarterlyReportUtil.gpTransferInConceptId()+ " AND value_coded=1065 and person_id = " + p.getPatientId());
-		strbuf.append(" and obs_datetime BETWEEN '" + df.format(minDate)
-				+ "' AND '" + df.format(maxDate) + "' ");
+		strbuf.append(" where concept_id = " + QuarterlyReportUtil.gpTransferInConceptId()
+				+ " AND value_coded=1065 and person_id = " + p.getPatientId());
+		strbuf.append(" and obs_datetime BETWEEN '" + df.format(minDate) + "' AND '" + df.format(maxDate) + "' ");
 
 		query = session.createSQLQuery(strbuf.toString());
 
@@ -3019,39 +2556,34 @@ public class QuarterlyReportingDAOImpl implements QuarterReportingDAO {
 	public List<Integer> getPatientsExitedFromCare() {
 		List<Integer> patientsExitedIds = null;
 
-		Session session = sessionFactory.getCurrentSession();
-		SQLQuery patientsExitedFromCare = session
-				.createSQLQuery("SELECT distinct pa.patient_id FROM patient pa "
-						+ "INNER JOIN person pe ON pa.patient_id = pe.person_id "
-						+ "INNER JOIN obs ob ON ob.person_id = pe.person_id WHERE ob.concept_id = 1811");
+		 Session session = sessionFactory.getCurrentSession();
+		SQLQuery patientsExitedFromCare = session.createSQLQuery("SELECT distinct pa.patient_id FROM patient pa "
+				+ "INNER JOIN person pe ON pa.patient_id = pe.person_id "
+				+ "INNER JOIN obs ob ON ob.person_id = pe.person_id WHERE ob.concept_id = 1811");
 		patientsExitedIds = patientsExitedFromCare.list();
 
 		return patientsExitedIds;
 	}
+
 	/****************************************************************************************************************************/
 	public List<Integer> getPatientsOnDapsone(Date quarterTo) {
-		Session session = sessionFactory.getCurrentSession();
-		
-		SimpleDateFormat df=new SimpleDateFormat("yyyy-MM-dd");
-		
-		SQLQuery patientsOnDapsone = session.createSQLQuery(
-		"SELECT distinct o.patient_id  "
-		+" FROM orders o "
-		+" INNER JOIN drug_order dro on dro.order_id=o.order_id  "
-		+" INNER JOIN patient pat on pat.patient_id=o.patient_id "
-		+" INNER JOIN encounter en on en.patient_id=pat.patient_id "
-		+" INNER JOIN patient_program pg on pat.patient_id=pg.patient_id "
-		+" INNER JOIN program gr on gr.program_id=pg.program_id AND gr.program_id = "
-		+Integer.parseInt(QuarterlyReportUtil.gpGetHIVProgramId())
-		+" AND o.concept_id =92  "
-		+" AND o.voided=0 AND pat.voided=0 AND pg.voided=0 "
-		+" INNER JOIN person p on o.patient_id = p.person_id   "
-		+" INNER JOIN obs obs on obs.person_id = p.person_id   "
-		+" AND pg.date_enrolled < '"+df.format(quarterTo)+"'"
-		+" AND en.encounter_datetime <= '" + df.format(quarterTo) + "' "
-		+" AND o.start_date <= '"+df.format(quarterTo)+"' ");
-		
-		
+		 Session session = sessionFactory.getCurrentSession();
+
+		SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd");
+
+		SQLQuery patientsOnDapsone = session.createSQLQuery("SELECT distinct o.patient_id  " + " FROM orders o "
+				+ " INNER JOIN drug_order dro on dro.order_id=o.order_id  "
+				+ " INNER JOIN patient pat on pat.patient_id=o.patient_id "
+				+ " INNER JOIN encounter en on en.patient_id=pat.patient_id "
+				+ " INNER JOIN patient_program pg on pat.patient_id=pg.patient_id "
+				+ " INNER JOIN program gr on gr.program_id=pg.program_id AND gr.program_id = "
+				+ Integer.parseInt(QuarterlyReportUtil.gpGetHIVProgramId()) + " AND o.concept_id =92  "
+				+ " AND o.voided=0 AND pat.voided=0 AND pg.voided=0 "
+				+ " INNER JOIN person p on o.patient_id = p.person_id   "
+				+ " INNER JOIN obs obs on obs.person_id = p.person_id   " + " AND pg.date_enrolled < '"
+				+ df.format(quarterTo) + "'" + " AND en.encounter_datetime <= '" + df.format(quarterTo) + "' "
+				+ " AND o.start_date <= '" + df.format(quarterTo) + "' ");
+
 		List<Integer> patientIds = patientsOnDapsone.list();
 
 		return patientIds;
@@ -3059,8 +2591,7 @@ public class QuarterlyReportingDAOImpl implements QuarterReportingDAO {
 
 	/****************************************************************************************************************************/
 	public boolean isPatientOnProphylaxisOnly(Patient p) {
-		List<Regimen> regimens = RegimenUtils.getRegimenHistory(p)
-				.getRegimenList();
+		List<Regimen> regimens = RegimenUtils.getRegimenHistory(p).getRegimenList();
 		Set<RegimenComponent> components = new HashSet<RegimenComponent>();
 
 		for (Regimen r : regimens) {
@@ -3070,15 +2601,13 @@ public class QuarterlyReportingDAOImpl implements QuarterReportingDAO {
 		List<Integer> regimenDrugs = new ArrayList<Integer>();
 
 		for (RegimenComponent rc : components) {
-			if (!rc.getDrugOrder().getDiscontinued())
+			if (rc.getDrugOrder().isActive())
 				regimenDrugs.add(rc.getDrug().getDrugId());
 		}
 
 		boolean found = false;
-		List<Integer> prophylaxisIds = QuarterlyReportUtil
-				.gpGetProphylaxisAsIntegers();
-		if (prophylaxisIds.size() >= regimenDrugs.size()
-				&& prophylaxisIds.containsAll(regimenDrugs)) {
+		List<Integer> prophylaxisIds = QuarterlyReportUtil.gpGetProphylaxisAsIntegers();
+		if (prophylaxisIds.size() >= regimenDrugs.size() && prophylaxisIds.containsAll(regimenDrugs)) {
 			for (Integer r : regimenDrugs) {
 				if (prophylaxisIds.contains(r)) {
 					found = true;
@@ -3094,8 +2623,7 @@ public class QuarterlyReportingDAOImpl implements QuarterReportingDAO {
 
 	/*******************************************************************************************************************************/
 	@Override
-	public List<Object[]> getRemoveDuplicates(List<Object[]> list1,
-			List<Object[]> list2) {
+	public List<Object[]> getRemoveDuplicates(List<Object[]> list1, List<Object[]> list2) {
 		List<Object[]> result = new ArrayList<Object[]>();
 
 		List<Integer> listt1 = QuarterlyReportUtil.getConvertToType(list1);
@@ -3104,8 +2632,7 @@ public class QuarterlyReportingDAOImpl implements QuarterReportingDAO {
 		SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd");
 
 		for (Integer d : listt1) {
-			Date when = getWhenPatientStarted(Context.getPatientService()
-					.getPatient(d));
+			Date when = getWhenPatientStarted(Context.getPatientService().getPatient(d));
 			if (!listt2.contains(d))
 				result.add(new Object[] { d, df.format(when), "Start ARVs" });
 		}
@@ -3116,8 +2643,7 @@ public class QuarterlyReportingDAOImpl implements QuarterReportingDAO {
 	/*******************************************************************************************************************************/
 
 	public Boolean isLastRegimenProphy(Patient p) {
-		List<Regimen> regimens = RegimenUtils.getRegimenHistory(p)
-				.getRegimenList();
+		List<Regimen> regimens = RegimenUtils.getRegimenHistory(p).getRegimenList();
 		Set<RegimenComponent> components = new HashSet<RegimenComponent>();
 
 		if (regimens.size() != 0)
@@ -3126,15 +2652,13 @@ public class QuarterlyReportingDAOImpl implements QuarterReportingDAO {
 		List<Integer> regimenDrugs = new ArrayList<Integer>();
 
 		for (RegimenComponent rc : components) {
-			if (!rc.getDrugOrder().getDiscontinued())
+			if (rc.getDrugOrder().isActive())
 				regimenDrugs.add(rc.getDrug().getDrugId());
 		}
 
 		boolean found = false;
-		List<Integer> prophylaxisIds = QuarterlyReportUtil
-				.gpGetProphylaxisAsIntegers();
-		if (prophylaxisIds.size() >= regimenDrugs.size()
-				&& prophylaxisIds.containsAll(regimenDrugs)) {
+		List<Integer> prophylaxisIds = QuarterlyReportUtil.gpGetProphylaxisAsIntegers();
+		if (prophylaxisIds.size() >= regimenDrugs.size() && prophylaxisIds.containsAll(regimenDrugs)) {
 			for (Integer r : regimenDrugs) {
 				if (prophylaxisIds.contains(r)) {
 					found = true;
@@ -3147,7 +2671,7 @@ public class QuarterlyReportingDAOImpl implements QuarterReportingDAO {
 		return found;
 
 	}
-	
+
 	public Boolean isLastProphylaxisTakenCotrimo(Integer id) {
 		Patient p = Context.getPatientService().getPatient(id);
 		List<Regimen> regimens = RegimenUtils.getRegimenHistory(p).getRegimenList();
@@ -3159,28 +2683,26 @@ public class QuarterlyReportingDAOImpl implements QuarterReportingDAO {
 		List<Integer> regimenDrugs = new ArrayList<Integer>();
 
 		for (RegimenComponent rc : components) {
-			if (rc.getDrug()!=null && !rc.getDrugOrder().getDiscontinued())
-////				regimenDrugs.add(rc.getDrug().getDrugId());
-//				if(rc.getDrug()!=null)
+			if (rc.getDrug() != null && rc.getDrugOrder().isActive())
+				//// regimenDrugs.add(rc.getDrug().getDrugId());
+				// if(rc.getDrug()!=null)
 				regimenDrugs.add(rc.getDrug().getConcept().getConceptId());
 		}
 
-		      boolean found = false;
-		      
-		      if (regimenDrugs.contains(92)) {
-				found=true;
-			}
+		boolean found = false;
+
+		if (regimenDrugs.contains(92)) {
+			found = true;
+		}
 
 		return found;
 
 	}
 
-
 	public List<Integer> getRetrieveARVDrugIdsOnly(List<Integer> drugIds) {
 		List<Integer> arvIds = new ArrayList<Integer>();
 		List<Integer> tbDrugIds = QuarterlyReportUtil.gpGetTBDrugIds();
-		List<Integer> prophylaxisIds = QuarterlyReportUtil
-				.gpGetProphylaxisAsIntegers();
+		List<Integer> prophylaxisIds = QuarterlyReportUtil.gpGetProphylaxisAsIntegers();
 		for (Integer id : drugIds) {
 			if (!tbDrugIds.contains(id) && !prophylaxisIds.contains(id))
 				arvIds.add(id);
@@ -3193,8 +2715,7 @@ public class QuarterlyReportingDAOImpl implements QuarterReportingDAO {
 	public Boolean isOnTriTherapy(Integer patientId) {
 		Boolean checked = false;
 
-		List<Regimen> regimens = RegimenUtils.getRegimenHistory(
-				Context.getPatientService().getPatient(patientId))
+		List<Regimen> regimens = RegimenUtils.getRegimenHistory(Context.getPatientService().getPatient(patientId))
 				.getRegimenList();
 		Set<RegimenComponent> components = new HashSet<RegimenComponent>();
 
@@ -3207,8 +2728,7 @@ public class QuarterlyReportingDAOImpl implements QuarterReportingDAO {
 		for (RegimenComponent rc : components) {
 			// if (!rc.getDrugOrder().getDiscontinued() ||
 			// rc.getDrugOrder().getDiscontinuedDate().getTime()<endDate.getTime())
-			if (!QuarterlyReportUtil.gpGetProphylaxisConceptIds().contains(
-					rc.getDrug().getConcept().getConceptId()))
+			if (!QuarterlyReportUtil.gpGetProphylaxisConceptIds().contains(rc.getDrug().getConcept().getConceptId()))
 				currentRegimen.add(rc.getDrug().getConcept().getConceptId());
 
 		}
@@ -3228,31 +2748,20 @@ public class QuarterlyReportingDAOImpl implements QuarterReportingDAO {
 		SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd");
 
 		try {
-			
-//			SQLQuery q = sessionFactory.getCurrentSession().createSQLQuery(
-//					" SELECT DISTINCT patient_id from patient pat INNER " +
-//					" JOIN orders o on pat.patient_id=o.patient_id "+
-//					" INNER JOIN person ps on pat.patient_id=ps.patient_id "+
-//					" INNER JOIN obs ob on ob.person_id=ps.person_id and ob.concept_id="+QuarterlyReportUtil.gpGetExitedFromCareConceptId()+
-//							" ob.voided=1 and ob.obs_datetime <="+df.format(endDate)
-//					);
-//			List<Integer> exited = q.list();
-			
-
 			for (Integer patientId : patientIds) {
 
 				SQLQuery query = null;
-				Session session = sessionFactory.getCurrentSession();
+				 Session session = sessionFactory.getCurrentSession();
 
 				StringBuffer strbuf = new StringBuffer();
 
 				strbuf.append(" SELECT DISTINCT o.concept_id, ");
-				strbuf.append(" IF(((o.start_date <='" + df.format(endDate) + "' AND o.discontinued=0 OR o.discontinued_date>='"+df.format(endDate)+"' ) ");
+				strbuf.append(" IF(((o.start_date <='" + df.format(endDate)
+						+ "' AND o.discontinued=0 OR o.discontinued_date>='" + df.format(endDate) + "' ) ");
 				strbuf.append("  ),1,0) ");
 				strbuf.append(" FROM orders o ");
-				strbuf.append(" INNER JOIN drug_order d ON o.order_id=d.order_id AND o.patient_id= "+ patientId);
-				strbuf.append(" AND o.concept_id IN("+ QuarterlyReportUtil.gpGetARVConceptIds() + ")"); 
-				
+				strbuf.append(" INNER JOIN drug_order d ON o.order_id=d.order_id AND o.patient_id= " + patientId);
+				strbuf.append(" AND o.concept_id IN(" + QuarterlyReportUtil.gpGetARVConceptIds() + ")");
 
 				query = session.createSQLQuery(strbuf.toString());
 
@@ -3261,7 +2770,6 @@ public class QuarterlyReportingDAOImpl implements QuarterReportingDAO {
 				List<Integer> regimenDrugsByConcept = new ArrayList<Integer>();
 
 				int add = 0;
-				
 
 				for (Object[] obj : records) {
 					add++;
@@ -3278,11 +2786,11 @@ public class QuarterlyReportingDAOImpl implements QuarterReportingDAO {
 					}
 				}
 
-				if (getPatientsOnAllByConceptIds(listDrugIdsByConcept,regimenDrugsByConcept)) {
+				if (getPatientsOnAllByConceptIds(listDrugIdsByConcept, regimenDrugsByConcept)) {
 					Patient patient = Context.getPatientService().getPatient(patientId);
 					Date when = getWhenPatientStarted(patient);
-//					if(!exited.contains(patient.getPatientId()))
-					objects.add(new Object[] { patient.getPatientId(),df.format(when), "Start ARV" });
+					// if(!exited.contains(patient.getPatientId()))
+					objects.add(new Object[] { patient.getPatientId(), df.format(when), "Start ARV" });
 
 				}
 			}
@@ -3291,20 +2799,22 @@ public class QuarterlyReportingDAOImpl implements QuarterReportingDAO {
 		}
 		return objects;
 	}
+
 	/*******************************************************************************************************************************/
 	@Override
-	public List<Object[]> getPatientsStartedCotrimo(Date quarterFrom,Date quarterTo, String gender, Integer minAge, Integer maxAge) {
-		
+	public List<Object[]> getPatientsStartedCotrimo(Date quarterFrom, Date quarterTo, String gender, Integer minAge,
+			Integer maxAge) {
+
 		Map<String, Integer> patientStartedWhenMap = new HashMap<String, Integer>();
 
-		StringBuffer strBuffer = new StringBuffer(); 
+		StringBuffer strBuffer = new StringBuffer();
 
 		StringBuffer queryPortion = new StringBuffer();
 
 		List<Object[]> objs = new ArrayList<Object[]>();
 
 		SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd");
-		
+
 		SQLQuery query = null;
 
 		if (gender != null) {
@@ -3315,14 +2825,15 @@ public class QuarterlyReportingDAOImpl implements QuarterReportingDAO {
 			queryPortion.append(" inner join orders o on o.patient_id = pa.patient_id ");
 			queryPortion.append(" inner join encounter en on pa.patient_id = en.patient_id ");
 			queryPortion.append(" inner join obs obs on obs.person_id = pe.person_id ");
-			queryPortion.append(" and pg.program_id =  "+ Integer.parseInt(QuarterlyReportUtil.gpGetHIVProgramId()));
+			queryPortion.append(" and pg.program_id =  " + Integer.parseInt(QuarterlyReportUtil.gpGetHIVProgramId()));
 			queryPortion.append(" and en.voided=0 and pg.voided=0 and pa.voided=0 and o.voided=0 ");
-			queryPortion.append(" and o.concept_id in( "+QuarterlyReportUtil.gpCotrimoConceptIds()+")");
-			queryPortion.append(" and o.concept_id<>1811 and  (cast(obs.obs_datetime as DATE))<='"+df.format(quarterTo)+"' ");
-//			queryPortion.append(" and o.discontinued=0 ");
-			queryPortion.append(" and pg.date_enrolled <= '"+ df.format(quarterTo) + "' and (pg.date_completed is null OR pg.date_completed >= '"+df.format(quarterTo)+"') ");
-			
-			
+			queryPortion.append(" and o.concept_id in( " + QuarterlyReportUtil.gpCotrimoConceptIds() + ")");
+			queryPortion.append(
+					" and o.concept_id<>1811 and  (cast(obs.obs_datetime as DATE))<='" + df.format(quarterTo) + "' ");
+			// queryPortion.append(" and o.discontinued=0 ");
+			queryPortion.append(" and pg.date_enrolled <= '" + df.format(quarterTo)
+					+ "' and (pg.date_completed is null OR pg.date_completed >= '" + df.format(quarterTo) + "') ");
+
 		} else {
 			queryPortion.append("select distinct pg.patient_id from patient_program pg ");
 			queryPortion.append(" inner join person pe on pg.patient_id = pe.person_id ");
@@ -3330,101 +2841,65 @@ public class QuarterlyReportingDAOImpl implements QuarterReportingDAO {
 			queryPortion.append(" inner join orders o on o.patient_id = pa.patient_id ");
 			queryPortion.append(" inner join encounter en on pa.patient_id = en.patient_id ");
 			queryPortion.append(" inner join obs obs on obs.person_id = pe.person_id ");
-			queryPortion.append(" and pg.program_id =  "+ Integer.parseInt(QuarterlyReportUtil.gpGetHIVProgramId()));
-			queryPortion.append(" and o.concept_id in( "+QuarterlyReportUtil.gpCotrimoConceptIds()+")");
+			queryPortion.append(" and pg.program_id =  " + Integer.parseInt(QuarterlyReportUtil.gpGetHIVProgramId()));
+			queryPortion.append(" and o.concept_id in( " + QuarterlyReportUtil.gpCotrimoConceptIds() + ")");
 			queryPortion.append(" and en.voided=0 and pg.voided=0 and pa.voided=0 and o.voided=0 ");
-			queryPortion.append(" and o.concept_id<>1811 and  (cast(obs.obs_datetime as DATE))<='"+df.format(quarterTo)+"' ");
-//			queryPortion.append(" and o.discontinued=0 ");
-			queryPortion.append(" and pg.date_enrolled <= '"+ df.format(quarterTo) + "' and (pg.date_completed is null OR pg.date_completed >= '"+df.format(quarterTo)+"') ");
-			
+			queryPortion.append(
+					" and o.concept_id<>1811 and  (cast(obs.obs_datetime as DATE))<='" + df.format(quarterTo) + "' ");
+			// queryPortion.append(" and o.discontinued=0 ");
+			queryPortion.append(" and pg.date_enrolled <= '" + df.format(quarterTo)
+					+ "' and (pg.date_completed is null OR pg.date_completed >= '" + df.format(quarterTo) + "') ");
+
 		}
 
-		
 		if (minAge != null && maxAge != null) {
 			strBuffer.append(queryPortion);
-			strBuffer.append(" AND TIMESTAMPDIFF(MONTH,pe.birthdate,CURDATE()) BETWEEN "+ minAge + " AND " + maxAge);
+			strBuffer.append(" AND TIMESTAMPDIFF(MONTH,pe.birthdate,CURDATE()) BETWEEN " + minAge + " AND " + maxAge);
 
 		}
 		if (minAge != null && maxAge == null) {
 			strBuffer.append(queryPortion);
-			strBuffer.append(" AND TIMESTAMPDIFF(MONTH,pe.birthdate,CURDATE()) >= "+ minAge);
-		}	
+			strBuffer.append(" AND TIMESTAMPDIFF(MONTH,pe.birthdate,CURDATE()) >= " + minAge);
+		}
 		if (minAge == null && maxAge == null) {
 			strBuffer.append(queryPortion);
-		}	
-		
-		query = sessionFactory.getCurrentSession().createSQLQuery(
-				strBuffer.toString());
-		
-		List<Integer> records = query.list();
-		
-		
-		double patientAge = 0 ;
-
-			List<Integer> patIds2 = new ArrayList<Integer>();
-//			for (Integer id : records) {
-//
-//				SQLQuery query2 = null;
-//				StringBuffer strbuf2 = new StringBuffer();
-//
-//				strbuf2.append("SELECT (MIN(o.start_date) - YEAR(s.birthdate)) * 12 ");
-//				strbuf2.append(" + (MONTH(CURDATE()) - MONTH(s.birthdate)) ");
-//				strbuf2.append("  - IF(DAYOFMONTH(CURDATE()) < DAYOFMONTH(s.birthdate),1,0) ");
-//				strbuf2.append(" FROM  orders o ");
-//				strbuf2.append(" INNER JOIN patient p on p.patient_id=o.patient_id " );
-//				strbuf2.append(" INNER JOIN person s on s.person_id=p.patient_id  ");
-//				strbuf2.append(" AND p.patient_id= "+id);
-//				
-//				log.info("ooooooooooooooooooooooooooooo "+strbuf2.toString());
-//
-//				query2 = sessionFactory.getCurrentSession().createSQLQuery(
-//						strbuf2.toString());
-//
-//				List<Double> record = query2.list(); 
-//
-//				if(record.get(0)!=null)
-//				patientAge = record.get(0).intValue();
-//				
-//				if(patientAge<1)
-//					patientAge=patientAge*(-1);
-//				
-//				if (minAge != null && maxAge != null) {
-//					if (patientAge >= minAge && patientAge <= maxAge)
-//						patIds2.add(id);
-//				}
-//				else if (minAge != null && maxAge == null) {
-//					if (patientAge >= minAge)
-//						patIds2.add(id);
-//				}
-//			}
-			
-			
-
-		List<Integer> patsOnCotrimo=new ArrayList<Integer>();
-		List<Integer> patsOnDapsone = getPatientsOnDapsone(quarterTo);
-		
-		for (Integer g : records) {
-	      if(!patsOnDapsone.contains(g)){
-				patsOnCotrimo.add(g);
-		      }
 		}
 
-		List<Integer> exitedInThePeriod = QuarterlyReportUtil.getConvertToType(getPatientsExitedInThePeriod(null, quarterTo)); 
-		
-		
+		query = sessionFactory.getCurrentSession().createSQLQuery(strBuffer.toString());
+
+		List<Integer> records = query.list();
+
+		double patientAge = 0;
+
+		List<Integer> patIds2 = new ArrayList<Integer>();
+
+		List<Integer> patsOnCotrimo = new ArrayList<Integer>();
+		List<Integer> patsOnDapsone = getPatientsOnDapsone(quarterTo);
+
+		for (Integer g : records) {
+			if (!patsOnDapsone.contains(g)) {
+				patsOnCotrimo.add(g);
+			}
+		}
+
+		List<Integer> exitedInThePeriod = QuarterlyReportUtil
+				.getConvertToType(getPatientsExitedInThePeriod(null, quarterTo));
+
 		for (Integer g : patsOnCotrimo) {
-//			if(patientsReceivedHIVCare.contains(g) && isLastProphylaxisTakenCotrimo(g))
-//				if(!exitedInThePeriod.contains(g))
-				objs.add(new Object[] { g, "",	"" });
+			// if(patientsReceivedHIVCare.contains(g) &&
+			// isLastProphylaxisTakenCotrimo(g))
+			// if(!exitedInThePeriod.contains(g))
+			objs.add(new Object[] { g, "", "" });
 		}
 
 		return objs;
 	}
+
 	/*******************************************************************************************************************************/
 	@Override
 	public Date getWhenStopART(Patient p) {
 		SQLQuery query = null;
-		Session session = sessionFactory.getCurrentSession();
+		 Session session = sessionFactory.getCurrentSession();
 
 		StringBuffer strbuf = new StringBuffer();
 
@@ -3438,17 +2913,18 @@ public class QuarterlyReportingDAOImpl implements QuarterReportingDAO {
 
 		return date;
 	}
+
 	/*******************************************************************************************************************************/
 	@Override
 	public Date getWhenTransOut(Patient p) {
 		SQLQuery query = null;
-		Session session = sessionFactory.getCurrentSession();
+		 Session session = sessionFactory.getCurrentSession();
 
 		StringBuffer strbuf = new StringBuffer();
 
 		strbuf.append("SELECT CAST(MIN(o.obs_datetime) AS DATE)  FROM obs o  ");
 		strbuf.append(" where o.person_id= " + p.getPatientId());
-		strbuf.append(" AND o.concept_id= " + 1811 +" AND o.value_coded="+1744);
+		strbuf.append(" AND o.concept_id= " + 1811 + " AND o.value_coded=" + 1744);
 
 		query = session.createSQLQuery(strbuf.toString());
 
@@ -3456,6 +2932,7 @@ public class QuarterlyReportingDAOImpl implements QuarterReportingDAO {
 
 		return date;
 	}
+
 	/*******************************************************************************************************************************/
 	@Override
 	public Date getWhenLost(Patient p) {
@@ -3467,7 +2944,7 @@ public class QuarterlyReportingDAOImpl implements QuarterReportingDAO {
 
 		strbuf.append("SELECT CAST(MIN(o.obs_datetime) AS DATE)  FROM obs o  ");
 		strbuf.append(" where o.person_id= " + p.getPatientId());
-		strbuf.append(" AND o.concept_id= " + 1811 +" AND o.value_coded="+1743);
+		strbuf.append(" AND o.concept_id= " + 1811 + " AND o.value_coded=" + 1743);
 
 		query = session.createSQLQuery(strbuf.toString());
 
@@ -3475,57 +2952,61 @@ public class QuarterlyReportingDAOImpl implements QuarterReportingDAO {
 
 		return date;
 	}
+
 	/*******************************************************************************************************************************/
 	@Override
-	public Integer getCalculageAge(Patient p,Date date1,Date date2) {
-			SQLQuery query2 = null;
-			StringBuffer strbuf2 = new StringBuffer();
-            SimpleDateFormat df=new SimpleDateFormat("yyyy-MM-dd");
-			strbuf2.append("SELECT (YEAR('"+df.format(date1)+"') - YEAR('"+df.format(date2)+"')) * 12 ");
-			strbuf2.append(" + (MONTH('"+df.format(date1)+"') - MONTH('"+df.format(date2)+"'))");
-			strbuf2.append("  - IF(DAYOFMONTH(CURDATE()) < DAYOFMONTH(s.birthdate),1,0) ");
-			strbuf2.append(" FROM  person s ");
-			strbuf2.append(" INNER JOIN patient p on p.patient_id=s.person_id ");
-			strbuf2.append(" INNER JOIN patient_program pg on pg.patient_id=p.patient_id and p.patient_id= " + p.getPatientId());
+	public Integer getCalculageAge(Patient p, Date date1, Date date2) {
+		SQLQuery query2 = null;
+		StringBuffer strbuf2 = new StringBuffer();
+		SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd");
+		strbuf2.append("SELECT (YEAR('" + df.format(date1) + "') - YEAR('" + df.format(date2) + "')) * 12 ");
+		strbuf2.append(" + (MONTH('" + df.format(date1) + "') - MONTH('" + df.format(date2) + "'))");
+		strbuf2.append("  - IF(DAYOFMONTH(CURDATE()) < DAYOFMONTH(s.birthdate),1,0) ");
+		strbuf2.append(" FROM  person s ");
+		strbuf2.append(" INNER JOIN patient p on p.patient_id=s.person_id ");
+		strbuf2.append(
+				" INNER JOIN patient_program pg on pg.patient_id=p.patient_id and p.patient_id= " + p.getPatientId());
 
-			query2 = sessionFactory.getCurrentSession().createSQLQuery(
-					strbuf2.toString());
+		query2 = sessionFactory.getCurrentSession().createSQLQuery(strbuf2.toString());
 
-			List<BigInteger> record = query2.list();
-			int patientAge =0;
-			if(record.get(0)!=null)
+		List<BigInteger> record = query2.list();
+		int patientAge = 0;
+		if (record.get(0) != null)
 			patientAge = record.get(0).intValue();
-			return patientAge;		
+		return patientAge;
 	}
+
 	/*******************************************************************************************************************************/
 	@Override
-	public List<Object[]> getPatientsTransferredOut(Date quarterFrom,Date quarterTo, String gender, Integer minAge, Integer maxAge) {
+	public List<Object[]> getPatientsTransferredOut(Date quarterFrom, Date quarterTo, String gender, Integer minAge,
+			Integer maxAge) {
 		StringBuffer strBuf = new StringBuffer();
 
 		SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd");
 
-		strBuf.append(" SELECT DISTINCT pa.patient_id FROM patient pa INNER JOIN orders os on os.patient_id=pa.patient_id" +
-				" INNER JOIN drug_order dor on dor.order_id=os.order_id " +
-				" inner join person ps on pa.patient_id=ps.person_id ");
-		strBuf.append(" INNER JOIN obs ob on ob.person_id=ps.person_id and ob.concept_id= "+ gpGetExitedFromCareConceptId() + " and ob.value_coded = 1744");
+		strBuf.append(
+				" SELECT DISTINCT pa.patient_id FROM patient pa INNER JOIN orders os on os.patient_id=pa.patient_id"
+						+ " INNER JOIN drug_order dor on dor.order_id=os.order_id "
+						+ " inner join person ps on pa.patient_id=ps.person_id ");
+		strBuf.append(" INNER JOIN obs ob on ob.person_id=ps.person_id and ob.concept_id= "
+				+ gpGetExitedFromCareConceptId() + " and ob.value_coded = 1744");
 		strBuf.append(" AND ob.obs_datetime <= '" + df.format(quarterTo) + "'");
-		strBuf.append(" AND ob.voided=0 AND ps.gender='"+gender+"'");
-		strBuf.append(" AND os.start_date <= '"+df.format(quarterTo)+"' ");
-		strBuf.append(" AND os.concept_id IN ("+QuarterlyReportUtil.gpGetARVConceptIds()+") ");
+		strBuf.append(" AND ob.voided=0 AND ps.gender='" + gender + "'");
+		strBuf.append(" AND os.start_date <= '" + df.format(quarterTo) + "' ");
+		strBuf.append(" AND os.concept_id IN (" + QuarterlyReportUtil.gpGetARVConceptIds() + ") ");
 
 		SQLQuery query = sessionFactory.getCurrentSession().createSQLQuery(strBuf.toString());
-		
-		
+
 		List<Integer> patientsTransOut = query.list();
 
 		List<Integer> lostPatients = getPatientsLostOnFollowup(quarterTo);
-		
+
 		List<Object[]> objs = new ArrayList<Object[]>();
-		
-		int patientAge = 0 ;
+
+		int patientAge = 0;
 
 		List<Integer> patIds2 = new ArrayList<Integer>();
-		
+
 		for (Integer id : patientsTransOut) {
 
 			SQLQuery query2 = null;
@@ -3535,69 +3016,70 @@ public class QuarterlyReportingDAOImpl implements QuarterReportingDAO {
 			strbuf2.append(" + (MONTH(ob.obs_datetime) - MONTH(s.birthdate)) ");
 			strbuf2.append("  - IF(DAYOFMONTH(ob.obs_datetime) < DAYOFMONTH(s.birthdate),1,0) ");
 			strbuf2.append(" FROM  person s ");
-			strbuf2.append(" INNER JOIN obs ob on ob.person_id=s.person_id " );
-			strbuf2.append(" AND ob.concept_id="+ gpGetExitedFromCareConceptId() + " AND ob.value_coded=1744 AND ob.obs_datetime<=  '" + df.format(quarterTo) + "'");
-			strbuf2.append(" AND s.person_id= "+id);
+			strbuf2.append(" INNER JOIN obs ob on ob.person_id=s.person_id ");
+			strbuf2.append(" AND ob.concept_id=" + gpGetExitedFromCareConceptId()
+					+ " AND ob.value_coded=1744 AND ob.obs_datetime<=  '" + df.format(quarterTo) + "'");
+			strbuf2.append(" AND s.person_id= " + id);
 
 			query2 = sessionFactory.getCurrentSession().createSQLQuery(strbuf2.toString());
 
-			List<Double> record = query2.list(); 
+			List<Double> record = query2.list();
 
-			if(record.get(0)!=null)
-			patientAge = record.get(0).intValue();
-			
-			
-			if(patientAge<1)
-				patientAge=patientAge*(-1);
-			
+			if (record.get(0) != null)
+				patientAge = record.get(0).intValue();
+
+			if (patientAge < 1)
+				patientAge = patientAge * (-1);
+
 			if (minAge != null && maxAge != null) {
 				if (patientAge >= minAge && patientAge <= maxAge)
-				if (!lostPatients.contains(id))
-					patIds2.add(id);
-			}
-			else if (minAge != null && maxAge == null) {
+					if (!lostPatients.contains(id))
+						patIds2.add(id);
+			} else if (minAge != null && maxAge == null) {
 				if (patientAge >= minAge)
-				if (!lostPatients.contains(id))
-					patIds2.add(id);
+					if (!lostPatients.contains(id))
+						patIds2.add(id);
 			}
 		}
 
-		for (Integer id : patIds2) { 
-			objs.add(new Object[] { id, "","" });
+		for (Integer id : patIds2) {
+			objs.add(new Object[] { id, "", "" });
 		}
-		return objs; 
+		return objs;
 
 	}
+
 	/*******************************************************************************************************************************/
 	@Override
-	public List<Object[]> getPatientsDead(Date quarterFrom, Date quarterTo,
-			String gender, Integer minAge, Integer maxAge) {
+	public List<Object[]> getPatientsDead(Date quarterFrom, Date quarterTo, String gender, Integer minAge,
+			Integer maxAge) {
 		StringBuffer strBuf = new StringBuffer();
 
 		SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd");
 
-		strBuf.append(" SELECT DISTINCT pa.patient_id FROM patient pa INNER JOIN orders os on os.patient_id=pa.patient_id" +
-				" INNER JOIN drug_order dor on dor.order_id=os.order_id " +
-				" inner join person ps on pa.patient_id=ps.person_id ");
-		strBuf.append(" INNER JOIN obs ob on ob.person_id=ps.person_id and ob.concept_id= "+ gpGetExitedFromCareConceptId() + " and ob.value_coded = 1742");
+		strBuf.append(
+				" SELECT DISTINCT pa.patient_id FROM patient pa INNER JOIN orders os on os.patient_id=pa.patient_id"
+						+ " INNER JOIN drug_order dor on dor.order_id=os.order_id "
+						+ " inner join person ps on pa.patient_id=ps.person_id ");
+		strBuf.append(" INNER JOIN obs ob on ob.person_id=ps.person_id and ob.concept_id= "
+				+ gpGetExitedFromCareConceptId() + " and ob.value_coded = 1742");
 		strBuf.append(" AND ob.obs_datetime <= '" + df.format(quarterTo) + "'");
-		strBuf.append(" AND ob.voided=0 AND ps.gender='"+gender+"'");
-		strBuf.append(" AND os.start_date <= '"+df.format(quarterTo)+"' ");
-		strBuf.append(" AND os.concept_id IN ("+QuarterlyReportUtil.gpGetARVConceptIds()+") ");
+		strBuf.append(" AND ob.voided=0 AND ps.gender='" + gender + "'");
+		strBuf.append(" AND os.start_date <= '" + df.format(quarterTo) + "' ");
+		strBuf.append(" AND os.concept_id IN (" + QuarterlyReportUtil.gpGetARVConceptIds() + ") ");
 
 		SQLQuery query = sessionFactory.getCurrentSession().createSQLQuery(strBuf.toString());
-		
-		
+
 		List<Integer> patientsTransOut = query.list();
 
 		List<Integer> lostPatients = getPatientsLostOnFollowup(quarterTo);
-		
+
 		List<Object[]> objs = new ArrayList<Object[]>();
-		
-		int patientAge = 0 ;
+
+		int patientAge = 0;
 
 		List<Integer> patIds2 = new ArrayList<Integer>();
-		
+
 		for (Integer id : patientsTransOut) {
 
 			SQLQuery query2 = null;
@@ -3607,245 +3089,202 @@ public class QuarterlyReportingDAOImpl implements QuarterReportingDAO {
 			strbuf2.append(" + (MONTH(ob.obs_datetime) - MONTH(s.birthdate)) ");
 			strbuf2.append("  - IF(DAYOFMONTH(ob.obs_datetime) < DAYOFMONTH(s.birthdate),1,0) ");
 			strbuf2.append(" FROM  person s ");
-			strbuf2.append(" INNER JOIN obs ob on ob.person_id=s.person_id " );
-			strbuf2.append(" AND ob.concept_id="+ gpGetExitedFromCareConceptId() + " AND ob.value_coded=1742 AND ob.obs_datetime<=  '" + df.format(quarterTo) + "'");
-			strbuf2.append(" AND s.person_id= "+id);
+			strbuf2.append(" INNER JOIN obs ob on ob.person_id=s.person_id ");
+			strbuf2.append(" AND ob.concept_id=" + gpGetExitedFromCareConceptId()
+					+ " AND ob.value_coded=1742 AND ob.obs_datetime<=  '" + df.format(quarterTo) + "'");
+			strbuf2.append(" AND s.person_id= " + id);
 
 			query2 = sessionFactory.getCurrentSession().createSQLQuery(strbuf2.toString());
 
-			List<Double> record = query2.list(); 
+			List<Double> record = query2.list();
 
-			if(record.get(0)!=null)
-			patientAge = record.get(0).intValue();
-			
-			
-			if(patientAge<1)
-				patientAge=patientAge*(-1);
-			
+			if (record.get(0) != null)
+				patientAge = record.get(0).intValue();
+
+			if (patientAge < 1)
+				patientAge = patientAge * (-1);
+
 			if (minAge != null && maxAge != null) {
 				if (patientAge >= minAge && patientAge <= maxAge)
-				if (!lostPatients.contains(id))
-					patIds2.add(id);
-			}
-			else if (minAge != null && maxAge == null) {
+					if (!lostPatients.contains(id))
+						patIds2.add(id);
+			} else if (minAge != null && maxAge == null) {
 				if (patientAge >= minAge)
-				if (!lostPatients.contains(id))
-					patIds2.add(id);
+					if (!lostPatients.contains(id))
+						patIds2.add(id);
 			}
 		}
 
-		for (Integer id : patIds2) { 
-			objs.add(new Object[] { id, "","" });
+		for (Integer id : patIds2) {
+			objs.add(new Object[] { id, "", "" });
 		}
-		return objs; 
+		return objs;
 
 	}
+
 	/*******************************************************************************************************************************/
 	@Override
-	public List<Object[]> getPatientsWithCD4CountInThePeriod(List<Integer> cohort,Date startdate,Date enddate) {
+	public List<Object[]> getPatientsWithCD4CountInThePeriod(List<Integer> cohort, Date startdate, Date enddate) {
 
-		SQLQuery maxObsDateQuery =null;
-		 List<Object[]> objs = new ArrayList<Object[]>();
+		SQLQuery maxObsDateQuery = null;
+		List<Object[]> objs = new ArrayList<Object[]>();
 		for (Integer id : cohort) {
-			if(startdate!=null && enddate!=null){
-				maxObsDateQuery = sessionFactory
-					.getCurrentSession()
-					.createSQLQuery(
-							"SELECT max(bs.obs_datetime) FROM orders o " +
-							"INNER JOIN drug_order dro on dro.order_id = o.order_id " +
-							"INNER JOIN patient p on p.patient_id=o.patient_id " +
-							"INNER JOIN obs bs on bs.person_id=p.patient_id " +
-							"AND o.patient_id = " + id +
-							" and bs.concept_id=  " +QuarterlyReportUtil.gpGetCD4CountConceptId()
-							+ " AND obs_datetime BETWEEN '"
-							+ QuarterlyReportUtil.getDateFormat(startdate)
-							+ "'"
-							+ " AND '"
-							+ QuarterlyReportUtil.getDateFormat(enddate)
-							+ "'"
-							);
+			if (startdate != null && enddate != null) {
+				maxObsDateQuery = sessionFactory.getCurrentSession()
+						.createSQLQuery("SELECT max(bs.obs_datetime) FROM orders o "
+								+ "INNER JOIN drug_order dro on dro.order_id = o.order_id "
+								+ "INNER JOIN patient p on p.patient_id=o.patient_id "
+								+ "INNER JOIN obs bs on bs.person_id=p.patient_id " + "AND o.patient_id = " + id
+								+ " and bs.concept_id=  " + QuarterlyReportUtil.gpGetCD4CountConceptId()
+								+ " AND obs_datetime BETWEEN '" + QuarterlyReportUtil.getDateFormat(startdate) + "'"
+								+ " AND '" + QuarterlyReportUtil.getDateFormat(enddate) + "'");
+			} else if (startdate != null && enddate == null) {
+				maxObsDateQuery = sessionFactory.getCurrentSession()
+						.createSQLQuery("SELECT max(bs.obs_datetime) FROM orders o "
+								+ "INNER JOIN drug_order dro on dro.order_id = o.order_id "
+								+ "INNER JOIN patient p on p.patient_id=o.patient_id "
+								+ "INNER JOIN obs bs on bs.person_id=p.patient_id " + "AND o.patient_id = " + id
+								+ " and bs.concept_id= " + QuarterlyReportUtil.gpGetCD4CountConceptId()
+								+ " AND obs_datetime <= '" + QuarterlyReportUtil.getDateFormat(startdate) + "'");
 			}
-			else if(startdate!=null && enddate==null){
-				maxObsDateQuery = sessionFactory
-						.getCurrentSession()
-						.createSQLQuery(
-								"SELECT max(bs.obs_datetime) FROM orders o " +
-								"INNER JOIN drug_order dro on dro.order_id = o.order_id " +
-								"INNER JOIN patient p on p.patient_id=o.patient_id " +
-								"INNER JOIN obs bs on bs.person_id=p.patient_id " +
-								"AND o.patient_id = " + id +
-								" and bs.concept_id= "+QuarterlyReportUtil.gpGetCD4CountConceptId() 
-								+ " AND obs_datetime <= '"
-								+ QuarterlyReportUtil.getDateFormat(startdate)
-								+ "'"
-								);	
-			}
-				
-				 Date obsDateTime =(Date) maxObsDateQuery.list().get(0);
-				 
-//				 log.info("uuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuu1 "+maxObsDateQuery.toString());
-			     
-				 SQLQuery cd4Value = sessionFactory
-								.getCurrentSession()
-								.createSQLQuery(
-										"SELECT bs.value_numeric FROM bs obs " +
-										"where bs.person_id = " + id +
-										" and bs.concept_id= "+QuarterlyReportUtil.gpGetCD4CountConceptId() 
-										+ " AND bs.obs_starttime = '"
-										+ QuarterlyReportUtil.getDateFormat(obsDateTime)
-										+ "'"
-										);
-				    
-//				    log.info("uuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuu2 "+cd4Value.toString());
-				    
-				    if(cd4Value!=null)
-				    	objs.add(new Object[] { id, "","" });
-			
-			}
-			
-		
-//		 log.info("kkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkk "+objs);
+
+			Date obsDateTime = (Date) maxObsDateQuery.list().get(0);
+
+			// log.info("uuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuu1
+			// "+maxObsDateQuery.toString());
+
+			SQLQuery cd4Value = sessionFactory.getCurrentSession()
+					.createSQLQuery("SELECT bs.value_numeric FROM bs obs " + "where bs.person_id = " + id
+							+ " and bs.concept_id= " + QuarterlyReportUtil.gpGetCD4CountConceptId()
+							+ " AND bs.obs_starttime = '" + QuarterlyReportUtil.getDateFormat(obsDateTime) + "'");
+
+			// log.info("uuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuu2
+			// "+cd4Value.toString());
+
+			if (cd4Value != null)
+				objs.add(new Object[] { id, "", "" });
+
+		}
+
+		// log.info("kkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkk "+objs);
 		return objs;
 	}
+
 	/*******************************************************************************************************************************/
 	@Override
 	public List<Object[]> getPatientsHadCD4CountAfter6Months(List<Object[]> patientIds) {
-		
-		Date arvStartedDate=null;
-		
+
+		Date arvStartedDate = null;
+
 		List<Object[]> objects = new ArrayList<Object[]>();
-		
-		 for (Object[] id : patientIds) {
-			
+
+		for (Object[] id : patientIds) {
+
 			arvStartedDate = getWhenPatientStarted(Context.getPatientService().getPatient((Integer) id[0]));
-			
-			SQLQuery query=null;
-			
+
+			SQLQuery query = null;
+
 			SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd");
-			
+
 			Date sixMonthsAfter = getXMonthAfterDate(arvStartedDate, 6);
 			Date twlvMonthsAfter = getXMonthAfterDate(arvStartedDate, 12);
-			
-			 Calendar calendar = Calendar.getInstance();  
-		     calendar.setTime(sixMonthsAfter);  
-		     
-		     calendar.add(Calendar.MONTH, 1);  
-		     calendar.set(Calendar.DAY_OF_MONTH, 1);  
-		     calendar.add(Calendar.DATE, -1);  
-		  
-		     Date dateWithLastDayOfTheMonth = calendar.getTime();  
 
-			query = sessionFactory
-						.getCurrentSession()
-						.createSQLQuery(
-								"select MAX(obs_datetime) from obs where  person_id= "
-										+ id[0]
-										+ " and concept_id = "
-										+ QuarterlyReportUtil
-												.gpGetCD4CountConceptId()
-										+ " and obs_datetime BETWEEN '"
-										+ QuarterlyReportUtil.getDateFormat(arvStartedDate)
-										+ "' AND '"+QuarterlyReportUtil.getDateFormat(dateWithLastDayOfTheMonth)+"'");
-			
-	     List<Date> date= query.list();
+			Calendar calendar = Calendar.getInstance();
+			calendar.setTime(sixMonthsAfter);
 
-	     Date d=date.get(0);
-	     SQLQuery cd4ValueQuery = null;
-	     Double value=null;
-	     if(d!=null){
-	    	 
-	    	 cd4ValueQuery = sessionFactory
-					.getCurrentSession()
-					.createSQLQuery(
-							"SELECT bs.value_numeric FROM obs bs " +
-							"where bs.person_id = " + id[0] +
-							" and bs.concept_id= "+QuarterlyReportUtil.gpGetCD4CountConceptId() 
-							+ " AND bs.obs_datetime = '"
-							+ QuarterlyReportUtil.getDateFormat(d)
-							+ "'"
-							);
-	      
-	      value=(Double) cd4ValueQuery.list().get(0);
-	      
-	      if(value!=null)
-		    	objects.add(new Object[] { id[0], value,d });
+			calendar.add(Calendar.MONTH, 1);
+			calendar.set(Calendar.DAY_OF_MONTH, 1);
+			calendar.add(Calendar.DATE, -1);
+
+			Date dateWithLastDayOfTheMonth = calendar.getTime();
+
+			query = sessionFactory.getCurrentSession()
+					.createSQLQuery("select MAX(obs_datetime) from obs where  person_id= " + id[0]
+							+ " and concept_id = " + QuarterlyReportUtil.gpGetCD4CountConceptId()
+							+ " and obs_datetime BETWEEN '" + QuarterlyReportUtil.getDateFormat(arvStartedDate)
+							+ "' AND '" + QuarterlyReportUtil.getDateFormat(dateWithLastDayOfTheMonth) + "'");
+
+			List<Date> date = query.list();
+
+			Date d = date.get(0);
+			SQLQuery cd4ValueQuery = null;
+			Double value = null;
+			if (d != null) {
+
+				cd4ValueQuery = sessionFactory.getCurrentSession()
+						.createSQLQuery("SELECT bs.value_numeric FROM obs bs " + "where bs.person_id = " + id[0]
+								+ " and bs.concept_id= " + QuarterlyReportUtil.gpGetCD4CountConceptId()
+								+ " AND bs.obs_datetime = '" + QuarterlyReportUtil.getDateFormat(d) + "'");
+
+				value = (Double) cd4ValueQuery.list().get(0);
+
+				if (value != null)
+					objects.add(new Object[] { id[0], value, d });
 			}
-	    
-	     }
-	   
+
+		}
+
 		return objects;
 
 	}
+
 	/*******************************************************************************************************************************/
 	@Override
 	public List<Object[]> getPatientsHadCD4CountAfter12Months(List<Object[]> patientIds) {
-    
-//		Date arvStartedDate=null;
-//		Date sixMonthsAfter=null;
-//		Date twelveMonthAfter=null;
-		 Double value=null;
-	
+
+		// Date arvStartedDate=null;
+		// Date sixMonthsAfter=null;
+		// Date twelveMonthAfter=null;
+		Double value = null;
+
 		List<Object[]> objects = new ArrayList<Object[]>();
-		
-		 for (Object[] id : patientIds) {
-			
+
+		for (Object[] id : patientIds) {
+
 			Date arvStartedDate = getWhenPatientStarted(Context.getPatientService().getPatient((Integer) id[0]));
-			Date twelveMonthAfter = getXMonthAfterDate(arvStartedDate,12);
-			
-			
-			 Calendar calendar = Calendar.getInstance();  
-		     calendar.setTime(twelveMonthAfter);  
-		     
-		     calendar.add(Calendar.MONTH, 1);  
-		     calendar.set(Calendar.DAY_OF_MONTH, 1);  
-		     calendar.add(Calendar.DATE, -1);  
-		  
-		     Date dateWithLastDayOfTheMonth = calendar.getTime();  
-		     
-		     Date oneMonthBefore = getDateInterval(dateWithLastDayOfTheMonth, 1);
-		     Date oneMonthAfter=getXMonthAfterDate(dateWithLastDayOfTheMonth, 1);
-		     
+			Date twelveMonthAfter = getXMonthAfterDate(arvStartedDate, 12);
 
-			SQLQuery query = sessionFactory
-						.getCurrentSession()
-						.createSQLQuery(
-								"select MAX(obs_datetime) from obs where  person_id= "
-										+ id[0]
-										+ " and concept_id = "
-										+ QuarterlyReportUtil
-												.gpGetCD4CountConceptId()
-										+ " and obs_datetime BETWEEN '"
-										+ QuarterlyReportUtil.getDateFormat(oneMonthBefore) + "' AND '"+QuarterlyReportUtil.getDateFormat(oneMonthAfter)+"' " 
-										);
-			
-		
-	     Date d= (Date) query.list().get(0);     
+			Calendar calendar = Calendar.getInstance();
+			calendar.setTime(twelveMonthAfter);
 
-	     SQLQuery cd4Value = null;
-	     
-	   try {
-		   if(d!=null){
-			     cd4Value = sessionFactory
-							.getCurrentSession()
-							.createSQLQuery(
-									"SELECT bs.value_numeric FROM obs bs " +
-									"where bs.person_id = " + id[0] +
-									" and bs.concept_id= "+QuarterlyReportUtil.gpGetCD4CountConceptId() 
-									+ " AND bs.obs_datetime = '"+ QuarterlyReportUtil.getDateFormat(d)	+ "'"
-									);
-			     }
+			calendar.add(Calendar.MONTH, 1);
+			calendar.set(Calendar.DAY_OF_MONTH, 1);
+			calendar.add(Calendar.DATE, -1);
 
-			      if(cd4Value!=null){
-			      value = (Double) cd4Value.list().get(0);
-			      
-				  if(value!=null)
-				   	objects.add(new Object[] { id[0], value,new Date() });
-				  }
-	} catch (Exception e) {
-		// TODO: handle exception
-	}
-	    
-		 }
+			Date dateWithLastDayOfTheMonth = calendar.getTime();
+
+			Date oneMonthBefore = getDateInterval(dateWithLastDayOfTheMonth, 1);
+			Date oneMonthAfter = getXMonthAfterDate(dateWithLastDayOfTheMonth, 1);
+
+			SQLQuery query = sessionFactory.getCurrentSession()
+					.createSQLQuery("select MAX(obs_datetime) from obs where  person_id= " + id[0]
+							+ " and concept_id = " + QuarterlyReportUtil.gpGetCD4CountConceptId()
+							+ " and obs_datetime BETWEEN '" + QuarterlyReportUtil.getDateFormat(oneMonthBefore)
+							+ "' AND '" + QuarterlyReportUtil.getDateFormat(oneMonthAfter) + "' ");
+
+			Date d = (Date) query.list().get(0);
+
+			SQLQuery cd4Value = null;
+
+			try {
+				if (d != null) {
+					cd4Value = sessionFactory.getCurrentSession()
+							.createSQLQuery("SELECT bs.value_numeric FROM obs bs " + "where bs.person_id = " + id[0]
+									+ " and bs.concept_id= " + QuarterlyReportUtil.gpGetCD4CountConceptId()
+									+ " AND bs.obs_datetime = '" + QuarterlyReportUtil.getDateFormat(d) + "'");
+				}
+
+				if (cd4Value != null) {
+					value = (Double) cd4Value.list().get(0);
+
+					if (value != null)
+						objects.add(new Object[] { id[0], value, new Date() });
+				}
+			} catch (Exception e) {
+				// TODO: handle exception
+			}
+
+		}
 
 		return objects;
 	}
@@ -3853,199 +3292,188 @@ public class QuarterlyReportingDAOImpl implements QuarterReportingDAO {
 	/*******************************************************************************************************************************/
 	@Override
 	public List<Object[]> getPatientsWithCD4AtMo(List<Object[]> patientIds) {
-        
-		Date arvStartedDate=null;
-		
+
+		Date arvStartedDate = null;
+
 		List<Object[]> objects = new ArrayList<Object[]>();
-		
-		 for (Object[] id : patientIds) {
-			
+
+		for (Object[] id : patientIds) {
+
 			arvStartedDate = getWhenPatientStarted(Context.getPatientService().getPatient((Integer) id[0]));
-			
-			SQLQuery query=null;
-		
-			
-			 Calendar calendar = Calendar.getInstance();  
-		     calendar.setTime(arvStartedDate);  
-		     
-		     calendar.add(Calendar.MONTH, 1);  
-		     calendar.set(Calendar.DAY_OF_MONTH, 1);  
-		     calendar.add(Calendar.DATE, -1);  
-		  
-		     Date dateWithLastDayOfTheMonth = calendar.getTime();  
 
-			query = sessionFactory
-						.getCurrentSession()
-						.createSQLQuery(
-								"select MAX(obs_datetime) from obs where  person_id= "
-										+ id[0]
-										+ " and concept_id = "
-										+ QuarterlyReportUtil
-												.gpGetCD4CountConceptId()
-										+ " and obs_datetime <= '"
-										+ QuarterlyReportUtil.getDateFormat(dateWithLastDayOfTheMonth)
-										+ "' ");
-	     List<Date> date= query.list();
+			SQLQuery query = null;
 
-//	     Date d=null;
-	     SQLQuery cd4ValueQuery = null;
-	     Double value=null;
-	     if(date!=null){
-	    	 Date d=date.get(0);
-	     
-	    	 try {
-	    		 cd4ValueQuery = sessionFactory
-	 					.getCurrentSession()
-	 					.createSQLQuery(
-	 							"SELECT bs.value_numeric FROM obs bs " +
-	 							"where bs.person_id = " + id[0] +
-	 							" and bs.concept_id= "+QuarterlyReportUtil.gpGetCD4CountConceptId() 
-	 							+ " AND bs.l_datetime = '"
-	 							+ QuarterlyReportUtil.getDateFormat(d)
-	 							+ "'"
-	 							);
-	    		 value=(Double) cd4ValueQuery.list().get(0);
-	   	      
-	   	      if(value!=null)
-	   		    	objects.add(new Object[] { id[0], value,d });
-			} catch (Exception e) {
-				// TODO: handle exception
+			Calendar calendar = Calendar.getInstance();
+			calendar.setTime(arvStartedDate);
+
+			calendar.add(Calendar.MONTH, 1);
+			calendar.set(Calendar.DAY_OF_MONTH, 1);
+			calendar.add(Calendar.DATE, -1);
+
+			Date dateWithLastDayOfTheMonth = calendar.getTime();
+
+			query = sessionFactory.getCurrentSession().createSQLQuery(
+					"select MAX(obs_datetime) from obs where  person_id= " + id[0] + " and concept_id = "
+							+ QuarterlyReportUtil.gpGetCD4CountConceptId() + " and obs_datetime <= '"
+							+ QuarterlyReportUtil.getDateFormat(dateWithLastDayOfTheMonth) + "' ");
+			List<Date> date = query.list();
+
+			// Date d=null;
+			SQLQuery cd4ValueQuery = null;
+			Double value = null;
+			if (date != null) {
+				Date d = date.get(0);
+
+				try {
+					cd4ValueQuery = sessionFactory.getCurrentSession()
+							.createSQLQuery("SELECT bs.value_numeric FROM obs bs " + "where bs.person_id = " + id[0]
+									+ " and bs.concept_id= " + QuarterlyReportUtil.gpGetCD4CountConceptId()
+									+ " AND bs.l_datetime = '" + QuarterlyReportUtil.getDateFormat(d) + "'");
+					value = (Double) cd4ValueQuery.list().get(0);
+
+					if (value != null)
+						objects.add(new Object[] { id[0], value, d });
+				} catch (Exception e) {
+					// TODO: handle exception
+				}
+
 			}
-	    	
-	      
-	     
-			}
-	    
-	     }
-	   
+
+		}
+
 		return objects;
 	}
 
 	@Override
-	public List<Integer> getPreARTpatientsTransferreIn(Date quarterFrom,Date quarterTo) {
+	public List<Integer> getPreARTpatientsTransferreIn(Date quarterFrom, Date quarterTo) {
 		StringBuffer transferInBuf = new StringBuffer();
 		StringBuffer preArtBuf = new StringBuffer();
 		SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd");
-		
+
 		transferInBuf.append(" SELECT DISTINCT o.person_id FROM obs o ");
 		transferInBuf.append(" INNER JOIN person pe ON pe.person_id=o.person_id ");
 		transferInBuf.append(" INNER JOIN patient pa ON pa.patient_id=pe.person_id ");
-		transferInBuf.append(" AND o.concept_id= "	+ Integer.parseInt(QuarterlyReportUtil.gpTransferInConceptId())+" AND value_coded=1065  ");
-		transferInBuf.append(" and o.obs_datetime BETWEEN '"+df.format(quarterFrom)+"' AND '"+df.format(quarterTo)+"'");
-		
+		transferInBuf.append(" AND o.concept_id= " + Integer.parseInt(QuarterlyReportUtil.gpTransferInConceptId())
+				+ " AND value_coded=1065  ");
+		transferInBuf.append(
+				" and o.obs_datetime BETWEEN '" + df.format(quarterFrom) + "' AND '" + df.format(quarterTo) + "'");
+
 		SQLQuery query = sessionFactory.getCurrentSession().createSQLQuery(transferInBuf.toString());
-		
+
 		List<Integer> transferredInPatients = query.list();
-		
+
 		List<Integer> preArtTransferredInPatients = new ArrayList<Integer>();
-		
+
 		preArtBuf.append("SELECT o.patient_id FROM orders o  ");
 		preArtBuf.append(" INNER JOIN patient pat on pat.patient_id=o.patient_id ");
 		preArtBuf.append(" INNER JOIN patient_program pg on pat.patient_id=pg.patient_id ");
 		preArtBuf.append(" INNER JOIN program gr on gr.program_id=pg.program_id AND gr.program_id = ");
 		preArtBuf.append(Integer.parseInt(QuarterlyReportUtil.gpGetHIVProgramId()));
-		preArtBuf.append(" AND o.concept_id in( "+ QuarterlyReportUtil.gpGetProphylaxisDrugConceptIds() + ") ");
+		preArtBuf.append(" AND o.concept_id in( " + QuarterlyReportUtil.gpGetProphylaxisDrugConceptIds() + ") ");
 		preArtBuf.append(" AND o.voided=0 AND pat.voided=0 AND pg.voided=0 ");
-		
+
 		SQLQuery query1 = sessionFactory.getCurrentSession().createSQLQuery(preArtBuf.toString());
-		
+
 		List<Integer> preArtPatients = query1.list();
-		
+
 		for (Integer id : preArtPatients) {
-			if(transferredInPatients.contains(id))
+			if (transferredInPatients.contains(id))
 				preArtTransferredInPatients.add(id);
 		}
-		
+
 		return preArtTransferredInPatients;
 	}
 
 	@Override
-	public List<Integer> getARTpatientsTransferreIn(Date quarterFrom,
-			Date quarterTo) {
-		
+	public List<Integer> getARTpatientsTransferreIn(Date quarterFrom, Date quarterTo) {
+
 		StringBuffer transferInBuf = new StringBuffer();
 		StringBuffer artBuf = new StringBuffer();
 		SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd");
-		
+
 		transferInBuf.append(" SELECT DISTINCT o.person_id FROM obs o ");
 		transferInBuf.append(" INNER JOIN person pe ON pe.person_id=o.person_id ");
 		transferInBuf.append(" INNER JOIN patient pa ON pa.patient_id=pe.person_id ");
-		transferInBuf.append(" AND o.concept_id= "	+ Integer.parseInt(QuarterlyReportUtil.gpTransferInConceptId())+" AND value_coded=1065  ");
-		
-		if(quarterFrom!=null && quarterTo!=null)
-		 transferInBuf.append(" and o.obs_datetime BETWEEN '"+df.format(quarterFrom)+"' AND '"+df.format(quarterTo)+"'");
-		if(quarterFrom !=null && quarterTo==null)
-		 transferInBuf.append(" and o.obs_datetime < '"+df.format(quarterFrom)+"'");
-		if(quarterFrom==null && quarterTo!=null)
-		 transferInBuf.append(" and o.obs_datetime < '"+df.format(quarterTo)+"'");
-		
+		transferInBuf.append(" AND o.concept_id= " + Integer.parseInt(QuarterlyReportUtil.gpTransferInConceptId())
+				+ " AND value_coded=1065  ");
+
+		if (quarterFrom != null && quarterTo != null)
+			transferInBuf.append(
+					" and o.obs_datetime BETWEEN '" + df.format(quarterFrom) + "' AND '" + df.format(quarterTo) + "'");
+		if (quarterFrom != null && quarterTo == null)
+			transferInBuf.append(" and o.obs_datetime < '" + df.format(quarterFrom) + "'");
+		if (quarterFrom == null && quarterTo != null)
+			transferInBuf.append(" and o.obs_datetime < '" + df.format(quarterTo) + "'");
+
 		SQLQuery query = sessionFactory.getCurrentSession().createSQLQuery(transferInBuf.toString());
-		
+
 		List<Integer> transferredInPatients = query.list();
-		
+
 		List<Integer> artTransferredInPatients = new ArrayList<Integer>();
-		
+
 		artBuf.append("SELECT o.patient_id FROM orders o  ");
 		artBuf.append(" INNER JOIN patient pat on pat.patient_id=o.patient_id ");
 		artBuf.append(" INNER JOIN patient_program pg on pat.patient_id=pg.patient_id ");
 		artBuf.append(" INNER JOIN program gr on gr.program_id=pg.program_id AND gr.program_id = ");
 		artBuf.append(Integer.parseInt(QuarterlyReportUtil.gpGetHIVProgramId()));
-		artBuf.append(" AND o.concept_id in( "+ QuarterlyReportUtil.gpGetARVConceptIds() + ") ");
+		artBuf.append(" AND o.concept_id in( " + QuarterlyReportUtil.gpGetARVConceptIds() + ") ");
 		artBuf.append(" AND o.voided=0 AND pat.voided=0 AND pg.voided=0 ");
-		
+
 		SQLQuery query1 = sessionFactory.getCurrentSession().createSQLQuery(artBuf.toString());
-		
+
 		List<Integer> artPatients = query1.list();
-		
+
 		for (Integer id : artPatients) {
-			if(transferredInPatients.contains(id))
+			if (transferredInPatients.contains(id))
 				artTransferredInPatients.add(id);
 		}
-		
+
 		return artTransferredInPatients;
 	}
 
 	@Override
-	public List<Integer> getAllPatientsTransferredIn(Date quarterFrom,
-			Date quarterTo) {
+	public List<Integer> getAllPatientsTransferredIn(Date quarterFrom, Date quarterTo) {
 		StringBuffer transferInBuf = new StringBuffer();
 		SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd");
-		
-		if(quarterFrom!=null && quarterTo==null){
+
+		if (quarterFrom != null && quarterTo == null) {
 			transferInBuf.append(" SELECT DISTINCT o.person_id FROM obs o ");
 			transferInBuf.append(" INNER JOIN person pe ON pe.person_id=o.person_id ");
 			transferInBuf.append(" INNER JOIN patient pa ON pa.patient_id=pe.person_id ");
-			transferInBuf.append(" AND o.concept_id= "	+ Integer.parseInt(QuarterlyReportUtil.gpTransferInConceptId())+" AND o.value_coded=1065  ");
-			transferInBuf.append(" and o.obs_datetime <= '"+df.format(quarterFrom)+"'");
+			transferInBuf.append(" AND o.concept_id= " + Integer.parseInt(QuarterlyReportUtil.gpTransferInConceptId())
+					+ " AND o.value_coded=1065  ");
+			transferInBuf.append(" and o.obs_datetime <= '" + df.format(quarterFrom) + "'");
 		}
-		if(quarterFrom==null && quarterTo!=null){
+		if (quarterFrom == null && quarterTo != null) {
 			transferInBuf.append(" SELECT DISTINCT o.person_id FROM obs o ");
 			transferInBuf.append(" INNER JOIN person pe ON pe.person_id=o.person_id ");
 			transferInBuf.append(" INNER JOIN patient pa ON pa.patient_id=pe.person_id ");
-			transferInBuf.append(" AND o.concept_id= "	+ Integer.parseInt(QuarterlyReportUtil.gpTransferInConceptId())+" AND o.value_coded=1065  ");
-			transferInBuf.append(" and o.obs_datetime <= '"+df.format(quarterTo)+"'");
+			transferInBuf.append(" AND o.concept_id= " + Integer.parseInt(QuarterlyReportUtil.gpTransferInConceptId())
+					+ " AND o.value_coded=1065  ");
+			transferInBuf.append(" and o.obs_datetime <= '" + df.format(quarterTo) + "'");
 		}
-		if(quarterFrom!=null && quarterTo!=null){
+		if (quarterFrom != null && quarterTo != null) {
 			transferInBuf.append(" SELECT DISTINCT o.person_id FROM obs o ");
 			transferInBuf.append(" INNER JOIN person pe ON pe.person_id=o.person_id ");
 			transferInBuf.append(" INNER JOIN patient pa ON pa.patient_id=pe.person_id ");
-			transferInBuf.append(" AND o.concept_id= "	+ Integer.parseInt(QuarterlyReportUtil.gpTransferInConceptId())+" AND o.value_coded=1065  ");
-			transferInBuf.append(" and o.obs_datetime BETWEEN '"+df.format(quarterFrom)+"' AND '"+df.format(quarterTo)+"'");
-			
-			log.info("vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv "+transferInBuf.toString());
+			transferInBuf.append(" AND o.concept_id= " + Integer.parseInt(QuarterlyReportUtil.gpTransferInConceptId())
+					+ " AND o.value_coded=1065  ");
+			transferInBuf.append(
+					" and o.obs_datetime BETWEEN '" + df.format(quarterFrom) + "' AND '" + df.format(quarterTo) + "'");
+
+			log.info("vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv " + transferInBuf.toString());
 		}
 
-		
 		SQLQuery query = sessionFactory.getCurrentSession().createSQLQuery(transferInBuf.toString());
-		
+
 		List<Integer> transferredInPatients = query.list();
-		
+
 		return transferredInPatients;
 	}
 
 	@Override
-	public List<Object[]> getNewOnArtTransferInExcluded(Date quarterFrom,
-			Date quarterTo, String gender, Integer minAge, Integer maxAge) {
+	public List<Object[]> getNewOnArtTransferInExcluded(Date quarterFrom, Date quarterTo, String gender, Integer minAge,
+			Integer maxAge) {
 		Map<String, Integer> patientStartedWhenMap = new HashMap<String, Integer>();
 
 		StringBuffer strBuffer = new StringBuffer();
@@ -4057,13 +3485,14 @@ public class QuarterlyReportingDAOImpl implements QuarterReportingDAO {
 		if (gender != null) {
 			strBuffer.append("SELECT o.patient_id , ");
 			strBuffer.append("IF((select min(o.start_date)) BETWEEN ");
-			strBuffer.append("'" + df.format(quarterFrom) + "'"	+ " AND '" + df.format(quarterTo) + "'" + " , " + " true " + " ,"+ "false)");
+			strBuffer.append("'" + df.format(quarterFrom) + "'" + " AND '" + df.format(quarterTo) + "'" + " , "
+					+ " true " + " ," + "false)");
 			strBuffer.append(" FROM orders o ");
 			strBuffer.append(" INNER JOIN patient pat on pat.patient_id=o.patient_id ");
 			strBuffer.append(" INNER JOIN patient_program pg on pat.patient_id=pg.patient_id ");
 			strBuffer.append(" INNER JOIN program gr on gr.program_id=pg.program_id AND gr.program_id = ");
 			strBuffer.append(Integer.parseInt(QuarterlyReportUtil.gpGetHIVProgramId()));
-			strBuffer.append(" AND o.concept_id in( "+ QuarterlyReportUtil.gpGetARVConceptIds() + ") ");
+			strBuffer.append(" AND o.concept_id in( " + QuarterlyReportUtil.gpGetARVConceptIds() + ") ");
 			strBuffer.append(" AND o.voided=0 AND pat.voided=0 AND pg.voided=0 ");
 			strBuffer.append(" INNER JOIN person p on o.patient_id = p.person_id   ");
 			strBuffer.append(" AND p.gender= '" + gender + "'");
@@ -4071,27 +3500,25 @@ public class QuarterlyReportingDAOImpl implements QuarterReportingDAO {
 		} else {
 			strBuffer.append("SELECT o.patient_id , ");
 			strBuffer.append("IF((select min(o.start_date)) BETWEEN ");
-			strBuffer.append("'" + df.format(quarterFrom) + "'"	+ " AND '" + df.format(quarterTo) + "'" + " , " + " true " + " ,"+ "false)");
+			strBuffer.append("'" + df.format(quarterFrom) + "'" + " AND '" + df.format(quarterTo) + "'" + " , "
+					+ " true " + " ," + "false)");
 			strBuffer.append(" FROM orders o ");
 			strBuffer.append(" INNER JOIN patient pat on pat.patient_id=o.patient_id ");
 			strBuffer.append(" INNER JOIN patient_program pg on pat.patient_id=pg.patient_id ");
 			strBuffer.append(" INNER JOIN program gr on gr.program_id=pg.program_id AND gr.program_id = ");
 			strBuffer.append(Integer.parseInt(QuarterlyReportUtil.gpGetHIVProgramId()));
-			strBuffer.append(" AND o.concept_id in( "+ QuarterlyReportUtil.gpGetARVConceptIds() + ") ");
+			strBuffer.append(" AND o.concept_id in( " + QuarterlyReportUtil.gpGetARVConceptIds() + ") ");
 			strBuffer.append(" AND o.voided=0 AND pat.voided=0 AND pg.voided=0 ");
 			strBuffer.append(" INNER JOIN person p on o.patient_id = p.person_id   ");
 			strBuffer.append(" group by o.patient_id ");
 		}
-		
 
 		SQLQuery query = sessionFactory.getCurrentSession().createSQLQuery(strBuffer.toString());
 
+		log.info("ppppppppppppppppppppppppppppppppp " + strBuffer.toString());
 
-		log.info("ppppppppppppppppppppppppppppppppp "+strBuffer.toString());
-		
-		
 		List<Object[]> records = query.list();
-		
+
 		List<Integer> patId1 = new ArrayList<Integer>();
 
 		int add = 0;
@@ -4103,91 +3530,82 @@ public class QuarterlyReportingDAOImpl implements QuarterReportingDAO {
 			patientStartedWhenMap.put(booleanValue, id);
 		}
 
-		for (String key : patientStartedWhenMap.keySet()) { 
+		for (String key : patientStartedWhenMap.keySet()) {
 			if (key.charAt(0) == '1') {
 				patId1.add(patientStartedWhenMap.get(key));
 			}
 		}
-		
-		//>>>>>>>>>>>>>>>>>>>>SEE IF PATIENTS IS NOT TRANFER-IN
-		SQLQuery transferInStr = sessionFactory.getCurrentSession().createSQLQuery
-				("SELECT DISTINCT o.person_id FROM obs o " +
-				"INNER JOIN person pe ON pe.person_id=o.person_id " +
-				"INNER JOIN patient pat ON pe.person_id=pat.patient_id " +
-				"INNER JOIN orders d ON d.patient_id=pat.patient_id " +
-				"AND o.concept_id= "+ Integer.parseInt(QuarterlyReportUtil.gpTransferInConceptId())+" AND value_coded=1065 " +
-				" AND o.obs_datetime BETWEEN  ' "+df.format(quarterFrom)+"' AND ' "+df.format(quarterTo)+"' "+
-				" AND d.concept_id IN ("+QuarterlyReportUtil.gpGetARVConceptIds()+")");
-		
+
+		// >>>>>>>>>>>>>>>>>>>>SEE IF PATIENTS IS NOT TRANFER-IN
+		SQLQuery transferInStr = sessionFactory.getCurrentSession()
+				.createSQLQuery("SELECT DISTINCT o.person_id FROM obs o "
+						+ "INNER JOIN person pe ON pe.person_id=o.person_id "
+						+ "INNER JOIN patient pat ON pe.person_id=pat.patient_id "
+						+ "INNER JOIN orders d ON d.patient_id=pat.patient_id " + "AND o.concept_id= "
+						+ Integer.parseInt(QuarterlyReportUtil.gpTransferInConceptId()) + " AND value_coded=1065 "
+						+ " AND o.obs_datetime BETWEEN  ' " + df.format(quarterFrom) + "' AND ' " + df.format(quarterTo)
+						+ "' " + " AND d.concept_id IN (" + QuarterlyReportUtil.gpGetARVConceptIds() + ")");
+
 		List<Integer> transferredInDuringQter = transferInStr.list();
-		
-		
-		//>>>>>>>>>>>>>>>>>>>>SEE IF PATIENTS IS NOT exited from care
-				SQLQuery exitedInStr = sessionFactory.getCurrentSession().createSQLQuery
-						("SELECT DISTINCT o.person_id FROM obs o " +
-						"INNER JOIN person pe ON pe.person_id=o.person_id " +
-						"INNER JOIN patient pat ON pe.person_id=pat.patient_id " +
-						"INNER JOIN orders d ON d.patient_id=pat.patient_id " +
-						"AND o.concept_id= "+ Integer.parseInt(QuarterlyReportUtil.gpGetExitedFromCareConceptId()) +
-						" AND o.obs_datetime <=  ' "+df.format(quarterTo)+"' ");
-				
-				List<Integer> exitedPatients = transferInStr.list();
-		
-		double patientAge = 0 ;
+
+		// >>>>>>>>>>>>>>>>>>>>SEE IF PATIENTS IS NOT exited from care
+		SQLQuery exitedInStr = sessionFactory.getCurrentSession().createSQLQuery(
+				"SELECT DISTINCT o.person_id FROM obs o " + "INNER JOIN person pe ON pe.person_id=o.person_id "
+						+ "INNER JOIN patient pat ON pe.person_id=pat.patient_id "
+						+ "INNER JOIN orders d ON d.patient_id=pat.patient_id " + "AND o.concept_id= "
+						+ Integer.parseInt(QuarterlyReportUtil.gpGetExitedFromCareConceptId())
+						+ " AND o.obs_datetime <=  ' " + df.format(quarterTo) + "' ");
+
+		List<Integer> exitedPatients = transferInStr.list();
+
+		double patientAge = 0;
 
 		List<Integer> patIds2 = new ArrayList<Integer>();
-			
-			for (Integer id : patId1) {
 
-				SQLQuery query2 = null;
-				StringBuffer strbuf2 = new StringBuffer();
+		for (Integer id : patId1) {
 
-				strbuf2.append("SELECT (MIN(o.start_date) - YEAR(s.birthdate)) * 12 ");
-				strbuf2.append(" + (MONTH(MIN(o.start_date)) - MONTH(s.birthdate)) ");
-				strbuf2.append("  - IF(DAYOFMONTH(MIN(o.start_date)) < DAYOFMONTH(s.birthdate),1,0) ");
-				strbuf2.append(" FROM  orders o ");
-				strbuf2.append(" INNER JOIN patient p on p.patient_id=o.patient_id " );
-				strbuf2.append(" INNER JOIN person s on s.person_id=p.patient_id  ");
-				strbuf2.append(" AND p.patient_id= "+id);
+			SQLQuery query2 = null;
+			StringBuffer strbuf2 = new StringBuffer();
 
-				query2 = sessionFactory.getCurrentSession().createSQLQuery(
-						strbuf2.toString());
+			strbuf2.append("SELECT (MIN(o.start_date) - YEAR(s.birthdate)) * 12 ");
+			strbuf2.append(" + (MONTH(MIN(o.start_date)) - MONTH(s.birthdate)) ");
+			strbuf2.append("  - IF(DAYOFMONTH(MIN(o.start_date)) < DAYOFMONTH(s.birthdate),1,0) ");
+			strbuf2.append(" FROM  orders o ");
+			strbuf2.append(" INNER JOIN patient p on p.patient_id=o.patient_id ");
+			strbuf2.append(" INNER JOIN person s on s.person_id=p.patient_id  ");
+			strbuf2.append(" AND p.patient_id= " + id);
 
-				List<Double> record = query2.list(); 
+			query2 = sessionFactory.getCurrentSession().createSQLQuery(strbuf2.toString());
 
-				if(record.get(0)!=null)
+			List<Double> record = query2.list();
+
+			if (record.get(0) != null)
 				patientAge = record.get(0).intValue();
-				
-				if(patientAge<1)
-					patientAge=patientAge*(-1);
-				
-				if (minAge != null && maxAge != null) {
-					if (patientAge >= minAge && patientAge <= maxAge)
-						if(!transferredInDuringQter.contains(id)) 
-							if(!exitedPatients.contains(id))
-						patIds2.add(id);
-				}
-				else if (minAge != null && maxAge == null) {
-					if (patientAge >= minAge)
-						if(!transferredInDuringQter.contains(id))
-							if(!exitedPatients.contains(id))
-						patIds2.add(id);
-				}
+
+			if (patientAge < 1)
+				patientAge = patientAge * (-1);
+
+			if (minAge != null && maxAge != null) {
+				if (patientAge >= minAge && patientAge <= maxAge)
+					if (!transferredInDuringQter.contains(id))
+						if (!exitedPatients.contains(id))
+							patIds2.add(id);
+			} else if (minAge != null && maxAge == null) {
+				if (patientAge >= minAge)
+					if (!transferredInDuringQter.contains(id))
+						if (!exitedPatients.contains(id))
+							patIds2.add(id);
 			}
-			for (Integer id : patIds2) {
-				Patient p = Context.getPatientService().getPatient(id);
-				Date when=getWhenPatientStarted(p);
-				if(when!=null)
-				objs.add(new Object[] { id, when,	"Start ARV" });
-				else
-					objs.add(new Object[] { id, "",	"Start ARV" });
-			}
+		}
+		for (Integer id : patIds2) {
+			Patient p = Context.getPatientService().getPatient(id);
+			Date when = getWhenPatientStarted(p);
+			if (when != null)
+				objs.add(new Object[] { id, when, "Start ARV" });
+			else
+				objs.add(new Object[] { id, "", "Start ARV" });
+		}
 		return objs;
 	}
-
-	
-
-  
-
 
 }

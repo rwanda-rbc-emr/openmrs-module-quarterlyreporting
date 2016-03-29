@@ -5,19 +5,17 @@ import java.text.ParseException;
 import java.util.Collection;
 import java.util.Date;
 import java.util.List;
-import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.openmrs.Concept;
-import org.openmrs.Obs;
-import org.openmrs.Order;
 import org.openmrs.Patient;
+import org.openmrs.api.impl.BaseOpenmrsService;
 import org.openmrs.module.quarterlyreporting.db.dao.QuarterReportingDAO;
 import org.openmrs.module.quarterlyreporting.service.QuarterlyReportingService;
 
-public class QuarterlyReportingServiceImpl implements QuarterlyReportingService {
+public class QuarterlyReportingServiceImpl extends BaseOpenmrsService implements QuarterlyReportingService {
 	private QuarterReportingDAO quarterlyreportingDAO;
 
 	public QuarterReportingDAO getQuarterlyreportingDAO() {
@@ -345,7 +343,4 @@ public class QuarterlyReportingServiceImpl implements QuarterlyReportingService 
 			Date quarterTo, String gender, Integer minAge, Integer maxAge) {
 		return quarterlyreportingDAO.getNewOnArtTransferInExcluded(quarterFrom, quarterTo, gender, minAge, maxAge);
 	}
-
-
-
 }

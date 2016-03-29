@@ -25,16 +25,6 @@
 		<class>@MODULE_PACKAGE@.extension.html.AdminList</class>
 	</extension>
 	
-	
-	<!-- AOP
-	<advice>
-		<point>org.openmrs.api.FormService</point>
-		<class>@MODULE_PACKAGE@.advice.DuplicateFormAdvisor</class>
-	</advice>
-	 /AOP -->
-	
-	
-	
 	<privilege>
 		<name>View Quarterly reporting</name>
 		<description>Able to view Quarterly reporting module</description>
@@ -63,9 +53,6 @@
 		</description>
 	</globalProperty>
 	
-	
-	
-	
 	<globalProperty>
 		<property>@MODULE_ID@.hivProgramId</property>
 		<defaultValue>2</defaultValue>
@@ -81,8 +68,6 @@
 			cotrimoxazole
 		</description>
 	</globalProperty>
-	
-	
 	
 	<globalProperty>
 		<property>@MODULE_ID@.prophylaxisDrugIds</property>
@@ -100,7 +85,6 @@
 		</description>
 	</globalProperty>
 	
-	
 	<globalProperty>
 		<property>@MODULE_ID@.tbDrugIds</property>
 		<defaultValue>656,767,745,5829,438,1411,1417,1406,740,1418,755,955,1414,1413,1419,1415,1633,450,2459,2460</defaultValue>
@@ -117,7 +101,6 @@
 		</description>
 	</globalProperty>
 	
-	
 	<globalProperty>
 		<property>@MODULE_ID@.exitedConceptId</property>
 		<defaultValue>1811</defaultValue>
@@ -133,8 +116,6 @@
 			concept Id for CD4 Count
 		</description>
 	</globalProperty>
-	
-	
 	
 	<globalProperty>
 		<property>@MODULE_ID@.returnVisitDateConceptId</property>
@@ -159,35 +140,6 @@
 			concept Id for TRANSFER IN FROM
 		</description>
 	</globalProperty>
-	
-	
-	<!--
-	<dwr>
-		<allow>
-			<create creator="new" javascript="DWRFormEntryService">
-				<param name="class" value="org.openmrs.module.@MODULE_ID@.web.DWRFormEntryService"/>
-				<include method="enterForm"/>
-			</create>
-		</allow>
-
-		<signatures>
-			<![CDATA[
-			import @MODULE_PACKAGE@.web.DWRFormEntryService;
-			DWRFormEntryService.enterForm(Integer patientId, Integer formId, boolean useEncounter, List<String> fields);
-			]]>
-		</signatures>	
-	</dwr>
-	-->
-	
-	<!-- Servlets -->
-	<!-- Accessed through the url /pageContext()/moduleServlet/<moduleId>/<servlet-name> 
-	<servlet>
-		<servlet-name>formDownload</servlet-name>
-		<servlet-class>@MODULE_PACKAGE@.web.FormDownloadServlet</servlet-class>
-	</servlet>
-	-->
-	<!-- /Servlets -->
-	
 	
 	<!-- Internationalization -->
 	<!-- All message codes should start with @MODULE_ID@.* -->

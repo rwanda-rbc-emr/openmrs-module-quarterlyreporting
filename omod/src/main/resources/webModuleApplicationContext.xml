@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<beans xmlns="http://www.springframework.org/schema/beans"
+	   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	   xmlns:context="http://www.springframework.org/schema/context"
+	   xmlns:util="http://www.springframework.org/schema/util"
+	   xsi:schemaLocation="http://www.springframework.org/schema/beans 
+           http://www.springframework.org/schema/beans/spring-beans-2.5.xsd
+           http://www.springframework.org/schema/context
+           http://www.springframework.org/schema/context/spring-context-2.5.xsd 
+           http://www.springframework.org/schema/util
+           http://www.springframework.org/schema/util/spring-util-2.0.xsd">
+	
+    <bean id="quarterlyreportUrlMapping" class="org.springframework.web.servlet.handler.SimpleUrlHandlerMapping">
+    	<property name="mappings">
+            <props>
+	           <prop key="module/@MODULE_ID@/quarterlyReportController.form">quarterlyReportController</prop>
+	           <prop key="module/@MODULE_ID@/viewPatientsController.form">viewPatientsController</prop>
+	           <prop key="module/@MODULE_ID@/exportController.form">exportController</prop>
+	           
+	            
+	    	</props>
+		</property>
+    </bean>
+	
+    <!-- Controllers -->
+	
+    <bean id="quarterlyReportController" class="@MODULE_PACKAGE@.web.controller.QuarterlyReportFormController">
+		<property name="viewName">
+			<value>/module/@MODULE_ID@/quarterlyReportForm</value>
+		</property>
+    </bean>
+    
+     <bean id="viewPatientsController" class="@MODULE_PACKAGE@.web.controller.ViewPatientsController">
+		<property name="viewName">
+			<value>/module/@MODULE_ID@/viewPatients</value>
+		</property>
+    </bean>
+    
+    <bean id="exportController" class="@MODULE_PACKAGE@.web.controller.ExportQuarterlyData"/>
+    
+   
+	
+    <!-- /Controllers -->
+    
+</beans>
