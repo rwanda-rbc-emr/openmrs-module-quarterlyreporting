@@ -371,7 +371,7 @@ public class QuarterlyReportingDAOImpl implements QuarterReportingDAO {
 
 			query2 = sessionFactory.getCurrentSession().createSQLQuery(strbuf2.toString());
 
-			List<Double> record = query2.list();
+			List<BigInteger> record = query2.list();
 
 			if (record.get(0) != null)
 				patientAge = record.get(0).intValue();
@@ -829,7 +829,7 @@ public class QuarterlyReportingDAOImpl implements QuarterReportingDAO {
 
 			query2 = sessionFactory.getCurrentSession().createSQLQuery(strbuf2.toString());
 
-			List<Double> record = query2.list();
+			List<BigInteger> record = query2.list();
 
 			if (record.get(0) != null)
 				patientAge = record.get(0).intValue();
@@ -1203,7 +1203,7 @@ public class QuarterlyReportingDAOImpl implements QuarterReportingDAO {
 
 			query2 = sessionFactory.getCurrentSession().createSQLQuery(strbuf2.toString());
 
-			List<Double> record = query2.list();
+			List<BigInteger> record = query2.list();
 
 			if (record.get(0) != null)
 				patientAge = record.get(0).intValue();
@@ -1353,7 +1353,7 @@ public class QuarterlyReportingDAOImpl implements QuarterReportingDAO {
 
 			query2 = sessionFactory.getCurrentSession().createSQLQuery(strbuf2.toString());
 
-			List<Double> record = query2.list();
+			List<BigInteger> record = query2.list();
 
 			if (record.get(0) != null)
 				patientAge = record.get(0).intValue();
@@ -3023,7 +3023,7 @@ public class QuarterlyReportingDAOImpl implements QuarterReportingDAO {
 
 			query2 = sessionFactory.getCurrentSession().createSQLQuery(strbuf2.toString());
 
-			List<Double> record = query2.list();
+			List<BigInteger> record = query2.list();
 
 			if (record.get(0) != null)
 				patientAge = record.get(0).intValue();
@@ -3096,7 +3096,7 @@ public class QuarterlyReportingDAOImpl implements QuarterReportingDAO {
 
 			query2 = sessionFactory.getCurrentSession().createSQLQuery(strbuf2.toString());
 
-			List<Double> record = query2.list();
+			List<BigInteger> record = query2.list();
 
 			if (record.get(0) != null)
 				patientAge = record.get(0).intValue();
@@ -3320,7 +3320,7 @@ public class QuarterlyReportingDAOImpl implements QuarterReportingDAO {
 
 			// Date d=null;
 			SQLQuery cd4ValueQuery = null;
-			Double value = null;
+			BigInteger value = null;
 			if (date != null) {
 				Date d = date.get(0);
 
@@ -3328,8 +3328,8 @@ public class QuarterlyReportingDAOImpl implements QuarterReportingDAO {
 					cd4ValueQuery = sessionFactory.getCurrentSession()
 							.createSQLQuery("SELECT bs.value_numeric FROM obs bs " + "where bs.person_id = " + id[0]
 									+ " and bs.concept_id= " + QuarterlyReportUtil.gpGetCD4CountConceptId()
-									+ " AND bs.l_datetime = '" + QuarterlyReportUtil.getDateFormat(d) + "'");
-					value = (Double) cd4ValueQuery.list().get(0);
+									+ " AND bs.value_datetime = '" + QuarterlyReportUtil.getDateFormat(d) + "'");
+					value = (BigInteger) cd4ValueQuery.list().get(0);
 
 					if (value != null)
 						objects.add(new Object[] { id[0], value, d });
@@ -3577,7 +3577,7 @@ public class QuarterlyReportingDAOImpl implements QuarterReportingDAO {
 
 			query2 = sessionFactory.getCurrentSession().createSQLQuery(strbuf2.toString());
 
-			List<Double> record = query2.list();
+			List<BigInteger> record = query2.list();
 
 			if (record.get(0) != null)
 				patientAge = record.get(0).intValue();
