@@ -4,7 +4,7 @@
 
 	<groupId>org.openmrs.module</groupId>
 	<artifactId>quarterlyreporting</artifactId>
-	<version>0.4.5</version>
+	<version>0.4.6-SNAPSHOT</version>
 	<packaging>pom</packaging>
 	<name>Quarterly HIV Care and ART Reporting</name>
 	<description>Parent project for Quarterly HIV Care and ART Reporting</description>
